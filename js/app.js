@@ -831,13 +831,14 @@
       }
       return { text: '☀️ Cota Integral • Grande Recarga Contínua (30d)', style: THEME_STYLE };
     }
-    if (splitKey === '15+15') {
+    const partitionKey = sc.partition ? sc.partition.join('+') : (sc.split ? sc.split.slice().sort((a, b) => b - a).join('+') : '');
+    if (splitKey === '15+15' || partitionKey === '15+15') {
       return { text: '⚖️ Semestral Clássico • 2 Grandes Descansos Equilibrados', style: THEME_STYLE };
     }
-    if (splitKey === '10+10+10') {
+    if (splitKey === '10+10+10' || partitionKey === '10+10+10') {
       return { text: '🎯 Tríade Equilibrada • Pausas Regulares ao Longo do Ano', style: THEME_STYLE };
     }
-    if (splitKey === '15+10+5') {
+    if (splitKey === '15+10+5' || partitionKey === '15+10+5') {
       return { text: '⚡ Estratégia Escalonada • Pausa Principal com Miniférias', style: THEME_STYLE };
     }
     if (isZeroWaste && isHighLeverage) {
@@ -854,37 +855,34 @@
   // runSimulation focada na lógica de estado e curadoria.
   // ====================================================
 
-  // Gera os badges de mérito (Campeã, Desperdício Zero, 10+10+10, Anti-Fadiga)
+  // Gera os badges de mérito (Campeã, Campeã Alternativa, Férias de Julho, Fim de Ano, 10+10+10, Anti-Fadiga)
   function buildBadgesHtml(sc, sIdx, distributeThroughoutYear) {
     let html = '';
-    if (sIdx === 0) {
+    const partitionKey = sc.partition ? sc.partition.join('+') : (sc.split ? sc.split.slice().sort((a, b) => b - a).join('+') : '');
+    const splitKey = sc.split ? sc.split.join('+') : '';
+
+    if (sIdx === 0 || sc.category === 'Campeã') {
       html += `<span class="bg-amber-100 text-amber-950 border border-amber-300 px-2.5 py-0.5 rounded-full text-xs font-black uppercase tracking-wider shadow-2xs flex items-center gap-1.5"><i data-lucide="crown" class="w-3.5 h-3.5 text-amber-700"></i> Campeã</span>`;
-      if (sc.totalWasted === 0) {
-        html += `<span class="bg-emerald-50 text-emerald-800 border border-emerald-200 px-2.5 py-0.5 rounded-full text-xs font-bold flex items-center gap-1 shadow-2xs"><i data-lucide="check-check" class="w-3.5 h-3.5 text-emerald-600"></i> Desperdício Zero</span>`;
-      }
-    } else if (sIdx === 1) {
-      if (sc.totalWasted === 0) {
-        html += `<span class="bg-emerald-50 text-emerald-800 border border-emerald-200 px-2.5 py-0.5 rounded-full text-xs font-bold flex items-center gap-1 shadow-2xs"><i data-lucide="check-check" class="w-3.5 h-3.5 text-emerald-600"></i> Desperdício Zero</span>`;
-      } else if (sc.split.join('+') === '10+10+10') {
-        html += `<span class="bg-slate-100 text-slate-800 border border-slate-200 px-2.5 py-0.5 rounded-full text-xs font-bold flex items-center gap-1 shadow-2xs"><i data-lucide="star" class="w-3.5 h-3.5 text-slate-600"></i> 10+10+10</span>`;
-      } else {
-        html += `<span class="bg-emerald-50 text-emerald-800 border border-emerald-200 px-2.5 py-0.5 rounded-full text-xs font-bold flex items-center gap-1 shadow-2xs"><i data-lucide="sparkles" class="w-3.5 h-3.5 text-emerald-600"></i> Vice-Campeã</span>`;
-      }
-    } else if (sIdx === 2) {
-      if (sc.split.join('+') === '10+10+10') {
-        html += `<span class="bg-slate-100 text-slate-800 border border-slate-200 px-2.5 py-0.5 rounded-full text-xs font-bold flex items-center gap-1 shadow-2xs"><i data-lucide="star" class="w-3.5 h-3.5 text-slate-600"></i> 10+10+10</span>`;
-      } else if (sc.totalWasted === 0) {
-        html += `<span class="bg-emerald-50 text-emerald-800 border border-emerald-200 px-2.5 py-0.5 rounded-full text-xs font-bold flex items-center gap-1 shadow-2xs"><i data-lucide="check-check" class="w-3.5 h-3.5 text-emerald-600"></i> Desperdício Zero</span>`;
-      } else {
-        html += `<span class="bg-slate-100 text-slate-800 border border-slate-200 px-2.5 py-0.5 rounded-full text-xs font-bold flex items-center gap-1 shadow-2xs"><i data-lucide="star" class="w-3.5 h-3.5 text-slate-600"></i> Opção Equilibrada</span>`;
-      }
+    } else if (sIdx === 1 || sc.category === 'Campeã Alternativa') {
+      html += `<span class="bg-amber-50 text-amber-900 border border-amber-300 px-2.5 py-0.5 rounded-full text-xs font-bold flex items-center gap-1.5 shadow-2xs"><i data-lucide="crown" class="w-3.5 h-3.5 text-amber-600"></i> Campeã Alternativa</span>`;
+    } else if (sc.category === 'Férias de Julho' || sc.category === 'Férias de Julho Alternativa') {
+      html += `<span class="bg-sky-50 text-sky-900 border border-sky-300 px-2.5 py-0.5 rounded-full text-xs font-bold flex items-center gap-1 shadow-2xs"><i data-lucide="sun" class="w-3.5 h-3.5 text-sky-600"></i> Férias de Julho</span>`;
+    } else if (sc.category === 'Recesso Fim de Ano' || sc.category === 'Recesso Fim de Ano Alternativo') {
+      html += `<span class="bg-purple-50 text-purple-900 border border-purple-300 px-2.5 py-0.5 rounded-full text-xs font-bold flex items-center gap-1 shadow-2xs"><i data-lucide="calendar-heart" class="w-3.5 h-3.5 text-purple-600"></i> Recesso Fim de Ano</span>`;
+    } else if (sc.category === 'Outono / Páscoa') {
+      html += `<span class="bg-orange-50 text-orange-900 border border-orange-300 px-2.5 py-0.5 rounded-full text-xs font-bold flex items-center gap-1 shadow-2xs"><i data-lucide="flower" class="w-3.5 h-3.5 text-orange-600"></i> Outono / Páscoa</span>`;
+    } else if (partitionKey === '10+10+10' || splitKey === '10+10+10') {
+      html += `<span class="bg-slate-100 text-slate-800 border border-slate-200 px-2.5 py-0.5 rounded-full text-xs font-bold flex items-center gap-1 shadow-2xs"><i data-lucide="star" class="w-3.5 h-3.5 text-slate-600"></i> 10+10+10</span>`;
+    } else if (partitionKey === '15+10+5') {
+      html += `<span class="bg-indigo-50 text-indigo-900 border border-indigo-200 px-2.5 py-0.5 rounded-full text-xs font-bold flex items-center gap-1 shadow-2xs"><i data-lucide="zap" class="w-3.5 h-3.5 text-indigo-600"></i> 15+10+5</span>`;
     } else {
-      if (sc.split.join('+') === '10+10+10') {
-        html += `<span class="bg-slate-100 text-slate-800 border border-slate-200 px-2.5 py-0.5 rounded-full text-xs font-bold flex items-center gap-1 shadow-2xs"><i data-lucide="star" class="w-3.5 h-3.5 text-slate-600"></i> 10+10+10</span>`;
-      } else if (sc.totalWasted === 0) {
-        html += `<span class="bg-emerald-50 text-emerald-800 border border-emerald-200 px-2.5 py-0.5 rounded-full text-xs font-bold flex items-center gap-1 shadow-2xs"><i data-lucide="check-check" class="w-3.5 h-3.5 text-emerald-600"></i> Desperdício Zero</span>`;
-      }
+      html += `<span class="bg-slate-100 text-slate-800 border border-slate-200 px-2.5 py-0.5 rounded-full text-xs font-bold flex items-center gap-1 shadow-2xs"><i data-lucide="sparkles" class="w-3.5 h-3.5 text-slate-600"></i> Alta Alavancagem</span>`;
     }
+
+    if (sc.totalWasted === 0) {
+      html += `<span class="bg-emerald-50 text-emerald-800 border border-emerald-200 px-2.5 py-0.5 rounded-full text-xs font-bold flex items-center gap-1 shadow-2xs"><i data-lucide="check-check" class="w-3.5 h-3.5 text-emerald-600"></i> Desperdício Zero</span>`;
+    }
+
     if (distributeThroughoutYear) {
       html += `<span class="bg-teal-50 text-teal-800 border border-teal-200 px-2.5 py-0.5 rounded-full text-xs font-bold flex items-center gap-1 shadow-2xs"><i data-lucide="shield-check" class="w-3.5 h-3.5 text-teal-600"></i> Anti-Fadiga</span>`;
     }
@@ -1216,29 +1214,9 @@
     }
 
     // Curadoria inteligente para a Fronteira de Pareto:
-    // Opção 01: Campeã Absoluta (Maior descanso real)
-    // Opção 02: Desperdício Zero (Melhor opção com totalWasted === 0)
-    // Opção 03: 10+10+10 (A clássica divisão equilibrada)
-    // Demais opções: Alternativas subsequentes
-    const scenarios = [];
-    const champion = rawScenarios[0];
-    scenarios.push(champion);
-
-    const zeroWaste = rawScenarios.find(s => s !== champion && s.totalWasted === 0);
-    if (zeroWaste) {
-      scenarios.push(zeroWaste);
-    }
-
-    const tenTenTen = rawScenarios.find(s => !scenarios.includes(s) && s.split.join('+') === '10+10+10');
-    if (tenTenTen) {
-      scenarios.push(tenTenTen);
-    }
-
-    rawScenarios.forEach(s => {
-      if (!scenarios.includes(s)) {
-        scenarios.push(s);
-      }
-    });
+    // O VacationOptimizer entrega até 10 opções calibradas e diversificadas,
+    // com as campeãs no topo para comparação direta, seguidas das âncoras sazonais e formatos clássicos.
+    const scenarios = rawScenarios;
 
     const best = scenarios[0];
 

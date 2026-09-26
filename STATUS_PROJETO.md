@@ -71,6 +71,16 @@ O painel de controle superior foi reestruturado de forma harmoniosa, com alturas
 
 ---
 
+### F. Sincronização Cronológica de Etapas & Motor de Diversidade Sazonal (10 Opções)
+- **Sincronização Cronológica dos Badges (`sc.split`):** O badge e o cabeçalho de cada card agora refletem a exata ordem cronológica das etapas vivenciadas pelo servidor (`combo.periods.map(p => p.length)`), eliminando discrepâncias onde a partição descendente (ex: `24 + 4 + 2`) discordava da sequência de etapas (ex: `Etapa 1: 2d`, `Etapa 2: 4d`, `Etapa 3: 24d`). A partição canônica original foi preservada em `sc.partition` para categorizações estruturais.
+- **Programação Dinâmica Multicanal com Âncoras Sazonais:** Superação do viés de concentração em que o prefix-max global sufocava períodos alternativos. O algoritmo agora mantém múltiplos canais de estado na Programação Dinâmica:
+  * *Canal Julho:* Garante combinações de altíssima folga ancoradas nas férias de inverno / recesso escolar de julho.
+  * *Canal Dezembro/Janeiro:* Garante opções conectadas ao recesso de fim de ano (MGI / Natal / Réveillon).
+  * *Canal Abril:* Garante opções de primeiro semestre aproveitando Semana Santa e Tiradentes.
+- **Ranking Expandido de 10 Opções Calibradas:** O painel de resultados agora exibe 10 opções completas, permitindo ao usuário comparar variações de pontuação máxima (Campeã e Campeã Alternativa lado a lado), alternativas para famílias (Julho), servidores em escala de fim de ano (Dezembro), e as divisões clássicas estatutárias (`10+10+10`, `15+10+5` e Desperdício Zero).
+
+---
+
 ## 3. SUÍTE DE TESTES AUTOMATIZADOS (`test_suite.js`)
 
 - **Total:** 32 testes automatizados cobrindo todo o ciclo do sistema.

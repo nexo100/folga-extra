@@ -375,239 +375,464 @@
       const totalWindowDays = Math.round((endWindowDate - startWindowDate) / (1000 * 60 * 60 * 24));
       const maxDay = Math.max(450, totalWindowDays + offset + 140);
 
-      // 2. Otimização exata por Programação Dinâmica para cada partição de férias
-      for (const split of splits) {
-        if (splitCount === 1) {
-          const len = split[0];
-          const list = candidatesByLen[len] || [];
-          list.sort((a, b) => b.totalOff - a.totalOff || a.wasted - b.wasted);
-          const topList = list.slice(0, 5);
+    function isJulyStage(p) {
+      return p.startDate.getMonth() === 6 || (p.startDate.getMonth() === 5 && p.endDate.getMonth() === 6 && p.endDate.getDate() >= 10);
+    }
 
-          for (const item of topList) {
-            let finalPeriod = item.period;
-            let finalOff = item.totalOff;
-            let actualComp = 0;
-            if (this.compensationDays > 0) {
-              const compP = this.evaluatePeriod(item.period.startDate, item.period.length, this.compensationDays);
-              if (!this.isCompPeriodExcluded(compP)) {
-                finalPeriod = compP;
-                finalOff = finalPeriod.totalOff;
-                actualComp = this.compensationDays;
-              }
-            }
+    function isDecStage(p, yr) {
+      return p.startDate.getMonth() === 11 || p.endDate.getFullYear() > yr || (p.endDate.getMonth() === 11 && p.endDate.getDate() >= 23);
+    }
 
-            const effectiveTotalDays = totalDays + actualComp;
-            validScenarios.push({
-              split,
-              periods: [finalPeriod],
-              totalOff: finalOff,
-              vacationDays: totalDays,
-              compensationDays: actualComp,
-              extraGain: finalOff - effectiveTotalDays,
-              totalWasted: finalPeriod.wastedEndDays,
-              leverage: (finalOff / effectiveTotalDays).toFixed(2),
-              windowStartDate: startWindowDate,
-              windowEndDate: endWindowDate
-            });
-          }
-        } else if (splitCount === 2) {
-          const [a, b] = split;
-          const perms = a === b ? [[a, b]] : [[a, b], [b, a]];
+    function isAprilStage(p) {
+      return p.startDate.getMonth() === 3 || (p.startDate.getMonth() === 2 && p.endDate.getMonth() === 3 && p.endDate.getDate() >= 5);
+    }
 
-          for (const [L1, L2] of perms) {
-            const list1 = candidatesByLen[L1] || [];
-            const list2 = candidatesByLen[L2] || [];
+    // 2. Otimização exata por Programação Dinâmica para cada partição de férias
+    for (const split of splits) {
+      if (splitCount === 1) {
+        const len = split[0];
+        const list = candidatesByLen[len] || [];
+        list.sort((a, b) => b.totalOff - a.totalOff || a.wasted - b.wasted);
 
-            // DP prefixo Estágio 1
-            const best1 = new Array(maxDay + 1).fill(null);
-            for (const p of list1) {
-              const r = p.returnIdx + offset;
-              if (r < 0 || r > maxDay) continue;
-              if (!best1[r] || p.totalOff > best1[r].totalOff || (p.totalOff === best1[r].totalOff && p.wasted < best1[r].wasted)) {
-                best1[r] = { totalOff: p.totalOff, wasted: p.wasted, periods: [p.period] };
-              }
-            }
-            for (let d = 1; d <= maxDay; d++) {
-              if (!best1[d] || (best1[d - 1] && (best1[d - 1].totalOff > best1[d].totalOff || (best1[d - 1].totalOff === best1[d].totalOff && best1[d - 1].wasted < best1[d].wasted)))) {
-                best1[d] = best1[d - 1];
-              }
-            }
+        const selected = list.slice(0, 5);
+        const julyCand = list.find(p => isJulyStage(p.period));
+        if (julyCand && !selected.includes(julyCand)) selected.push(julyCand);
 
-            // Testa candidatos Estágio 2
-            let bestCombo = null;
-            for (const p2 of list2) {
-              const startD = p2.effStartIdx - minGap + offset;
-              if (startD <= 0) continue;
-              const prev = best1[startD];
-              if (!prev) continue;
-              const combinedOff = prev.totalOff + p2.totalOff;
-              const combinedWasted = prev.wasted + p2.wasted;
+        const decCand = list.find(p => isDecStage(p.period, this.year));
+        if (decCand && !selected.includes(decCand)) selected.push(decCand);
 
-              if (!bestCombo || combinedOff > bestCombo.totalOff || (combinedOff === bestCombo.totalOff && combinedWasted < bestCombo.totalWasted)) {
-                bestCombo = {
-                  split,
-                  periods: [...prev.periods, p2.period],
-                  totalOff: combinedOff,
-                  totalWasted: combinedWasted
-                };
-              }
-            }
+        const aprilCand = list.find(p => isAprilStage(p.period));
+        if (aprilCand && !selected.includes(aprilCand)) selected.push(aprilCand);
 
-            if (bestCombo) {
-              this._applyCompensationAndPushScenario(validScenarios, bestCombo, totalDays);
+        const zeroWasteCand = list.find(p => p.wasted === 0);
+        if (zeroWasteCand && !selected.includes(zeroWasteCand)) selected.push(zeroWasteCand);
+
+        for (const item of selected) {
+          let finalPeriod = item.period;
+          let finalOff = item.totalOff;
+          let actualComp = 0;
+          if (this.compensationDays > 0) {
+            const compP = this.evaluatePeriod(item.period.startDate, item.period.length, this.compensationDays);
+            if (!this.isCompPeriodExcluded(compP)) {
+              finalPeriod = compP;
+              finalOff = finalPeriod.totalOff;
+              actualComp = this.compensationDays;
             }
           }
-        } else if (splitCount === 3) {
-          const [a, b, c] = split;
-          const rawPerms = [
-            [a, b, c], [a, c, b],
-            [b, a, c], [b, c, a],
-            [c, a, b], [c, b, a]
-          ];
-          const permSet = new Set();
-          const perms = rawPerms.filter(p => {
-            const k = p.join(',');
-            if (permSet.has(k)) return false;
-            permSet.add(k);
-            return true;
+
+          const effectiveTotalDays = totalDays + actualComp;
+          validScenarios.push({
+            split: [len],
+            partition: [len],
+            periods: [finalPeriod],
+            totalOff: finalOff,
+            vacationDays: totalDays,
+            compensationDays: actualComp,
+            extraGain: finalOff - effectiveTotalDays,
+            totalWasted: finalPeriod.wastedEndDays,
+            leverage: (finalOff / effectiveTotalDays).toFixed(2),
+            windowStartDate: startWindowDate,
+            windowEndDate: endWindowDate
           });
+        }
+      } else if (splitCount === 2) {
+        const [a, b] = split;
+        const perms = a === b ? [[a, b]] : [[a, b], [b, a]];
 
-          for (const [L1, L2, L3] of perms) {
-            const list1 = candidatesByLen[L1] || [];
-            const list2 = candidatesByLen[L2] || [];
-            const list3 = candidatesByLen[L3] || [];
+        for (const [L1, L2] of perms) {
+          const list1 = candidatesByLen[L1] || [];
+          const list2 = candidatesByLen[L2] || [];
 
-            // DP prefixo Estágio 1
-            const best1 = new Array(maxDay + 1).fill(null);
-            for (const p of list1) {
-              const r = p.returnIdx + offset;
-              if (r < 0 || r > maxDay) continue;
-              if (!best1[r] || p.totalOff > best1[r].totalOff || (p.totalOff === best1[r].totalOff && p.wasted < best1[r].wasted)) {
-                best1[r] = { totalOff: p.totalOff, wasted: p.wasted, periods: [p.period] };
+          // DP prefixo Estágio 1 (Global, Julho, Abril)
+          const best1 = new Array(maxDay + 1).fill(null);
+          const best1July = new Array(maxDay + 1).fill(null);
+          const best1April = new Array(maxDay + 1).fill(null);
+
+          for (const p of list1) {
+            const r = p.returnIdx + offset;
+            if (r < 0 || r > maxDay) continue;
+            if (!best1[r] || p.totalOff > best1[r].totalOff || (p.totalOff === best1[r].totalOff && p.wasted < best1[r].wasted)) {
+              best1[r] = { totalOff: p.totalOff, wasted: p.wasted, periods: [p.period] };
+            }
+            if (isJulyStage(p.period)) {
+              if (!best1July[r] || p.totalOff > best1July[r].totalOff || (p.totalOff === best1July[r].totalOff && p.wasted < best1July[r].wasted)) {
+                best1July[r] = { totalOff: p.totalOff, wasted: p.wasted, periods: [p.period] };
               }
             }
-            for (let d = 1; d <= maxDay; d++) {
-              if (!best1[d] || (best1[d - 1] && (best1[d - 1].totalOff > best1[d].totalOff || (best1[d - 1].totalOff === best1[d].totalOff && best1[d - 1].wasted < best1[d].wasted)))) {
-                best1[d] = best1[d - 1];
+            if (isAprilStage(p.period)) {
+              if (!best1April[r] || p.totalOff > best1April[r].totalOff || (p.totalOff === best1April[r].totalOff && p.wasted < best1April[r].wasted)) {
+                best1April[r] = { totalOff: p.totalOff, wasted: p.wasted, periods: [p.period] };
               }
             }
+          }
+          for (let d = 1; d <= maxDay; d++) {
+            if (!best1[d] || (best1[d - 1] && (best1[d - 1].totalOff > best1[d].totalOff || (best1[d - 1].totalOff === best1[d].totalOff && best1[d - 1].wasted < best1[d].wasted)))) {
+              best1[d] = best1[d - 1];
+            }
+            if (!best1July[d] || (best1July[d - 1] && (best1July[d - 1].totalOff > best1July[d].totalOff || (best1July[d - 1].totalOff === best1July[d].totalOff && best1July[d - 1].wasted < best1July[d].wasted)))) {
+              best1July[d] = best1July[d - 1];
+            }
+            if (!best1April[d] || (best1April[d - 1] && (best1April[d - 1].totalOff > best1April[d].totalOff || (best1April[d - 1].totalOff === best1April[d].totalOff && best1April[d - 1].wasted < best1April[d].wasted)))) {
+              best1April[d] = best1April[d - 1];
+            }
+          }
 
-            // DP prefixo Estágio 2 com espaçamento saudável
-            const best2 = new Array(maxDay + 1).fill(null);
-            for (const p2 of list2) {
-              const startD = p2.effStartIdx - minGap + offset;
-              if (startD <= 0) continue;
-              const prev = best1[startD];
-              if (!prev) continue;
-              const r2 = p2.returnIdx + offset;
-              if (r2 < 0 || r2 > maxDay) continue;
+          // Testa candidatos Estágio 2 com múltiplos canais
+          let bestGlobal = null;
+          let bestJuly = null;
+          let bestDec = null;
+          let bestApril = null;
+
+          for (const p2 of list2) {
+            const startD = p2.effStartIdx - minGap + offset;
+            if (startD <= 0) continue;
+
+            const prev = best1[startD];
+            if (prev) {
               const combinedOff = prev.totalOff + p2.totalOff;
               const combinedWasted = prev.wasted + p2.wasted;
+              const combo = {
+                split: [L1, L2],
+                partition: split,
+                periods: [...prev.periods, p2.period],
+                totalOff: combinedOff,
+                totalWasted: combinedWasted
+              };
+              if (!bestGlobal || combinedOff > bestGlobal.totalOff || (combinedOff === bestGlobal.totalOff && combinedWasted < bestGlobal.totalWasted)) {
+                bestGlobal = combo;
+              }
+              if (isJulyStage(p2.period)) {
+                if (!bestJuly || combinedOff > bestJuly.totalOff || (combinedOff === bestJuly.totalOff && combinedWasted < bestJuly.totalWasted)) {
+                  bestJuly = combo;
+                }
+              }
+              if (isDecStage(p2.period, this.year)) {
+                if (!bestDec || combinedOff > bestDec.totalOff || (combinedOff === bestDec.totalOff && combinedWasted < bestDec.totalWasted)) {
+                  bestDec = combo;
+                }
+              }
+              if (isAprilStage(p2.period)) {
+                if (!bestApril || combinedOff > bestApril.totalOff || (combinedOff === bestApril.totalOff && combinedWasted < bestApril.totalWasted)) {
+                  bestApril = combo;
+                }
+              }
+            }
 
+            const prevJuly = best1July[startD];
+            if (prevJuly) {
+              const combinedOff = prevJuly.totalOff + p2.totalOff;
+              const combinedWasted = prevJuly.wasted + p2.wasted;
+              const combo = {
+                split: [L1, L2],
+                partition: split,
+                periods: [...prevJuly.periods, p2.period],
+                totalOff: combinedOff,
+                totalWasted: combinedWasted
+              };
+              if (!bestJuly || combinedOff > bestJuly.totalOff || (combinedOff === bestJuly.totalOff && combinedWasted < bestJuly.totalWasted)) {
+                bestJuly = combo;
+              }
+            }
+
+            const prevApril = best1April[startD];
+            if (prevApril) {
+              const combinedOff = prevApril.totalOff + p2.totalOff;
+              const combinedWasted = prevApril.wasted + p2.wasted;
+              const combo = {
+                split: [L1, L2],
+                partition: split,
+                periods: [...prevApril.periods, p2.period],
+                totalOff: combinedOff,
+                totalWasted: combinedWasted
+              };
+              if (!bestApril || combinedOff > bestApril.totalOff || (combinedOff === bestApril.totalOff && combinedWasted < bestApril.totalWasted)) {
+                bestApril = combo;
+              }
+            }
+          }
+
+          [bestGlobal, bestJuly, bestDec, bestApril].forEach(c => {
+            if (c) this._applyCompensationAndPushScenario(validScenarios, c, totalDays);
+          });
+        }
+      } else if (splitCount === 3) {
+        const [a, b, c] = split;
+        const rawPerms = [
+          [a, b, c], [a, c, b],
+          [b, a, c], [b, c, a],
+          [c, a, b], [c, b, a]
+        ];
+        const permSet = new Set();
+        const perms = rawPerms.filter(p => {
+          const k = p.join(',');
+          if (permSet.has(k)) return false;
+          permSet.add(k);
+          return true;
+        });
+
+        for (const [L1, L2, L3] of perms) {
+          const list1 = candidatesByLen[L1] || [];
+          const list2 = candidatesByLen[L2] || [];
+          const list3 = candidatesByLen[L3] || [];
+
+          // DP prefixo Estágio 1
+          const best1 = new Array(maxDay + 1).fill(null);
+          const best1July = new Array(maxDay + 1).fill(null);
+          const best1April = new Array(maxDay + 1).fill(null);
+
+          for (const p of list1) {
+            const r = p.returnIdx + offset;
+            if (r < 0 || r > maxDay) continue;
+            if (!best1[r] || p.totalOff > best1[r].totalOff || (p.totalOff === best1[r].totalOff && p.wasted < best1[r].wasted)) {
+              best1[r] = { totalOff: p.totalOff, wasted: p.wasted, periods: [p.period] };
+            }
+            if (isJulyStage(p.period)) {
+              if (!best1July[r] || p.totalOff > best1July[r].totalOff || (p.totalOff === best1July[r].totalOff && p.wasted < best1July[r].wasted)) {
+                best1July[r] = { totalOff: p.totalOff, wasted: p.wasted, periods: [p.period] };
+              }
+            }
+            if (isAprilStage(p.period)) {
+              if (!best1April[r] || p.totalOff > best1April[r].totalOff || (p.totalOff === best1April[r].totalOff && p.wasted < best1April[r].wasted)) {
+                best1April[r] = { totalOff: p.totalOff, wasted: p.wasted, periods: [p.period] };
+              }
+            }
+          }
+          for (let d = 1; d <= maxDay; d++) {
+            if (!best1[d] || (best1[d - 1] && (best1[d - 1].totalOff > best1[d].totalOff || (best1[d - 1].totalOff === best1[d].totalOff && best1[d - 1].wasted < best1[d].wasted)))) {
+              best1[d] = best1[d - 1];
+            }
+            if (!best1July[d] || (best1July[d - 1] && (best1July[d - 1].totalOff > best1July[d].totalOff || (best1July[d - 1].totalOff === best1July[d].totalOff && best1July[d - 1].wasted < best1July[d].wasted)))) {
+              best1July[d] = best1July[d - 1];
+            }
+            if (!best1April[d] || (best1April[d - 1] && (best1April[d - 1].totalOff > best1April[d].totalOff || (best1April[d - 1].totalOff === best1April[d].totalOff && best1April[d - 1].wasted < best1April[d].wasted)))) {
+              best1April[d] = best1April[d - 1];
+            }
+          }
+
+          // DP prefixo Estágio 2 com canais sazonais
+          const best2 = new Array(maxDay + 1).fill(null);
+          const best2July = new Array(maxDay + 1).fill(null);
+          const best2April = new Array(maxDay + 1).fill(null);
+
+          for (const p2 of list2) {
+            const startD = p2.effStartIdx - minGap + offset;
+            if (startD <= 0) continue;
+            const r2 = p2.returnIdx + offset;
+            if (r2 < 0 || r2 > maxDay) continue;
+
+            const prev = best1[startD];
+            if (prev) {
+              const combinedOff = prev.totalOff + p2.totalOff;
+              const combinedWasted = prev.wasted + p2.wasted;
+              const entry = { totalOff: combinedOff, wasted: combinedWasted, periods: [...prev.periods, p2.period] };
               if (!best2[r2] || combinedOff > best2[r2].totalOff || (combinedOff === best2[r2].totalOff && combinedWasted < best2[r2].wasted)) {
-                best2[r2] = { totalOff: combinedOff, wasted: combinedWasted, periods: [...prev.periods, p2.period] };
+                best2[r2] = entry;
               }
-            }
-            for (let d = 1; d <= maxDay; d++) {
-              if (!best2[d] || (best2[d - 1] && (best2[d - 1].totalOff > best2[d].totalOff || (best2[d - 1].totalOff === best2[d].totalOff && best2[d - 1].wasted < best2[d].wasted)))) {
-                best2[d] = best2[d - 1];
+              if (isJulyStage(p2.period)) {
+                if (!best2July[r2] || combinedOff > best2July[r2].totalOff || (combinedOff === best2July[r2].totalOff && combinedWasted < best2July[r2].wasted)) {
+                  best2July[r2] = entry;
+                }
+              }
+              if (isAprilStage(p2.period)) {
+                if (!best2April[r2] || combinedOff > best2April[r2].totalOff || (combinedOff === best2April[r2].totalOff && combinedWasted < best2April[r2].wasted)) {
+                  best2April[r2] = entry;
+                }
               }
             }
 
-            // Testa candidatos Estágio 3
-            let bestCombo = null;
-            for (const p3 of list3) {
-              const startD = p3.effStartIdx - minGap + offset;
-              if (startD <= 0) continue;
-              const prev = best2[startD];
-              if (!prev) continue;
+            const prevJuly = best1July[startD];
+            if (prevJuly) {
+              const combinedOff = prevJuly.totalOff + p2.totalOff;
+              const combinedWasted = prevJuly.wasted + p2.wasted;
+              const entry = { totalOff: combinedOff, wasted: combinedWasted, periods: [...prevJuly.periods, p2.period] };
+              if (!best2July[r2] || combinedOff > best2July[r2].totalOff || (combinedOff === best2July[r2].totalOff && combinedWasted < best2July[r2].wasted)) {
+                best2July[r2] = entry;
+              }
+            }
+
+            const prevApril = best1April[startD];
+            if (prevApril) {
+              const combinedOff = prevApril.totalOff + p2.totalOff;
+              const combinedWasted = prevApril.wasted + p2.wasted;
+              const entry = { totalOff: combinedOff, wasted: combinedWasted, periods: [...prevApril.periods, p2.period] };
+              if (!best2April[r2] || combinedOff > best2April[r2].totalOff || (combinedOff === best2April[r2].totalOff && combinedWasted < best2April[r2].wasted)) {
+                best2April[r2] = entry;
+              }
+            }
+          }
+
+          for (let d = 1; d <= maxDay; d++) {
+            if (!best2[d] || (best2[d - 1] && (best2[d - 1].totalOff > best2[d].totalOff || (best2[d - 1].totalOff === best2[d].totalOff && best2[d - 1].wasted < best2[d].wasted)))) {
+              best2[d] = best2[d - 1];
+            }
+            if (!best2July[d] || (best2July[d - 1] && (best2July[d - 1].totalOff > best2July[d].totalOff || (best2July[d - 1].totalOff === best2July[d].totalOff && best2July[d - 1].wasted < best2July[d].wasted)))) {
+              best2July[d] = best2July[d - 1];
+            }
+            if (!best2April[d] || (best2April[d - 1] && (best2April[d - 1].totalOff > best2April[d].totalOff || (best2April[d - 1].totalOff === best2April[d].totalOff && best2April[d - 1].wasted < best2April[d].wasted)))) {
+              best2April[d] = best2April[d - 1];
+            }
+          }
+
+          // Testa candidatos Estágio 3 com canais sazonais
+          let bestGlobal = null;
+          let bestJuly = null;
+          let bestDec = null;
+          let bestApril = null;
+
+          for (const p3 of list3) {
+            const startD = p3.effStartIdx - minGap + offset;
+            if (startD <= 0) continue;
+
+            const prev = best2[startD];
+            if (prev) {
               const combinedOff = prev.totalOff + p3.totalOff;
               const combinedWasted = prev.wasted + p3.wasted;
-
-              if (!bestCombo || combinedOff > bestCombo.totalOff || (combinedOff === bestCombo.totalOff && combinedWasted < bestCombo.totalWasted)) {
-                bestCombo = {
-                  split,
-                  periods: [...prev.periods, p3.period],
-                  totalOff: combinedOff,
-                  totalWasted: combinedWasted
-                };
+              const combo = {
+                split: [L1, L2, L3],
+                partition: split,
+                periods: [...prev.periods, p3.period],
+                totalOff: combinedOff,
+                totalWasted: combinedWasted
+              };
+              if (!bestGlobal || combinedOff > bestGlobal.totalOff || (combinedOff === bestGlobal.totalOff && combinedWasted < bestGlobal.totalWasted)) {
+                bestGlobal = combo;
+              }
+              if (isDecStage(p3.period, this.year)) {
+                if (!bestDec || combinedOff > bestDec.totalOff || (combinedOff === bestDec.totalOff && combinedWasted < bestDec.totalWasted)) {
+                  bestDec = combo;
+                }
+              }
+              if (isJulyStage(p3.period)) {
+                if (!bestJuly || combinedOff > bestJuly.totalOff || (combinedOff === bestJuly.totalOff && combinedWasted < bestJuly.totalWasted)) {
+                  bestJuly = combo;
+                }
               }
             }
 
-            if (bestCombo) {
-              this._applyCompensationAndPushScenario(validScenarios, bestCombo, totalDays);
+            const prevJuly = best2July[startD];
+            if (prevJuly) {
+              const combinedOff = prevJuly.totalOff + p3.totalOff;
+              const combinedWasted = prevJuly.wasted + p3.wasted;
+              const combo = {
+                split: [L1, L2, L3],
+                partition: split,
+                periods: [...prevJuly.periods, p3.period],
+                totalOff: combinedOff,
+                totalWasted: combinedWasted
+              };
+              if (!bestJuly || combinedOff > bestJuly.totalOff || (combinedOff === bestJuly.totalOff && combinedWasted < bestJuly.totalWasted)) {
+                bestJuly = combo;
+              }
+            }
+
+            const prevApril = best2April[startD];
+            if (prevApril) {
+              const combinedOff = prevApril.totalOff + p3.totalOff;
+              const combinedWasted = prevApril.wasted + p3.wasted;
+              const combo = {
+                split: [L1, L2, L3],
+                partition: split,
+                periods: [...prevApril.periods, p3.period],
+                totalOff: combinedOff,
+                totalWasted: combinedWasted
+              };
+              if (!bestApril || combinedOff > bestApril.totalOff || (combinedOff === bestApril.totalOff && combinedWasted < bestApril.totalWasted)) {
+                bestApril = combo;
+              }
             }
           }
+
+          [bestGlobal, bestJuly, bestDec, bestApril].forEach(c => {
+            if (c) this._applyCompensationAndPushScenario(validScenarios, c, totalDays);
+          });
         }
       }
+    }
 
-      // Ordena cenários pelo descanso total (1º) e menor desperdício no fim (2º)
-      validScenarios.sort((a, b) => {
-        if (b.totalOff !== a.totalOff) return b.totalOff - a.totalOff;
-        return a.totalWasted - b.totalWasted;
-      });
+    // Ordena cenários pelo descanso total (1º) e menor desperdício no fim (2º)
+    validScenarios.sort((a, b) => {
+      if (b.totalOff !== a.totalOff) return b.totalOff - a.totalOff;
+      return a.totalWasted - b.totalWasted;
+    });
 
-      // 3. Montagem de ranking transparente e diversificado
-      const uniqueScenarios = [];
-      const seenSplits = new Set();
-      const seenKeys = new Set();
+    // 3. Montagem de ranking transparente e diversificado (10 Opções)
+    const maxOff = validScenarios[0]?.totalOff || 0;
+    const uniqueScenarios = [];
+    const seenSplits = new Set();
+    const seenKeys = new Set();
 
-      // Top absoluto (sem filtros cegos)
-      for (const s of validScenarios) {
-        const splitKey = s.split.join('+');
-        const key = s.periods.map(p => `${formatISODate(p.startDate)}_${p.length}`).join('|');
-        if (!seenSplits.has(splitKey) && !seenKeys.has(key)) {
-          seenSplits.add(splitKey);
-          seenKeys.add(key);
-          uniqueScenarios.push(s);
-          if (uniqueScenarios.length >= 4) break;
-        }
+    function addScenario(s, category) {
+      if (!s) return false;
+      const key = s.periods.map(p => `${formatISODate(p.startDate)}_${p.length}`).join('|');
+      if (seenKeys.has(key)) return false;
+      seenKeys.add(key);
+      seenSplits.add(s.split.join('+'));
+      s.category = category || s.category;
+      uniqueScenarios.push(s);
+      return true;
+    }
+
+    // 1. Campeãs Globais: Permite mais de uma variação de campeã para o usuário comparar opções máximas
+    const topChamps = validScenarios.filter(s => s.totalOff >= maxOff - 1);
+    let champCount = 0;
+    for (const s of topChamps) {
+      if (addScenario(s, s.totalOff === maxOff ? 'Campeã' : 'Campeã Alternativa')) {
+        champCount++;
+        if (champCount >= 2) break;
       }
+    }
 
-      // Garante presença do clássico 10+10+10 se houver
-      if (totalDays === 30 && splitCount === 3 && !seenSplits.has('10+10+10')) {
-        const best10 = validScenarios.find(s => s.split.join('+') === '10+10+10');
-        if (best10) {
-          const key = best10.periods.map(p => `${formatISODate(p.startDate)}_${p.length}`).join('|');
-          seenSplits.add('10+10+10');
-          seenKeys.add(key);
-          uniqueScenarios.push(best10);
-        }
+    // 2. Férias Escolares de Julho / Inverno
+    const bestJuly = validScenarios.find(s => s.periods.some(p => isJulyStage(p)) && !seenKeys.has(s.periods.map(p => `${formatISODate(p.startDate)}_${p.length}`).join('|')));
+    if (bestJuly) addScenario(bestJuly, 'Férias de Julho');
+
+    // 3. Recesso de Fim de Ano (Natal / Réveillon / MGI)
+    const bestDec = validScenarios.find(s => s.periods.some(p => isDecStage(p, this.year)) && !seenKeys.has(s.periods.map(p => `${formatISODate(p.startDate)}_${p.length}`).join('|')));
+    if (bestDec) addScenario(bestDec, 'Recesso Fim de Ano');
+
+    // 4. Outono / Páscoa / Tiradentes (Abril)
+    const bestApril = validScenarios.find(s => s.periods.some(p => isAprilStage(p)) && !seenKeys.has(s.periods.map(p => `${formatISODate(p.startDate)}_${p.length}`).join('|')));
+    if (bestApril) addScenario(bestApril, 'Outono / Páscoa');
+
+    // 5. Clássica 10+10+10 (para 3 etapas) ou 15+15 (para 2 etapas)
+    if (splitCount === 3 && totalDays === 30) {
+      const best10 = validScenarios.find(s => (s.partition?.join('+') === '10+10+10' || s.split.join('+') === '10+10+10') && !seenKeys.has(s.periods.map(p => `${formatISODate(p.startDate)}_${p.length}`).join('|')));
+      if (best10) addScenario(best10, '10+10+10');
+    } else if (splitCount === 2 && totalDays === 30) {
+      const best1515 = validScenarios.find(s => (s.partition?.join('+') === '15+15' || s.split.join('+') === '15+15') && !seenKeys.has(s.periods.map(p => `${formatISODate(p.startDate)}_${p.length}`).join('|')));
+      if (best1515) addScenario(best1515, '15+15');
+    }
+
+    // 6. Escalonada 15+10+5
+    if (splitCount === 3 && totalDays === 30) {
+      let best15 = validScenarios.find(s => s.split.join('+') === '15+10+5' && !seenKeys.has(s.periods.map(p => `${formatISODate(p.startDate)}_${p.length}`).join('|')));
+      if (!best15) {
+        best15 = validScenarios.find(s => s.partition?.join('+') === '15+10+5' && !seenKeys.has(s.periods.map(p => `${formatISODate(p.startDate)}_${p.length}`).join('|')));
       }
+      if (best15) addScenario(best15, '15+10+5');
+    }
 
-      // Garante presença do clássico 15+10+5 se houver
-      if (totalDays === 30 && splitCount === 3 && !seenSplits.has('15+10+5')) {
-        const best15 = validScenarios.find(s => s.split.join('+') === '15+10+5');
-        if (best15) {
-          const key = best15.periods.map(p => `${formatISODate(p.startDate)}_${p.length}`).join('|');
-          seenSplits.add('15+10+5');
-          seenKeys.add(key);
-          uniqueScenarios.push(best15);
-        }
-      }
+    // 7. Desperdício Zero
+    const zeroWaste = validScenarios.find(s => s.totalWasted === 0 && !seenKeys.has(s.periods.map(p => `${formatISODate(p.startDate)}_${p.length}`).join('|')));
+    if (zeroWaste) addScenario(zeroWaste, 'Desperdício Zero');
 
-      // Completa com opções de zero desperdício se existirem
-      const zeroWasteOption = validScenarios.find(s => s.totalWasted === 0 && !seenKeys.has(s.periods.map(p => `${formatISODate(p.startDate)}_${p.length}`).join('|')));
-      if (zeroWasteOption && uniqueScenarios.length < 6) {
-        const key = zeroWasteOption.periods.map(p => `${formatISODate(p.startDate)}_${p.length}`).join('|');
-        seenKeys.add(key);
-        uniqueScenarios.push(zeroWasteOption);
-      }
+    // 8. Alternativas sazonais adicionais se houver vagas
+    const secondJuly = validScenarios.find(s => s.periods.some(p => isJulyStage(p)) && !seenKeys.has(s.periods.map(p => `${formatISODate(p.startDate)}_${p.length}`).join('|')));
+    if (secondJuly && uniqueScenarios.length < 10) addScenario(secondJuly, 'Férias de Julho Alternativa');
 
-      // Completa com outras ótimas alternativas até 6 opções
-      for (const s of validScenarios) {
-        const key = s.periods.map(p => `${formatISODate(p.startDate)}_${p.length}`).join('|');
-        if (!seenKeys.has(key)) {
-          seenKeys.add(key);
-          uniqueScenarios.push(s);
-          if (uniqueScenarios.length >= 6) break;
-        }
-      }
+    const secondDec = validScenarios.find(s => s.periods.some(p => isDecStage(p, this.year)) && !seenKeys.has(s.periods.map(p => `${formatISODate(p.startDate)}_${p.length}`).join('|')));
+    if (secondDec && uniqueScenarios.length < 10) addScenario(secondDec, 'Recesso Fim de Ano Alternativo');
 
-      return uniqueScenarios.sort((a, b) => {
-        if (b.totalOff !== a.totalOff) return b.totalOff - a.totalOff;
-        return a.totalWasted - b.totalWasted;
-      });
+    // 9. Preenche até 10 opções com as melhores alternativas únicas restantes
+    for (const s of validScenarios) {
+      if (uniqueScenarios.length >= 10) break;
+      addScenario(s, 'Alta Alavancagem');
+    }
+
+    return uniqueScenarios.sort((a, b) => {
+      if (b.totalOff !== a.totalOff) return b.totalOff - a.totalOff;
+      return a.totalWasted - b.totalWasted;
+    });
     }
 
     /**
@@ -657,6 +882,7 @@
       const effectiveTotalDays = totalDays + actualComp;
       targetList.push({
         split: combo.split,
+        partition: combo.partition || (combo.split ? combo.split.slice().sort((a, b) => b - a) : combo.periods.map(p => p.length).sort((a, b) => b - a)),
         periods: finalPeriods,
         totalOff: finalTotalOff,
         vacationDays: totalDays,
