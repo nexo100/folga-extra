@@ -2,8 +2,7 @@
 **Projeto:** Folga Extra (UFBA) — Otimizador Inteligente de Férias e Descanso  
 **Versão Atual:** v3.1  
 **Data de Atualização:** 25/09/2026  
-**Caminho Local Principal:** `C:\Users\nexo\github\folga-extra`  
-**Junction de Compatibilidade:** `C:\Users\nexo\.gemini\antigravity\scratch\folga-extra`  
+**Caminho Local Oficial:** `C:\Users\nexo\github\folga-extra`  
 **Repositório GitHub:** `https://github.com/nexo100/folga-extra`  
 **Conversa de Origem:** [🔗 Análise e Reprodução de Site](conversation://f1f763d6-076e-4543-a905-f0eaa0736efd)  
 **Conversa de Continuação/Índice:** [🔗 Retomada e Próximos Passos](conversation://1c2a3b0a-fa69-4089-a588-81fff2b16f3c)  
@@ -119,7 +118,7 @@ O repositório e a máquina possuem 3 camadas de blindagem ativas:
 ## 6. INSTRUÇÃO PARA ABRIR A NOVA CONVERSA DO PROJETO
 
 Ao abrir a nova conversa no Antigravity:
-1. Verifique se o projeto ativo é `C:\Users\nexo\github\folga-extra` (ou pelo junction `C:\Users\nexo\.gemini\antigravity\scratch\folga-extra`).
+1. Verifique se o projeto ativo é `C:\Users\nexo\github\folga-extra`.
 2. Envie o seguinte prompt inicial:
    > *"Estou retomando o projeto Folga Extra a partir de @STATUS_PROJETO.md e @conversation://f1f763d6-076e-4543-a905-f0eaa0736efd. O ambiente está com 32/32 testes aprovados. Vamos definir o próximo passo do desenvolvimento."*
 

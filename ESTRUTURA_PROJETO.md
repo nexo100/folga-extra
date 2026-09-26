@@ -1,7 +1,6 @@
 # 🗺️ MAPA MESTRE E ESTRUTURA DO PROJETO FOLGA EXTRA
-> **Papel deste Documento:** Hub central de referência ("Link Simbólico") do projeto.  
-> **Localização Física Principal:** `C:\Users\nexo\github\folga-extra`  
-> **Link de Compatibilidade (Junction):** `C:\Users\nexo\.gemini\antigravity\scratch\folga-extra`  
+> **Papel deste Documento:** Hub central de referência do projeto.  
+> **Localização Física Oficial:** `C:\Users\nexo\github\folga-extra`  
 > **Repositório GitHub:** `https://github.com/nexo100/folga-extra`  
 > **Estado de Qualidade:** 32 / 32 Testes Aprovados (100% Green)
 
@@ -19,7 +18,7 @@
 ## 📂 ÁRVORE COMPLETA DE DIRETÓRIOS E ARQUIVOS
 
 ```text
-C:\Users\nexo\.gemini\antigravity\scratch\folga-extra\
+C:\Users\nexo\github\folga-extra\
 │
 ├── 📄 index.html                     # Interface SPA completa: Cockpit (3 Cards), Fita Anual, Cards de Cenário, Dock & Drawer
 ├── 📄 sw.js                           # Service Worker PWA (Offline-First, Cache-First para fontes, Tailwind CDN e JS locais)
