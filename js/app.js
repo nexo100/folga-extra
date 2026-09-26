@@ -32,6 +32,7 @@
     holidays: [],
     currentScenarios: [],
     comparedScenarios: [],
+    hasCalculated: false,
 
     // Ponto 2: Janela Personalizada & Períodos a Evitar
     customWindowEnabled: false,
@@ -1152,6 +1153,11 @@
   // EXECUÇÃO DA SIMULAÇÃO COM MOTOR COMBINATÓRIO
   // ----------------------------------------------------
   function runSimulation(isUserAction = true) {
+    if (!state.hasCalculated && !isUserAction) {
+      return;
+    }
+    state.hasCalculated = true;
+
     state.vacationDays = parseInt(document.getElementById('vacationDays').value) || 30;
     state.selectedYear = parseInt(document.getElementById('selectedYear').value) || 2027;
     state.selectedLocation = document.getElementById('selectedLocation').value || 'UFBA_SALVADOR';
@@ -1328,13 +1334,17 @@
 
     if (window.lucide) window.lucide.createIcons();
 
-    if (isUserAction && window.confetti) {
-      confetti({
-        particleCount: 50,
-        spread: 60,
-        origin: { y: 0.6 }
-      });
-      resultsSection.scrollIntoView({ behavior: 'smooth' });
+    if (isUserAction) {
+      if (window.confetti) {
+        confetti({
+          particleCount: 50,
+          spread: 60,
+          origin: { y: 0.6 }
+        });
+      }
+      if (resultsSection) {
+        resultsSection.scrollIntoView({ behavior: 'smooth' });
+      }
     }
   }
 
@@ -1992,7 +2002,7 @@
     document.addEventListener('DOMContentLoaded', () => {
       initWorkingDaysUI();
       onYearOrLocationChange();
-      runSimulation(false);
+      // Não executa simulação na carga inicial: os resultados permanecem 100% ocultos até o clique em Calcular
       if (typeof window !== 'undefined' && window.lucide) window.lucide.createIcons();
     });
   }
