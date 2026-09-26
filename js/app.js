@@ -1272,377 +1272,79 @@
     const isRibbonActive = sIdx === (state.activeScenarioIndex || 0);
     const isCompared = state.comparedScenarios && state.comparedScenarios.includes(sIdx);
     const theme = getScenarioStrategicTheme(sc, sIdx, state.distributeThroughoutYear);
+    const badgesHtml = buildBadgesHtml(sc, sIdx, state.distributeThroughoutYear);
 
-      // Macro-Contrast Top Accent (4px) - consistente entre todas as opções
-      const topAccentClass = 'bg-slate-900';
+    const card = document.createElement('div');
+    card.id = `scenarioCard_${sIdx}`;
+    card.className = isRibbonActive
+      ? `bg-gradient-to-br from-amber-100/80 via-sky-50/90 to-indigo-100/70 rounded-3xl border-2 border-amber-400 shadow-xl ring-2 ring-amber-400/40 transition-all duration-300 overflow-hidden`
+      : `bg-slate-100/90 rounded-3xl border-2 border-slate-300/90 shadow-md transition-all duration-300 overflow-hidden hover:border-amber-400 hover:shadow-xl hover:bg-gradient-to-br hover:from-amber-100/40 hover:via-sky-50/50 hover:to-indigo-100/40 cursor-pointer`;
 
-      // Badges de Mérito Harmonizados
-      let badgesHtml = '';
-      if (sIdx === 0) {
-        badgesHtml += `<span class="bg-amber-100 text-amber-950 border border-amber-300 px-2.5 py-0.5 rounded-full text-xs font-black uppercase tracking-wider shadow-2xs flex items-center gap-1.5"><i data-lucide="crown" class="w-3.5 h-3.5 text-amber-700"></i> Campeã</span>`;
-        if (sc.totalWasted === 0) {
-          badgesHtml += `<span class="bg-emerald-50 text-emerald-800 border border-emerald-200 px-2.5 py-0.5 rounded-full text-xs font-bold flex items-center gap-1 shadow-2xs"><i data-lucide="check-check" class="w-3.5 h-3.5 text-emerald-600"></i> Desperdício Zero</span>`;
-        }
-      } else if (sIdx === 1) {
-        if (sc.totalWasted === 0) {
-          badgesHtml += `<span class="bg-emerald-50 text-emerald-800 border border-emerald-200 px-2.5 py-0.5 rounded-full text-xs font-bold flex items-center gap-1 shadow-2xs"><i data-lucide="check-check" class="w-3.5 h-3.5 text-emerald-600"></i> Desperdício Zero</span>`;
-        } else if (sc.split.join('+') === '10+10+10') {
-          badgesHtml += `<span class="bg-slate-100 text-slate-800 border border-slate-200 px-2.5 py-0.5 rounded-full text-xs font-bold flex items-center gap-1 shadow-2xs"><i data-lucide="star" class="w-3.5 h-3.5 text-slate-600"></i> 10+10+10</span>`;
-        } else {
-          badgesHtml += `<span class="bg-emerald-50 text-emerald-800 border border-emerald-200 px-2.5 py-0.5 rounded-full text-xs font-bold flex items-center gap-1 shadow-2xs"><i data-lucide="sparkles" class="w-3.5 h-3.5 text-emerald-600"></i> Vice-Campeã</span>`;
-        }
-      } else if (sIdx === 2) {
-        if (sc.split.join('+') === '10+10+10') {
-          badgesHtml += `<span class="bg-slate-100 text-slate-800 border border-slate-200 px-2.5 py-0.5 rounded-full text-xs font-bold flex items-center gap-1 shadow-2xs"><i data-lucide="star" class="w-3.5 h-3.5 text-slate-600"></i> 10+10+10</span>`;
-        } else if (sc.totalWasted === 0) {
-          badgesHtml += `<span class="bg-emerald-50 text-emerald-800 border border-emerald-200 px-2.5 py-0.5 rounded-full text-xs font-bold flex items-center gap-1 shadow-2xs"><i data-lucide="check-check" class="w-3.5 h-3.5 text-emerald-600"></i> Desperdício Zero</span>`;
-        } else {
-          badgesHtml += `<span class="bg-slate-100 text-slate-800 border border-slate-200 px-2.5 py-0.5 rounded-full text-xs font-bold flex items-center gap-1 shadow-2xs"><i data-lucide="star" class="w-3.5 h-3.5 text-slate-600"></i> Opção Equilibrada</span>`;
-        }
-      } else {
-        if (sc.split.join('+') === '10+10+10') {
-          badgesHtml += `<span class="bg-slate-100 text-slate-800 border border-slate-200 px-2.5 py-0.5 rounded-full text-xs font-bold flex items-center gap-1 shadow-2xs"><i data-lucide="star" class="w-3.5 h-3.5 text-slate-600"></i> 10+10+10</span>`;
-        } else if (sc.totalWasted === 0) {
-          badgesHtml += `<span class="bg-emerald-50 text-emerald-800 border border-emerald-200 px-2.5 py-0.5 rounded-full text-xs font-bold flex items-center gap-1 shadow-2xs"><i data-lucide="check-check" class="w-3.5 h-3.5 text-emerald-600"></i> Desperdício Zero</span>`;
-        }
-      }
-
-      if (state.distributeThroughoutYear) {
-        badgesHtml += `<span class="bg-teal-50 text-teal-800 border border-teal-200 px-2.5 py-0.5 rounded-full text-xs font-bold flex items-center gap-1 shadow-2xs"><i data-lucide="shield-check" class="w-3.5 h-3.5 text-teal-600"></i> Anti-Fadiga</span>`;
-      }
-
-      const card = document.createElement('div');
-      card.id = `scenarioCard_${sIdx}`;
-      card.className = isRibbonActive
-        ? `bg-gradient-to-br from-amber-100/80 via-sky-50/90 to-indigo-100/70 rounded-3xl border-2 border-amber-400 shadow-xl ring-2 ring-amber-400/40 transition-all duration-300 overflow-hidden`
-        : `bg-slate-100/90 rounded-3xl border-2 border-slate-300/90 shadow-md transition-all duration-300 overflow-hidden hover:border-amber-400 hover:shadow-xl hover:bg-gradient-to-br hover:from-amber-100/40 hover:via-sky-50/50 hover:to-indigo-100/40 cursor-pointer`;
-
-      let tabsHtml = '';
-      if (sc.periods.length > 1) {
-        const tabsItems = [];
-        sc.periods.forEach((p, pIdx) => {
-          if (pIdx > 0) {
-            const prevP = sc.periods[pIdx - 1];
-            const gapDays = Math.round((p.effectiveStart - prevP.returnDate) / (1000 * 60 * 60 * 24));
-            const monthsVal = (gapDays / 30.4).toFixed(1);
-            const monthsStr = monthsVal.endsWith('.0') ? `${parseInt(monthsVal)}m` : `${monthsVal}m`;
-
-            tabsItems.push(`
-              <!-- CONECTOR SUTIL DE TRANSIÇÃO (NÃO-BOTÃO) -->
-              <div id="tabGap_${sIdx}_${pIdx}"
-                title="Intervalo de trabalho entre Etapa ${pIdx} e Etapa ${pIdx + 1}: ${gapDays} dias (~${monthsStr} de recarga)"
-                class="flex items-center gap-1 px-1.5 py-0.5 rounded-lg text-xs select-none shrink-0 text-slate-500 hover:text-slate-800 transition-all">
-                <span class="w-2 h-0.5 bg-slate-300 rounded-full"></span>
-                <i data-lucide="clock" class="w-3 h-3 text-slate-400"></i>
-                <span class="font-mono font-bold text-slate-700 text-[11px]">${gapDays}d</span>
-                <span class="text-[10px] text-slate-400 hidden sm:inline">(~${monthsStr})</span>
-                <i data-lucide="arrow-right" class="w-3 h-3 text-slate-400"></i>
-                <span class="w-2 h-0.5 bg-slate-300 rounded-full"></span>
-              </div>
-            `);
-          }
-
-          tabsItems.push(`
-            <button type="button"
-              id="tabBtn_${sIdx}_${pIdx}"
-              onclick="event.stopPropagation(); window.OtimizaApp.selectStageTab(${sIdx}, ${pIdx}, ${sc.periods.length})"
-              class="px-3.5 py-1.5 rounded-xl text-xs transition-all flex items-center gap-1.5 cursor-pointer shrink-0 ${pIdx === 0 ? 'bg-slate-900 text-white font-black shadow-xs' : 'bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-950 font-bold border border-slate-200/80'}">
-              <span id="tabBadge_${sIdx}_${pIdx}" class="w-4 h-4 rounded-md ${pIdx === 0 ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-700'} flex items-center justify-center font-mono font-black text-[9px]">${String(pIdx + 1).padStart(2, '0')}</span>
-              <span>Etapa ${pIdx + 1} (${p.length}d)</span>
-            </button>
-          `);
-        });
-
-        tabsHtml = `
-          <!-- SELETOR DE ETAPAS VIA ABAS (SEGMENTED CONTROL & TIMELINE STEPPER) -->
-          <div class="pb-3 border-b border-slate-300">
-            <div class="w-full flex items-center justify-between gap-2 p-1.5 bg-slate-200/90 rounded-2xl border border-slate-300/80 shadow-2xs">
-              <div class="flex items-center gap-1 sm:gap-1.5 shrink-0 flex-wrap sm:flex-nowrap">
-                ${tabsItems.join('')}
-                <div class="h-4 w-px bg-slate-300/80 shrink-0 mx-1 hidden sm:block"></div>
-                <button type="button"
-                  id="tabBtn_${sIdx}_all"
-                  onclick="event.stopPropagation(); window.OtimizaApp.selectStageTab(${sIdx}, 'all', ${sc.periods.length})"
-                  class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shrink-0 bg-white hover:bg-slate-50 text-slate-600 hover:text-slate-900 border border-slate-200/80">
-                  <i data-lucide="layers" class="w-3.5 h-3.5"></i>
-                  <span>Todas</span>
-                </button>
-              </div>
-
-              <div id="tabInfo_${sIdx}" class="text-[11px] font-semibold text-slate-600 flex items-center gap-1.5 shrink-0 px-2 hidden 2xl:flex">
-                <span class="flex items-center gap-1 text-slate-600">
-                  <i data-lucide="calendar" class="w-3.5 h-3.5 text-slate-500"></i>
-                  Exibindo Etapa 1 de ${sc.periods.length}
-                </span>
-              </div>
-            </div>
-          </div>
-        `;
-      }
-
-      let periodsHtml = tabsHtml;
-
+    // Abas de navegação entre etapas
+    let tabsHtml = '';
+    if (sc.periods.length > 1) {
+      const tabsItems = [];
       sc.periods.forEach((p, pIdx) => {
-        const joinedHolidays = [...p.holidaysBefore, ...p.holidaysAfter, ...p.holidaysInside];
-        const holidayTags = joinedHolidays.map(h => {
-          const isFacultativo = h.type === 'recesso' || h.type === 'vespera' || h.type === 'ponte' || h.type === 'servidor' || (h.name && h.name.toLowerCase().includes('facultativo'));
-          const colorClass = isFacultativo
-            ? 'bg-blue-50 text-blue-900 border border-blue-300'
-            : 'bg-amber-100 text-amber-950 border border-amber-300';
-          return `<span class="${colorClass} px-2.5 py-0.5 rounded-lg text-[10px] font-bold shadow-2xs">${h.name}</span>`;
-        }).join(' ');
-
-        // Indicador de dia útil vs repouso no encerramento
-        const endStatusHtml = p.wastedEndDays === 0
-          ? `<span class="text-emerald-700 font-bold text-[10px] flex items-center gap-1 mt-0.5"><i data-lucide="check" class="w-3 h-3 text-emerald-600"></i> Termina em dia útil (${DAYS_NAME[p.endDate.getDay()]})</span>`
-          : `<span class="text-amber-800 font-bold text-[10px] flex items-center gap-1 mt-0.5" title="O último dia oficial cai em repouso"><i data-lucide="alert-circle" class="w-3 h-3 text-amber-600"></i> Termina em ${DAYS_NAME[p.endDate.getDay()]} (${p.wastedEndDays}d em repouso)</span>`;
-
-        // Se houver etapa anterior, conector visual para a visão "Todas"
-        let gapHtml = '';
         if (pIdx > 0) {
           const prevP = sc.periods[pIdx - 1];
           const gapDays = Math.round((p.effectiveStart - prevP.returnDate) / (1000 * 60 * 60 * 24));
           const monthsVal = (gapDays / 30.4).toFixed(1);
-          const monthsStr = monthsVal.endsWith('.0') ? `${parseInt(monthsVal)} meses` : `${monthsVal} meses`;
-
-          gapHtml = `
-            <div id="gapConnector_${sIdx}_${pIdx}" class="hidden flex items-center justify-center my-4 relative select-none">
-              <div class="absolute inset-0 flex items-center" aria-hidden="true">
-                <div class="w-full border-t-2 border-dashed border-slate-400"></div>
-              </div>
-              <div class="relative z-10 inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-300 border-2 border-slate-400 text-slate-800 text-xs shadow-xs font-bold">
-                <div class="w-2 h-2 rounded-full ${state.distributeThroughoutYear ? 'bg-teal-500' : 'bg-slate-600'}"></div>
-                <i data-lucide="clock" class="w-3.5 h-3.5 text-slate-700"></i>
-                <span>Intervalo de Trabalho: <strong class="text-slate-950 font-mono font-bold">${gapDays} dias</strong> <span class="text-slate-700 font-medium">(~${monthsStr} de recarga)</span></span>
-                ${state.distributeThroughoutYear ? `
-                  <span class="ml-1 px-2 py-0.5 rounded-md text-[10px] font-black bg-teal-50 text-teal-800 border border-teal-200/80 flex items-center gap-1 shadow-2xs">
-                    <i data-lucide="shield-check" class="w-3 h-3 text-teal-600"></i> Espaçamento Anti-Fadiga
-                  </span>
-                ` : ''}
-              </div>
+          const monthsStr = monthsVal.endsWith('.0') ? `${parseInt(monthsVal)}m` : `${monthsVal}m`;
+          tabsItems.push(`
+            <div id="tabGap_${sIdx}_${pIdx}"
+              title="Intervalo de trabalho entre Etapa ${pIdx} e Etapa ${pIdx + 1}: ${gapDays} dias (~${monthsStr} de recarga)"
+              class="flex items-center gap-1 px-1.5 py-0.5 rounded-lg text-xs select-none shrink-0 text-slate-500 hover:text-slate-800 transition-all">
+              <span class="w-2 h-0.5 bg-slate-300 rounded-full"></span>
+              <i data-lucide="clock" class="w-3 h-3 text-slate-400"></i>
+              <span class="font-mono font-bold text-slate-700 text-[11px]">${gapDays}d</span>
+              <span class="text-[10px] text-slate-400 hidden sm:inline">(~${monthsStr})</span>
+              <i data-lucide="arrow-right" class="w-3 h-3 text-slate-400"></i>
+              <span class="w-2 h-0.5 bg-slate-300 rounded-full"></span>
             </div>
-          `;
+          `);
         }
-
-
-        // Navegação rápida inferior no rodapé da etapa
-        let bottomNav = '';
-        if (sc.periods.length > 1) {
-          bottomNav = `
-            <div class="flex items-center justify-between pt-3 border-t border-slate-200 text-xs">
-              ${pIdx > 0 ? `
-                <button type="button" onclick="event.stopPropagation(); window.OtimizaApp.selectStageTab(${sIdx}, ${pIdx - 1}, ${sc.periods.length})"
-                  class="px-3 py-1.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs">
-                  <i data-lucide="chevron-left" class="w-3.5 h-3.5"></i>
-                  <span>Etapa ${pIdx} (${sc.periods[pIdx - 1].length}d)</span>
-                </button>
-              ` : '<div></div>'}
-
-              ${pIdx < sc.periods.length - 1 ? `
-                <button type="button" onclick="event.stopPropagation(); window.OtimizaApp.selectStageTab(${sIdx}, ${pIdx + 1}, ${sc.periods.length})"
-                  class="px-3.5 py-1.5 rounded-xl border border-slate-900 bg-slate-900 hover:bg-slate-800 text-white font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs">
-                  <span>Próxima: Etapa ${pIdx + 2} (${sc.periods[pIdx + 1].length}d)</span>
-                  <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
-                </button>
-              ` : `
-                <button type="button" onclick="event.stopPropagation(); window.OtimizaApp.selectStageTab(${sIdx}, 'all', ${sc.periods.length})"
-                  class="text-[11px] font-bold text-slate-600 hover:text-slate-950 flex items-center gap-1 cursor-pointer">
-                  <span>Ver todas as etapas juntas</span>
-                  <i data-lucide="layers" class="w-3 h-3"></i>
-                </button>
-              `}
-            </div>
-          `;
-        }
-
-        periodsHtml += `
-          ${gapHtml}
-          <div id="stageContainer_${sIdx}_${pIdx}" class="${(sc.periods.length === 1 || pIdx === 0) ? '' : 'hidden'} space-y-3">
-            <div class="bg-white/95 border-2 border-slate-300 rounded-2xl p-5 space-y-4 shadow-sm">
-              
-              <!-- HEADER DA ETAPA -->
-              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-slate-300/80 pb-3">
-                <div class="flex items-center gap-2.5">
-                  <span class="w-7 h-7 rounded-lg bg-slate-900 text-white font-mono font-black text-xs flex items-center justify-center shrink-0 shadow-2xs">${String(pIdx + 1).padStart(2, '0')}</span>
-                  <span class="font-extrabold text-slate-900 text-sm tracking-tight">Etapa ${pIdx + 1} • <span class="font-mono">${p.length}</span> Dias Marcados</span>
-                </div>
-                <div class="flex items-center gap-2 flex-wrap">
-                  ${p.compDaysApplied > 0 ? `
-                    <span class="text-xs font-bold text-sky-800 bg-sky-50 border border-sky-200 px-2.5 py-0.5 rounded-lg flex items-center gap-1 shadow-2xs" title="Aplicação de ${p.compDaysApplied} dias de banco de horas">
-                      <i data-lucide="clock" class="w-3 h-3 text-sky-600"></i> +${p.compDaysApplied}d Banco
-                    </span>
-                  ` : ''}
-                  <span class="text-xs font-black text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-lg shadow-2xs">
-                    🔥 ${p.totalOff} Dias Livres
-                  </span>
-                  <span class="text-xs font-bold text-slate-700 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-lg flex items-center gap-1 shadow-2xs">
-                    <i data-lucide="trending-up" class="w-3 h-3 text-slate-500"></i> ${p.leverage}x
-                  </span>
-                </div>
-              </div>
-
-              <!-- FLATTENED 3-COLUMN LINEAR BOARDING PASS ITINERARY (NO NESTED BOXES INSIDE BOXES) -->
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-0 items-center py-1">
-                <!-- COLUNA 1: 🛫 1º DIA LIVRE REAL -->
-                <div class="space-y-1">
-                  <div class="flex items-center justify-between gap-1 text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                    <span>🛫 1º DIA LIVRE REAL</span>
-                    <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-slate-300 hidden md:block"></i>
-                  </div>
-                  <div class="text-base sm:text-lg font-black font-mono text-slate-950">
-                    ${formatDate(p.effectiveStart)}
-                  </div>
-                  <div class="text-xs text-slate-600 font-medium">
-                    ${DAYS_NAME[p.effectiveStart.getDay()]} • ${optimizer.isWorkingDay(p.effectiveStart) ? 'Início de Férias' : 'Repouso Semanal'}
-                  </div>
-                </div>
-
-                <!-- COLUNA 2: 📋 OFICIAL NO SOUGOV / SIGRH -->
-                <div class="space-y-1 md:border-l md:border-r border-slate-300 md:px-5 relative">
-                  <div class="flex items-center justify-between gap-2 text-[10px] font-black uppercase tracking-wider text-slate-700">
-                    <span class="flex items-center gap-1">📋 PERÍODO NO SIGRH</span>
-                    <div class="flex items-center gap-1.5">
-                      <span class="px-2 py-0.5 rounded-md bg-slate-900 text-white font-mono font-bold text-[10px]">
-                        ${p.length}d
-                      </span>
-                      <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-slate-300 hidden md:block"></i>
-                    </div>
-                  </div>
-                  <div class="text-base sm:text-lg font-black font-mono text-slate-950">
-                    ${formatDate(p.startDate)} a ${formatDate(p.endDate)}
-                  </div>
-                  <div class="text-xs">
-                    ${endStatusHtml}
-                  </div>
-                </div>
-
-                <!-- COLUNA 3: 💼 VOLTA AO TRABALHO -->
-                <div class="space-y-1 md:pl-5">
-                  <div class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-emerald-800">
-                    <span>💼 VOLTA AO TRABALHO</span>
-                  </div>
-                  <div class="text-base sm:text-lg font-black font-mono text-slate-950">
-                    ${formatDate(p.returnDate)}
-                  </div>
-                  <div class="text-xs text-emerald-800 font-medium flex items-center gap-1">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 inline-block"></span>
-                    <span>${DAYS_NAME[p.returnDate.getDay()]} • 1º Dia de Expediente</span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- SUB-BARRA: EMENDAS & BOTÃO EXPANSOR DO CALENDÁRIO -->
-              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-2 border-t border-slate-300/80">
-                <div class="flex items-center gap-1.5 flex-wrap">
-                  ${joinedHolidays.length > 0 ? `
-                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1 mr-0.5">
-                      <i data-lucide="sparkles" class="w-3 h-3 text-amber-500"></i> Emenda:
-                    </span>
-                    ${holidayTags}
-                  ` : '<span class="text-[11px] text-slate-500 font-medium">Sem feriados adicionais na etapa</span>'}
-                </div>
-
-                <button type="button" onclick="event.stopPropagation(); window.OtimizaApp.toggleMiniCalendar(${sIdx}, ${pIdx})" class="self-start sm:self-auto text-[11px] font-bold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-100 border border-slate-300 px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer shrink-0 shadow-xs">
-                  <i data-lucide="chevron-up" id="btnCalendarIcon_${sIdx}_${pIdx}" class="w-3.5 h-3.5 text-slate-600"></i>
-                  <span id="btnCalendarText_${sIdx}_${pIdx}">Ocultar Calendário</span>
-                </button>
-              </div>
-
-              <!-- CONTAINER EXPANDIDO POR PADRÃO DO MINI-CALENDÁRIO -->
-              <div id="miniCalendar_${sIdx}_${pIdx}" class="pt-3 border-t border-slate-300/80">
-                ${renderMiniCalendar(p, optimizer)}
-              </div>
-
-              ${bottomNav}
-
-            </div>
-          </div>
-        `;
+        tabsItems.push(`
+          <button type="button"
+            id="tabBtn_${sIdx}_${pIdx}"
+            onclick="event.stopPropagation(); window.OtimizaApp.selectStageTab(${sIdx}, ${pIdx}, ${sc.periods.length})"
+            class="px-3.5 py-1.5 rounded-xl text-xs transition-all flex items-center gap-1.5 cursor-pointer shrink-0 ${pIdx === 0 ? 'bg-slate-900 text-white font-black shadow-xs' : 'bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-950 font-bold border border-slate-200/80'}">
+            <span id="tabBadge_${sIdx}_${pIdx}" class="w-4 h-4 rounded-md ${pIdx === 0 ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-700'} flex items-center justify-center font-mono font-black text-[9px]">${String(pIdx + 1).padStart(2, '0')}</span>
+            <span>Etapa ${pIdx + 1} (${p.length}d)</span>
+          </button>
+        `);
       });
-
-      const datesSummary = sc.periods.map(p => `${formatDate(p.startDate).slice(0, 5)} a ${formatDate(p.endDate).slice(0, 5)}`).join('  •  ');
-
-      card.innerHTML = `
-        <!-- ACCENT TOP BORDER (4PX) -->
-        <div class="h-1 w-full ${topAccentClass}"></div>
-
-        <!-- ACCORDION HEADER (CLICKABLE) -->
-        <div onclick="window.OtimizaApp.toggleScenario(${sIdx})" class="p-5 sm:p-6 cursor-pointer flex flex-col md:flex-row md:items-center justify-between gap-4 select-none hover:bg-slate-300/40 transition-colors">
-          <div class="space-y-2 flex-1">
-            <div class="flex items-center gap-2 flex-wrap">
-              <span class="font-mono font-black text-xs px-2.5 py-1 rounded-lg bg-slate-200 text-slate-900 border border-slate-300">OPÇÃO ${String(sIdx + 1).padStart(2, '0')}</span>
-              ${badgesHtml}
-              <h4 class="font-black text-slate-900 text-base sm:text-lg tracking-tight ml-1">
-                ${sc.split.join(' + ')} dias
-              </h4>
+      tabsHtml = `
+        <!-- SELETOR DE ETAPAS VIA ABAS (SEGMENTED CONTROL & TIMELINE STEPPER) -->
+        <div class="pb-3 border-b border-slate-300">
+          <div class="w-full flex items-center justify-between gap-2 p-1.5 bg-slate-200/90 rounded-2xl border border-slate-300/80 shadow-2xs">
+            <div class="flex items-center gap-1 sm:gap-1.5 shrink-0 flex-wrap sm:flex-nowrap">
+              ${tabsItems.join('')}
+              <div class="h-4 w-px bg-slate-300/80 shrink-0 mx-1 hidden sm:block"></div>
+              <button type="button"
+                id="tabBtn_${sIdx}_all"
+                onclick="event.stopPropagation(); window.OtimizaApp.selectStageTab(${sIdx}, 'all', ${sc.periods.length})"
+                class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shrink-0 bg-white hover:bg-slate-50 text-slate-600 hover:text-slate-900 border border-slate-200/80">
+                <i data-lucide="layers" class="w-3.5 h-3.5"></i>
+                <span>Todas</span>
+              </button>
             </div>
-            <div class="pt-0.5">
-              <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold ${theme.style} border shadow-2xs">
-                ${theme.text}
+            <div id="tabInfo_${sIdx}" class="text-[11px] font-semibold text-slate-600 flex items-center gap-1.5 shrink-0 px-2 hidden 2xl:flex">
+              <span class="flex items-center gap-1 text-slate-600">
+                <i data-lucide="calendar" class="w-3.5 h-3.5 text-slate-500"></i>
+                Exibindo Etapa 1 de ${sc.periods.length}
               </span>
             </div>
-            <p class="text-xs text-slate-600 font-medium flex items-center gap-1.5">
-              <i data-lucide="calendar-range" class="w-3.5 h-3.5 text-slate-500"></i>
-              <span class="text-slate-600">Períodos de Férias:</span>
-              <span class="text-slate-900 font-mono font-bold">${datesSummary}</span>
-            </p>
-          </div>
-
-          <div class="flex items-center gap-3 sm:gap-4 self-end md:self-auto flex-wrap">
-            <div class="text-right">
-              <span class="text-[10px] uppercase font-bold text-slate-500 block tracking-wider">Descanso Real</span>
-              <span class="text-xl sm:text-2xl font-black text-slate-900 font-mono">${sc.totalOff} dias</span>
-            </div>
-            <div class="text-right pl-3.5 border-l border-slate-300">
-              <span class="text-[10px] uppercase font-bold text-emerald-800 block tracking-wider">Ganho Líquido</span>
-              <span class="text-xl sm:text-2xl font-black text-emerald-700 font-mono">+${sc.extraGain}d</span>
-            </div>
-            <div class="text-right pl-3.5 border-l border-slate-300">
-              <span class="text-[10px] uppercase font-bold text-slate-600 block tracking-wider">Alavancagem</span>
-              <span class="text-xl sm:text-2xl font-black text-slate-800 font-mono">${sc.leverage}x</span>
-            </div>
-            <div class="pl-2 flex items-center gap-2">
-              <!-- BOTÃO DE ALTERNÂNCIA PARA O COMPARADOR DESACOPLADO -->
-              <button type="button" 
-                id="btnCompare_${sIdx}"
-                onclick="event.stopPropagation(); window.OtimizaApp.toggleCompareScenario(${sIdx})" 
-                aria-label="${isCompared ? 'Remover Opção ' + (sIdx + 1) + ' da comparação' : 'Adicionar Opção ' + (sIdx + 1) + ' à comparação'}"
-                class="px-3 py-2 rounded-xl border ${isCompared ? 'border-amber-500 bg-amber-400 text-slate-950 font-black shadow-xs ring-2 ring-amber-400/40' : 'border-slate-300 bg-white hover:bg-slate-100 text-slate-700 hover:text-slate-950 font-bold shadow-2xs'} text-xs transition-all duration-200 flex items-center gap-1.5 cursor-pointer shrink-0">
-                <i data-lucide="${isCompared ? 'check' : 'plus'}" class="w-3.5 h-3.5 ${isCompared ? 'text-slate-950' : 'text-slate-500'}"></i>
-                <span>${isCompared ? 'Comparando' : 'Comparar'}</span>
-              </button>
-
-              <button type="button" aria-label="Expandir detalhes da opção" class="w-9 h-9 rounded-xl border border-slate-300 text-slate-700 hover:text-slate-900 hover:bg-slate-200/70 bg-white flex items-center justify-center transition-all shadow-xs cursor-pointer">
-                <i data-lucide="chevron-down" id="scenarioBtnIcon_${sIdx}" class="w-4 h-4 transition-transform duration-200 ${isChampion ? 'rotate-180' : ''}"></i>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- ACCORDION BODY (COLLAPSIBLE) -->
-        <div id="scenarioBody_${sIdx}" class="${isChampion ? '' : 'hidden'} border-t-2 border-amber-300/60 p-5 sm:p-6 space-y-4 bg-white/40 backdrop-blur-xs">
-          ${periodsHtml}
-
-          <!-- FOOTER ACTION BUTTONS: MOSTRAR NA FITA & COPIAR RESUMO & BAIXAR .ICS -->
-          <div class="pt-3 flex flex-col sm:flex-row items-center justify-end gap-3 border-t border-slate-300">
-            <button type="button" onclick="window.OtimizaApp.selectScenarioForRibbon(${sIdx}, true)" id="ribbonActiveBtn_${sIdx}" class="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-slate-300 ${isRibbonActive ? 'bg-slate-200 text-slate-900' : 'bg-white hover:bg-slate-50 text-slate-700'} text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer">
-              <i data-lucide="${isRibbonActive ? 'check' : 'activity'}" class="w-4 h-4 ${isRibbonActive ? 'text-emerald-600' : 'text-slate-500'}"></i>
-              <span>${isRibbonActive ? 'Ativo na Fita Anual' : 'Destacar na Fita Anual'}</span>
-            </button>
-            <button type="button" onclick="window.OtimizaApp.copyScenarioSummary(${sIdx}, this)" class="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer">
-              <i data-lucide="copy" class="w-4 h-4 text-slate-500"></i>
-              <span>Copiar Resumo de Férias</span>
-            </button>
-            <button type="button" onclick="window.OtimizaApp.downloadScenarioICS(${sIdx})" class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer">
-              <i data-lucide="calendar-plus" class="w-4 h-4 text-white"></i>
-              <span>Baixar Calendário (.ICS)</span>
-            </button>
           </div>
         </div>
       `;
+    }
 
-      scenariosContainer.appendChild(card);
-    });
+    // Etapas e card completo usando os builders dedicados
+    const periodsBodyHtml = sc.periods.map((p, pIdx) => buildPeriodHtml(sc, sIdx, p, pIdx, optimizer)).join('');
+    card.innerHTML = buildScenarioCardHtml(sc, sIdx, isChampion, isRibbonActive, isCompared, theme, badgesHtml, tabsHtml, periodsBodyHtml);
+
+    scenariosContainer.appendChild(card);
+  });
 
     state.currentScenarios = scenarios;
 
