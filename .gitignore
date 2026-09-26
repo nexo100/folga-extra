@@ -1,0 +1,18 @@
+# Arquivos de sistema e ambiente
+.DS_Store
+Thumbs.db
+desktop.ini
+*.log
+
+# Dependências (se vier a usar Node/npm futuramente)
+node_modules/
+package-lock.json
+
+# IDEs e Editores
+.vscode/
+.idea/
+
+# Arquivos de ambiente e segredos
+.env
+.env.*
+!.env.example

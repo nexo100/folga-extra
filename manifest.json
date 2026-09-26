@@ -1,0 +1,21 @@
+{
+  "name": "Folga Extra • Otimizador de Férias UFBA",
+  "short_name": "Folga Extra",
+  "description": "Otimizador inteligente de férias para servidores públicos federais da UFBA e Salvador / BA. Cálculo exato de alavancagem, feriados e pontes oficiais.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "lang": "pt-BR",
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "192x192 512x512 any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "utilities"]
+}

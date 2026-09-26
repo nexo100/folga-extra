@@ -1,0 +1,136 @@
+# DOCUMENTO DE TRANSIÇÃO E ESTADO DO PROJETO (HANDOFF)
+**Projeto:** Folga Extra (UFBA) — Otimizador Inteligente de Férias e Descanso  
+**Versão Atual:** v3.1  
+**Data de Atualização:** 25/09/2026  
+**Caminho Local Principal:** `C:\Users\nexo\github\folga-extra`  
+**Junction de Compatibilidade:** `C:\Users\nexo\.gemini\antigravity\scratch\folga-extra`  
+**Repositório GitHub:** `https://github.com/nexo100/folga-extra`  
+**Conversa de Origem:** [🔗 Análise e Reprodução de Site](conversation://f1f763d6-076e-4543-a905-f0eaa0736efd)  
+**Conversa de Continuação/Índice:** [🔗 Retomada e Próximos Passos](conversation://1c2a3b0a-fa69-4089-a588-81fff2b16f3c)  
+
+---
+
+## 1. RESUMO EXECUTIVO DO ESTADO ATUAL
+
+O projeto encontra-se em estado maduro, com arquitetura desacoplada, alta fidelidade à legislação (Lei 8.112/90) e suíte de testes 100% verde (**32 / 32 testes aprovados**). Todas as regras de negócio, interface visual, PWA offline e diretrizes de governança/segurança estão plenamente implementadas e gravadas em disco.
+
+---
+
+## 2. ARQUITETURA E FUNCIONALIDADES CONCLUÍDAS
+
+### A. Cockpit Principal Reorganizado (Estrutura Equilibrada em 3 Cards de Mesma Altura)
+O painel de controle superior foi reestruturado de forma harmoniosa, com alturas idênticas (`items-stretch` e `h-full justify-between`) e divisão temática clara:
+1. **Card 1: Lotação & Cota de Férias (Perfil & Regime)**
+   - Instituição / Calendário oficial (UFBA Salvador/BA, Salvador Geral, Federal).
+   - Dias de trabalho na semana (jornada semanal).
+   - Cota de férias solicitadas (1 a 30 dias).
+   - Parcelamento das férias (1x, 2x ou 3x etapas).
+2. **Card 2: Calendário & Janela Temporal (Exercício & Janela)**
+   - Ano / Exercício base de referência (2025, 2026, 2027, 2028).
+   - **Janela Diminuída 1 (Personalizar Data):** Início de busca a partir de data configurável e alcance interanual de 1 ou 2 anos (Art. 77 Lei 8.112/90).
+   - **Janela Diminuída 2 (Data Proibida):** Intervalo de datas a evitar com chips interativos de exclusão estrita.
+3. **Card 3: Alavancagem & Bem-Estar (Emendas & Folgas)**
+   - Banco de Horas / Folgas cirúrgicas (+ / -).
+   - Toggles de emendas inteligentes (Carnaval UFBA, Pontes MGI, Vésperas 24/31, Combate à Fadiga).
+   - **Escala de Recesso MGI Integrada:** Revezamento de fim de ano (Sem Escala, Turma Natal, Turma Ano Novo).
+
+---
+
+### B. Ponto 2: Janela Temporal e Períodos a Evitar (100% Implementado)
+- **Alcance Temporal de 1 e 2 Anos:** Suporte nativo à busca interanual contínua de 12 ou 24 meses (Art. 77 da Lei 8.112/90 para acúmulo de até 2 períodos por necessidade de serviço).
+- **Buffer Dinâmico da Programação Dinâmica (`js/optimizer.js`):** Ajuste automático de memória (`maxDay = totalWindowDays + offset + 140`), comportando até 760+ dias sem estouro de pilha ou falha de limite.
+- **Exclusão Estrita de Períodos Bloqueados:** Interface com chips removíveis para bloquear períodos com colegas de férias ou projetos críticos. O otimizador descarta qualquer candidato que toque nesses intervalos.
+- **Fita Panorâmica e Calendários Dinâmicos (`js/ribbon.js`, `js/app.js`):** Renderização reativa dos meses da janela e contagem escopada de feriados.
+- **Robustez de Datas ISO:** Normalização em formato local `YYYY-MM-DD` com `T00:00:00` para neutralizar desvios de timezone UTC.
+
+---
+
+### C. Comparador Desacoplado (Dock Flutuante + Drawer Lateral)
+- Botão `[+ Comparar]` em cada card de cenário gerado (permite selecionar até 3 opções simultâneas).
+- **Dock Flutuante Inferior:** Barra compacta no rodapé com contadores e botão "Comparar Agora".
+- **Slide-Over Drawer Lateral:** Painel deslizante à direita com tabela comparativa analítica:
+  * Ganho líquido e multiplicador de alavancagem.
+  * Dias de trabalho entre etapas (avaliação de fadiga).
+  * Feriados e pontes aproveitadas.
+  * Verificação de repouso semanal (alerta de 0d no fim de semana).
+- **Decisões Estritas de Design Mantidas:** Zero botão *"Adotar este Cenário"* e zero *"Tags Temáticas"* dentro do comparador (foco 100% analítico e técnico).
+
+---
+
+### D. PWA e Suporte Offline-First
+- Service Worker (`sw.js`) configurado com cache dinâmico de assets locais e fontes/Tailwind CDN.
+- `manifest.json` com especificações de tema, ícones e inicialização standalone.
+
+---
+
+### E. Navegador de Etapas por Abas (Segmented Control & Itinerary Stepper)
+- **Visualização Focada (Uma por Vez):** Ao expandir qualquer card de cenário, o usuário visualiza a régua de etapas táteis (`Etapa 1`, `Etapa 2`, `Etapa 3`) e o botão `Todas`.
+- **Conectores Interativos com Seta na Barra de Abas:** Entre as etapas na própria barra de abas, foi inserido um botão/indicador com seta (`➔ [⏱️ 115d de trabalho (~3.8 meses de recarga)]`) ocupando toda a linha de forma panorâmica e permitindo avançar de etapa com um clique.
+- **Redução Drástica de Altura e Eliminação de Redundância:** A altura do card expandido reduziu de ~1000px para ~350px. O banner que ficava repetido no corpo foi unificado na barra de abas, eliminando a rolagem cansativa e focando diretamente no *boarding pass*.
+- **Navegação Sequencial Integrada:** Botões no rodapé de cada etapa (`Próxima: Etapa 2 ➔` / `⬅ Voltar`) para leitura sequencial fluida.
+- **Visão Panorama Opcional:** O botão `Todas` permite visualizar o itinerário contínuo completo com os conectores de intervalo tracejados quando desejado.
+
+---
+
+## 3. SUÍTE DE TESTES AUTOMATIZADOS (`test_suite.js`)
+
+- **Total:** 32 testes automatizados cobrindo todo o ciclo do sistema.
+- **Execução:** `node test_suite.js` (executado via terminal).
+- **Status:** **32 / 32 APROVADOS (100% GREEN)**.
+  - *Core & Algoritmo (23 testes):* Cálculos móveis (Gauss/Meeus), feriados nacionais e Salvador, Carnaval UFBA, pontes, repouso semanal, não-sobreposição, divisões 10+10+10 e 15+10+5, espaçamento saudável (>=60d / >=75d), recesso MGI, contagem escopada, janela de 1/2 anos e exclusão estrita.
+  - *UI & DOM (7 testes):* Fita anual proporcional, desacoplamento de cores, boarding pass, integridade PWA, comparador desacoplado, fita dinâmica.
+  - *Tags & Roteiros (1 teste):* Motor de 30+ arquétipos temáticos.
+  - *Design System (1 teste):* Linter de conformidade estrita com `GUIA_CORES_SISTEMA.md`.
+- ⚠️ **REGRA CRÍTICA DE DESEMPENHO:** NUNCA execute a ferramenta `view_file` diretamente em `test_suite.js`.
+
+---
+
+## 4. GOVERNANÇA, SEGURANÇA E CONFINAMENTO
+
+O repositório e a máquina possuem 3 camadas de blindagem ativas:
+1. **Camada 1 (Settings Nativas da Aplicação):**
+   - Ajustar no painel de configurações do Antigravity (`Non-Workspace File Access: Ask/Deny` e `Auto-Execution Policy`).
+2. **Camada 2 (Lifecycle Hooks - Bloqueio Determinístico):**
+   - `.agents/hooks.json` e `.agents/security_gate.js` (no workspace e global em `~/.gemini/config/`).
+   - Bloqueio imediato (`decision: "deny"`) para `localtunnel`, `lt`, `ngrok`, `cloudflared`, `serveo`, `ipify`, `ifconfig.me` e binding `0.0.0.0`.
+3. **Camada 3 (Rules Persistentes em Disco):**
+   - `GEMINI.md` e `.agents/rules/security.md` no projeto.
+   - `~/.gemini/config/GEMINI.md` e `~/.gemini/config/rules/security_rules.md` globais.
+
+---
+
+## 5. MAPA DE ARQUIVOS PRINCIPAIS
+
+| Arquivo | Função |
+| :--- | :--- |
+| `index.html` | Interface completa, Cockpit em 3 cards, Dock e Drawer do comparador. |
+| `js/app.js` | Estado reativo, orquestração de eventos, filtros e renderização. |
+| `js/optimizer.js` | Motor de Programação Dinâmica, janela 1/2 anos, exclusão de períodos. |
+| `js/holidays.js` | Computus móvel, feriados fixos e recesso MGI interanual. |
+| `js/ribbon.js` | Linha do tempo panorâmica, fitas mensais e mini-calendários. |
+| `js/tags.js` | Motor de 30+ arquétipos temáticos para os cenários. |
+| `test_suite.js` | Suíte de testes automatizados com 32 asserções. |
+| `GUIA_CORES_SISTEMA.md` | Design System com a paleta oficial corporativa. |
+| `REGRAS_ALGORITMO.md` | Especificação formal dos algoritmos e base legal (Lei 8.112/90). |
+| `GEMINI.md` | Diretrizes de segurança, governança e integridade técnica. |
+
+---
+
+## 6. INSTRUÇÃO PARA ABRIR A NOVA CONVERSA DO PROJETO
+
+Ao abrir a nova conversa no Antigravity:
+1. Verifique se o projeto ativo é `C:\Users\nexo\github\folga-extra` (ou pelo junction `C:\Users\nexo\.gemini\antigravity\scratch\folga-extra`).
+2. Envie o seguinte prompt inicial:
+   > *"Estou retomando o projeto Folga Extra a partir de @STATUS_PROJETO.md e @conversation://f1f763d6-076e-4543-a905-f0eaa0736efd. O ambiente está com 32/32 testes aprovados. Vamos definir o próximo passo do desenvolvimento."*
+
+---
+
+## 7. BACKLOG E PROJETOS FUTUROS (ROADMAP)
+
+### A. Copiloto Interativo de Férias & Fixação de Etapas (Pinning & Wizard)
+- **Conceito:** Permitir ao servidor definir uma etapa âncora prioritária (ex.: férias em Julho para acompanhar filhos ou no Carnaval) e fixar essa data com um botão `[📌 Fixar Parcela]`.
+- **Comportamento Algorítmico:** O otimizador congela a parcela escolhida, desconta os dias da cota anual e recalcula dinamicamente por Programação Dinâmica as melhores brechas remanescentes para as etapas seguintes, respeitando o intervalo mínimo de 60 dias de recarga (anti-fadiga).
+- **Modos de Operação Previstos:**
+  1. *Modo Copiloto (Alfinete no Card):* Usuário fixa uma parcela de um resultado e o sistema recalcula as demais na hora.
+  2. *Modo Construtor Guiado (Passo a Passo):* Wizard interativo que sugere primeiro as melhores janelas principais e depois arremata os períodos complementares.
+

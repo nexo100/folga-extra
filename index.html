@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="pt-br" class="h-full">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+  <title>Folga Extra • Otimizador Inteligente de Férias UFBA</title>
+  <meta name="description" content="Otimizador inteligente de férias para servidores públicos federais da UFBA e Salvador / BA. Cálculo exato de alavancagem, feriados e pontes oficiais."/>
+  
+  <!-- PWA & Mobile Web App Capabilities -->
+  <meta name="theme-color" content="#0f172a"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="Folga Extra"/>
+  <link rel="manifest" href="manifest.json"/>
+  <link rel="icon" type="image/svg+xml" href="icons/icon.svg"/>
+  <link rel="apple-touch-icon" href="icons/icon.svg"/>
+  
+  <!-- Tipografia de Alto Padrão: Plus Jakarta Sans & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace']
+          },
+          colors: {
+            brand: {
+              50: '#F8FAFC',
+              100: '#F1F5F9',
+              200: '#E2E8F0',
+              500: '#0F172A',
+              600: '#020617',
+              700: '#000000',
+            },
+            ufba: {
+              navy: '#002B49',
+              gold: '#D97706',
+              light: '#F8FAFC'
+            }
+          },
+          boxShadow: {
+            'card': '0 4px 20px -2px rgba(15, 23, 42, 0.05), 0 2px 6px -1px rgba(15, 23, 42, 0.03)',
+            'glow-amber': '0 0 25px -5px rgba(245, 158, 11, 0.25)',
+            'glow-emerald': '0 0 25px -5px rgba(16, 185, 129, 0.2)'
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Estilos globais e barras de rolagem elegantes */
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #CBD5E1;
+      border-radius: 9999px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+  </style>
+</head>
+<body class="h-full bg-[#F8FAFC] text-slate-800 flex flex-col font-sans antialiased selection:bg-amber-400 selection:text-slate-950">
+
+  <!-- TOP HEADER / NAV BAR -->
+  <header class="bg-white/80 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-40 py-3.5 px-4 sm:px-8">
+    <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-2xl bg-slate-900 text-amber-400 flex items-center justify-center shadow-md shadow-slate-900/10">
+          <i data-lucide="sun-medium" class="w-5 h-5 text-amber-400"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="font-black text-xl tracking-tight text-slate-950">Otimiza Férias</h1>
+            <span class="px-2 py-0.5 rounded-full bg-slate-100 border border-slate-200 text-[10px] font-bold text-slate-600 uppercase tracking-wider">
+              UFBA
+            </span>
+          </div>
+          <p class="text-[11px] text-slate-500 font-medium">Edição Especial Servidor Federal • Salvador / BA</p>
+        </div>
+      </div>
+
+      <!-- AÇÕES DO HEADER: INSTALAR APP & SELETOR DE REGIME -->
+      <div class="flex items-center gap-2.5 self-center sm:self-auto">
+        <button id="btnInstallPwa" type="button"
+          class="hidden px-3 py-1.5 rounded-xl text-xs font-bold transition-all bg-amber-400 hover:bg-amber-300 text-slate-950 shadow-xs border border-amber-500/40 flex items-center gap-1.5 cursor-pointer">
+          <i data-lucide="download" class="w-3.5 h-3.5 text-slate-950"></i> Instalar App
+        </button>
+
+        <!-- IDENTIDADE INSTITUCIONAL DO REGIME (LEI 8.112/90) -->
+        <div class="flex items-center gap-2 bg-slate-100 px-3.5 py-1.5 rounded-2xl border border-slate-200/80 text-xs font-bold text-slate-800 shadow-2xs">
+          <i data-lucide="graduation-cap" class="w-3.5 h-3.5 text-slate-900"></i>
+          <span>Servidor UFBA (Lei 8.112/90)</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN WRAPPER -->
+  <main class="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
+
+    <!-- HERO SECTION (ATMOSFERA SOLAR, VIBRANTE E LÚDICA) -->
+    <section class="bg-gradient-to-br from-amber-100/80 via-sky-50/90 to-indigo-100/70 border-2 border-amber-300/80 rounded-3xl p-6 sm:p-10 text-slate-900 shadow-lg shadow-amber-500/10 relative overflow-hidden">
+      
+      <!-- CÍRCULOS DE BRILHO E DECORAÇÃO DE FUNDO -->
+      <div class="absolute -right-16 -top-16 w-72 h-72 bg-amber-400/25 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="absolute -left-16 -bottom-16 w-72 h-72 bg-sky-400/25 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="absolute -right-6 -bottom-8 opacity-15 pointer-events-none text-amber-700">
+        <i data-lucide="palmtree" class="w-64 h-64"></i>
+      </div>
+
+      <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-8">
+        
+        <!-- COLUNA DE TEXTO & CONTEÚDO -->
+        <div class="space-y-4 max-w-2xl">
+          
+          <!-- BADGES DE TOPO -->
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="inline-flex items-center gap-1.5 bg-amber-400 text-slate-950 font-black px-3.5 py-1 rounded-full text-xs shadow-xs border border-amber-500">
+              <i data-lucide="sun" class="w-3.5 h-3.5 text-slate-950"></i> Férias Inteligentes • UFBA
+            </span>
+            <span class="inline-flex items-center gap-1.5 bg-white/90 backdrop-blur-xs text-slate-800 px-3 py-1 rounded-full text-xs font-bold border border-slate-200 shadow-2xs">
+              <i data-lucide="map-pin" class="w-3.5 h-3.5 text-amber-600"></i> Salvador, Bahia
+            </span>
+            <span class="inline-flex items-center gap-1.5 bg-emerald-100 text-emerald-950 px-3 py-1 rounded-full text-xs font-black border border-emerald-300 shadow-2xs">
+              <span class="w-2 h-2 rounded-full bg-emerald-600 animate-ping"></span>
+              Descanso Dobrado
+            </span>
+          </div>
+
+          <!-- TÍTULO COM DESTAQUE SOLAR -->
+          <h2 class="text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight text-slate-950">
+            Mais praia e viagem, <span class="bg-gradient-to-r from-amber-600 via-orange-600 to-indigo-600 bg-clip-text text-transparent">menos dias úteis trabalhados.</span>
+          </h2>
+
+          <!-- SUBTÍTULO DIRETO E ATRAENTE -->
+          <p class="text-slate-700 text-sm sm:text-base leading-relaxed font-medium">
+            O algoritmo encontra as melhores brechas do calendário de Salvador para você esticar sua folga: emendas perfeitas com o Carnaval no Circuito, festas juninas, feriados cívicos, pontes oficiais e o recesso de fim de ano.
+          </p>
+
+          <!-- CHIPS COLORIDOS E DIVERTIDOS DE DESTAQUE -->
+          <div class="flex items-center gap-2 flex-wrap pt-1">
+            <span class="inline-flex items-center gap-1 px-3 py-1 rounded-xl text-xs font-bold bg-pink-100 text-pink-900 border border-pink-300 shadow-2xs">
+              🎭 Carnaval no Circuito
+            </span>
+            <span class="inline-flex items-center gap-1 px-3 py-1 rounded-xl text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300 shadow-2xs">
+              🌽 São João da Bahia
+            </span>
+            <span class="inline-flex items-center gap-1 px-3 py-1 rounded-xl text-xs font-bold bg-orange-100 text-orange-900 border border-orange-300 shadow-2xs">
+              🏖️ Dois de Julho
+            </span>
+            <span class="inline-flex items-center gap-1 px-3 py-1 rounded-xl text-xs font-bold bg-sky-100 text-sky-900 border border-sky-300 shadow-2xs">
+              🎄 Recesso de Fim de Ano
+            </span>
+            <span class="inline-flex items-center gap-1 px-3 py-1 rounded-xl text-xs font-bold bg-indigo-100 text-indigo-900 border border-indigo-300 shadow-2xs">
+              ⚖️ Lei 8.112/1990 • Servidor Federal
+            </span>
+          </div>
+
+        </div>
+
+        <!-- MINI-WIDGET LÚDICO LATERAL (BILHETE DE FÉRIAS / EMBARQUE) -->
+        <div class="hidden lg:flex flex-col items-center justify-center p-6 rounded-3xl bg-white/90 backdrop-blur-md border-2 border-amber-300 shadow-md space-y-3.5 shrink-0 text-center select-none rotate-1 hover:rotate-0 transition-transform duration-300">
+          <div class="w-14 h-14 rounded-2xl bg-amber-400 text-slate-950 flex items-center justify-center shadow-sm">
+            <i data-lucide="plane-takeoff" class="w-7 h-7"></i>
+          </div>
+          <div>
+            <span class="text-[11px] font-black uppercase tracking-wider text-amber-800 block">Potencial do Calendário</span>
+            <span class="text-3xl font-black text-slate-950 font-mono tracking-tight">Até +25 Dias</span>
+            <span class="text-xs text-emerald-700 font-extrabold block mt-0.5">Folga Praticamente Dobrada! 🔥</span>
+          </div>
+          <div class="pt-1 border-t border-slate-200/80 w-full flex items-center justify-center gap-1.5 text-[11px] font-mono font-bold text-slate-600">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-500"></i> Alavancagem até 1.8x
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- COCKPIT DE CONFIGURAÇÃO (3 COLUNAS ESTRUTURADAS) -->
+    <section class="bg-white rounded-3xl border border-slate-200/90 shadow-card p-6 sm:p-8 space-y-6">
+      
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+        <div>
+          <h3 class="text-base sm:text-lg font-extrabold text-slate-900 flex items-center gap-2">
+            <i data-lucide="sliders-horizontal" class="w-4 h-4 text-slate-900"></i>
+            Cockpit de Simulação • Parâmetros do Servidor
+          </h3>
+          <p class="text-xs text-slate-500 mt-0.5">Ajuste os parâmetros abaixo para gerar o melhor planejamento anual.</p>
+        </div>
+        <div class="text-xs text-slate-400 font-mono">
+          Ano Selecionado: <span class="font-bold text-slate-700" id="currentYearDisplay">2027</span>
+        </div>
+      </div>
+
+      <form id="simulatorForm" class="space-y-6" onsubmit="event.preventDefault(); runSimulation(true);">
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
+
+          <!-- CARD COLUNA 1: LOTAÇÃO & COTA DE FÉRIAS -->
+          <div class="bg-slate-50/60 p-5 rounded-2xl border border-slate-200/70 h-full flex flex-col justify-between space-y-4">
+            <div class="space-y-4">
+              <!-- CABEÇALHO DO CARD 1 -->
+              <div class="flex items-center justify-between border-b border-slate-200/60 pb-2.5">
+                <div class="flex items-center gap-2 text-slate-900 font-extrabold text-xs uppercase tracking-wider">
+                  <i data-lucide="building-2" class="w-4 h-4 text-slate-700"></i>
+                  <span>1. Lotação & Cota de Férias</span>
+                </div>
+                <span class="text-[10px] text-slate-400 font-semibold">Perfil & Regime</span>
+              </div>
+
+              <!-- INSTITUIÇÃO / LOCALIDADE -->
+              <div class="space-y-1.5">
+                <label class="block text-xs font-bold text-slate-700">
+                  Instituição / Feriados Locais
+                </label>
+                <div class="relative">
+                  <select id="selectedLocation" onchange="onYearOrLocationChange()"
+                    class="w-full pl-3.5 pr-8 py-2.5 bg-white border border-slate-200 rounded-xl font-bold text-slate-800 text-xs focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900 appearance-none cursor-pointer">
+                    <option value="UFBA_SALVADOR" selected>UFBA (Salvador / BA)</option>
+                    <option value="SALVADOR_BA">Salvador / BA (Geral)</option>
+                    <option value="NACIONAL">Feriados Federais Apenas</option>
+                  </select>
+                  <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 absolute right-3 top-3.5 pointer-events-none"></i>
+                </div>
+              </div>
+
+              <!-- JORNADA DA SEMANA -->
+              <div class="space-y-1.5">
+                <label class="block text-xs font-bold text-slate-700">
+                  Dias de Trabalho na Semana
+                </label>
+                <div class="grid grid-cols-7 gap-1 w-full" id="workingDaysContainer">
+                  <!-- Renderizado via JS -->
+                </div>
+                <p class="text-[10px] text-slate-400">Marque seus dias regulares de expediente.</p>
+              </div>
+
+              <!-- DIAS DE FÉRIAS SOLICITADOS -->
+              <div class="space-y-1.5 pt-1 border-t border-slate-200/60">
+                <label class="block text-xs font-bold text-slate-700">
+                  Dias de Férias Solicitados
+                </label>
+                <input type="number" id="vacationDays" min="1" max="30" value="30" required oninput="onVacationDaysInput(event)" onchange="onVacationDaysInput(event)"
+                  class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl font-mono font-bold text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900 transition-all"/>
+              </div>
+
+              <!-- PARCELAMENTO -->
+              <div class="space-y-1.5">
+                <label class="block text-xs font-bold text-slate-700">
+                  Em quantas parcelas dividir?
+                </label>
+                <div class="grid grid-cols-3 gap-2">
+                  <button type="button" onclick="setSplit(1)" id="btnSplit1"
+                    class="py-2.5 px-2 rounded-xl border font-black text-sm transition-all flex items-center justify-center border-slate-200 bg-white hover:bg-slate-50 text-slate-700 cursor-pointer">
+                    <span>1x</span>
+                  </button>
+                  <button type="button" onclick="setSplit(2)" id="btnSplit2"
+                    class="py-2.5 px-2 rounded-xl border font-black text-sm transition-all flex items-center justify-center border-slate-200 bg-white hover:bg-slate-50 text-slate-700 cursor-pointer">
+                    <span>2x</span>
+                  </button>
+                  <button type="button" onclick="setSplit(3)" id="btnSplit3"
+                    class="py-2.5 px-2 rounded-xl border font-black text-sm transition-all flex items-center justify-center border-slate-900 bg-slate-900 text-white shadow-xs cursor-pointer">
+                    <span>3x</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- RODAPÉ DO CARD 1 -->
+            <div class="pt-2 border-t border-slate-200/60 text-[10px] text-slate-400 flex items-center justify-between">
+              <span>Parcelas flexíveis a partir de 1 dia</span>
+              <span class="font-semibold text-slate-500">Art. 77 Lei 8.112/90</span>
+            </div>
+          </div>
+
+          <!-- CARD COLUNA 2: CALENDÁRIO & JANELA TEMPORAL -->
+          <div class="bg-slate-50/60 p-5 rounded-2xl border border-slate-200/70 h-full flex flex-col justify-between space-y-4">
+            <div class="space-y-3.5">
+              <!-- CABEÇALHO DO CARD 2 -->
+              <div class="flex items-center justify-between border-b border-slate-200/60 pb-2.5">
+                <div class="flex items-center gap-2 text-slate-900 font-extrabold text-xs uppercase tracking-wider">
+                  <i data-lucide="calendar-range" class="w-4 h-4 text-slate-700"></i>
+                  <span>2. Calendário & Janela Temporal</span>
+                </div>
+                <span class="text-[10px] text-slate-400 font-semibold">Exercício & Janela</span>
+              </div>
+
+              <!-- ANO DE REFERÊNCIA -->
+              <div class="space-y-1.5">
+                <div class="flex items-center justify-between">
+                  <label class="block text-xs font-bold text-slate-700">
+                    Ano de Referência
+                  </label>
+                  <span class="text-[10px] text-slate-400 font-mono">Exercício Base</span>
+                </div>
+                <div class="relative">
+                  <select id="selectedYear" onchange="onYearOrLocationChange()"
+                    class="w-full pl-3.5 pr-8 py-2.5 bg-white border border-slate-200 rounded-xl font-mono font-bold text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900 appearance-none cursor-pointer">
+                    <option value="2025">2025</option>
+                    <option value="2026">2026</option>
+                    <option value="2027" selected>2027</option>
+                    <option value="2028">2028</option>
+                  </select>
+                  <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 absolute right-3 top-3.5 pointer-events-none"></i>
+                </div>
+              </div>
+
+              <!-- BOTÃO DE VISIBILIDADE / TOGGLE DAS JANELAS AVANÇADAS -->
+              <div class="pt-1">
+                <button type="button" onclick="toggleCustomWindowSection()" id="btnToggleCustomWindow"
+                  class="w-full py-1.5 px-2.5 rounded-xl bg-slate-100 hover:bg-slate-200/80 text-slate-800 text-[11px] font-bold transition-all flex items-center justify-between cursor-pointer border border-slate-200 shadow-2xs">
+                  <div class="flex items-center gap-1.5">
+                    <i data-lucide="sliders" class="w-3.5 h-3.5 text-slate-600"></i>
+                    <span>Janelas de Configuração</span>
+                  </div>
+                  <div class="flex items-center gap-1">
+                    <span class="text-[10px] text-slate-500 font-semibold" id="textToggleCustomWindow">Visíveis</span>
+                    <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400 rotate-180 transition-transform duration-200" id="iconToggleCustomWindow"></i>
+                  </div>
+                </button>
+              </div>
+
+              <!-- SEÇÃO COM AS DUAS JANELAS DIMINUÍDAS -->
+              <div id="customWindowSection" class="space-y-2.5">
+                
+                <!-- JANELA DIMINUÍDA 1: PERSONALIZAR DATA -->
+                <div class="bg-white rounded-xl border border-slate-200/90 shadow-2xs p-3 space-y-2">
+                  <div class="flex items-center justify-between border-b border-slate-100 pb-1.5">
+                    <label class="flex items-center gap-2 cursor-pointer select-none">
+                      <input type="checkbox" id="enableCustomWindow" onchange="toggleEnableCustomWindow(this.checked)" class="w-3.5 h-3.5 rounded text-amber-600 focus:ring-amber-500 cursor-pointer"/>
+                      <span class="text-[11px] font-bold text-slate-800 flex items-center gap-1.5">
+                        <i data-lucide="calendar" class="w-3.5 h-3.5 text-amber-600"></i>
+                        Personalizar Data
+                      </span>
+                    </label>
+                    <span class="px-1.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-slate-100 text-slate-600 border border-slate-200" id="badgeCustomWindowStatus">
+                      Opcional
+                    </span>
+                  </div>
+
+                  <!-- CONTROLES DA JANELA 1 -->
+                  <div id="customWindowControls" class="space-y-2 opacity-50 pointer-events-none transition-opacity duration-200">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      <div>
+                        <label for="windowStartDateInput" class="block text-[10px] font-bold text-slate-600 mb-0.5">
+                          Iniciar a partir de:
+                        </label>
+                        <input type="date" id="windowStartDateInput" value="2027-05-03" onchange="onCustomWindowParamsChange()"
+                          class="w-full px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg font-mono text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900"/>
+                      </div>
+                      <div>
+                        <label class="block text-[10px] font-bold text-slate-600 mb-0.5">
+                          Alcance da busca:
+                        </label>
+                        <div class="grid grid-cols-2 gap-1">
+                          <button type="button" onclick="setWindowYears(1)" id="btnWindow1Year"
+                            class="py-1 px-1 rounded-lg border text-[11px] font-bold transition-all flex items-center justify-center border-slate-900 bg-slate-900 text-white shadow-2xs cursor-pointer">
+                            <span>1 Ano</span>
+                          </button>
+                          <button type="button" onclick="setWindowYears(2)" id="btnWindow2Years"
+                            class="py-1 px-1 rounded-lg border text-[11px] font-medium transition-all flex items-center justify-center border-slate-200 bg-white hover:bg-slate-50 text-slate-700 cursor-pointer">
+                            <span>2 Anos</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- JANELA DIMINUÍDA 2: DATA PROIBIDA (PERÍODOS A EVITAR) -->
+                <div class="bg-white rounded-xl border border-slate-200/90 shadow-2xs p-3 space-y-2">
+                  <div class="flex items-center justify-between border-b border-slate-100 pb-1.5">
+                    <span class="text-[11px] font-bold text-slate-800 flex items-center gap-1.5">
+                      <i data-lucide="ban" class="w-3.5 h-3.5 text-rose-500"></i>
+                      Data Proibida
+                    </span>
+                    <span class="text-[9px] text-slate-400 font-semibold">Períodos a Evitar</span>
+                  </div>
+
+                  <div class="space-y-2">
+                    <div class="grid grid-cols-2 gap-1.5">
+                      <div>
+                        <span class="block text-[10px] text-slate-500 font-semibold mb-0.5">De:</span>
+                        <input type="date" id="excludedPeriodStart" class="w-full px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-mono font-bold text-slate-900"/>
+                      </div>
+                      <div>
+                        <span class="block text-[10px] text-slate-500 font-semibold mb-0.5">Até:</span>
+                        <input type="date" id="excludedPeriodEnd" class="w-full px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-mono font-bold text-slate-900"/>
+                      </div>
+                    </div>
+                    <button type="button" onclick="addExcludedPeriod()"
+                      class="w-full py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg font-bold text-xs flex items-center justify-center gap-1 cursor-pointer transition-colors shadow-2xs">
+                      <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                      <span>Adicionar Data Proibida</span>
+                    </button>
+                    <!-- CHIPS LIST -->
+                    <div class="pt-0.5">
+                      <div id="excludedPeriodsList" class="flex flex-wrap gap-1 max-h-16 overflow-y-auto custom-scrollbar">
+                        <span class="text-[10px] text-slate-400 italic">Nenhuma data proibida.</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- RODAPÉ DO CARD 2 -->
+            <div class="pt-2 border-t border-slate-200/60 text-[10px] text-slate-400 flex items-center justify-between">
+              <span>Busca interanual contínua</span>
+              <span class="font-semibold text-slate-500">Art. 77 Lei 8.112/90</span>
+            </div>
+          </div>
+
+          <!-- CARD COLUNA 3: ALAVANCAGEM & BEM-ESTAR -->
+          <div class="bg-slate-50/60 p-5 rounded-2xl border border-slate-200/70 h-full flex flex-col justify-between space-y-4">
+            <div class="space-y-3.5">
+              <!-- CABEÇALHO DO CARD 3 -->
+              <div class="flex items-center justify-between border-b border-slate-200/60 pb-2.5">
+                <div class="flex items-center gap-2 text-slate-900 font-extrabold text-xs uppercase tracking-wider">
+                  <i data-lucide="sparkles" class="w-4 h-4 text-slate-700"></i>
+                  <span>3. Alavancagem & Bem-Estar</span>
+                </div>
+                <span class="text-[10px] text-slate-400 font-semibold">Emendas & Folgas</span>
+              </div>
+
+              <!-- BANCO DE HORAS COM STEPPER TÁTIL -->
+              <div class="space-y-1.5">
+                <div class="flex items-center justify-between">
+                  <label class="block text-xs font-bold text-slate-700">
+                    Banco de Horas / Folgas
+                  </label>
+                  <span class="text-[10px] text-slate-400 font-mono">Alocação Cirúrgica</span>
+                </div>
+                
+                <div class="flex items-center gap-2 bg-white p-1.5 rounded-xl border border-slate-200 shadow-2xs">
+                  <button type="button" onclick="changeCompensation(-1)" class="w-8 h-8 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-800 font-extrabold flex items-center justify-center cursor-pointer transition-colors">
+                    -
+                  </button>
+                  <div class="flex-1 text-center font-mono font-black text-slate-900 text-xs" id="compensationDaysDisplay">
+                    0 dias
+                  </div>
+                  <input type="hidden" id="compensationDays" value="0"/>
+                  <button type="button" onclick="changeCompensation(1)" class="w-8 h-8 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-800 font-extrabold flex items-center justify-center cursor-pointer transition-colors">
+                    +
+                  </button>
+                </div>
+                <p class="text-[10px] text-slate-400">Somados onde geram o maior descanso extra.</p>
+              </div>
+
+              <!-- TOGGLES INTELIGENTES DE EMENDAS -->
+              <div class="space-y-1.5 pt-1 border-t border-slate-200/60">
+                <!-- CARNAVAL NO CIRCUITO -->
+                <label class="flex items-start gap-2.5 p-1 rounded-xl hover:bg-white cursor-pointer transition-colors">
+                  <input type="checkbox" id="includeCarnavalCircuito" checked onchange="onYearOrLocationChange()" class="mt-0.5 w-3.5 h-3.5 rounded text-amber-600 focus:ring-amber-500 cursor-pointer"/>
+                  <div class="text-[11px]">
+                    <span class="font-bold text-slate-900 block leading-tight">Circuito Carnaval UFBA</span>
+                    <span class="text-slate-500 text-[10px] leading-tight block">Quarta pré-Carnaval a Quarta de Cinzas.</span>
+                  </div>
+                </label>
+
+                <!-- PONTES MGI -->
+                <label class="flex items-start gap-2.5 p-1 rounded-xl hover:bg-white cursor-pointer transition-colors">
+                  <input type="checkbox" id="autoBridgeHolidays" checked onchange="onYearOrLocationChange()" class="mt-0.5 w-3.5 h-3.5 rounded text-sky-600 focus:ring-sky-500 cursor-pointer"/>
+                  <div class="text-[11px]">
+                    <span class="font-bold text-slate-900 block leading-tight">Enforcar Pontes MGI/UFBA</span>
+                    <span class="text-slate-500 text-[10px] leading-tight block">Sexta pós-quinta e segunda pré-terça.</span>
+                  </div>
+                </label>
+
+                <!-- VÉSPERAS DE NATAL E ANO NOVO -->
+                <label class="flex items-start gap-2.5 p-1 rounded-xl hover:bg-white cursor-pointer transition-colors">
+                  <input type="checkbox" id="includeVesperas" checked onchange="onYearOrLocationChange()" class="mt-0.5 w-3.5 h-3.5 rounded text-sky-600 focus:ring-sky-500 cursor-pointer"/>
+                  <div class="text-[11px]">
+                    <span class="font-bold text-slate-900 block leading-tight">Vésperas Natal/Ano Novo (24 e 31)</span>
+                    <span class="text-slate-500 text-[10px] leading-tight block">Pontos facultativos federais.</span>
+                  </div>
+                </label>
+
+                <!-- ANTI-FADIGA -->
+                <label class="flex items-start gap-2.5 p-1 rounded-xl hover:bg-white cursor-pointer transition-colors">
+                  <input type="checkbox" id="distributeThroughoutYear" onchange="runSimulation(false)" class="mt-0.5 w-3.5 h-3.5 rounded text-teal-600 focus:ring-teal-500 cursor-pointer"/>
+                  <div class="text-[11px]">
+                    <span class="font-bold text-slate-900 block leading-tight">Combate à Fadiga (Espaçado)</span>
+                    <span class="text-slate-500 text-[10px] leading-tight block">Mínimo 60 dias de trabalho entre etapas.</span>
+                  </div>
+                </label>
+              </div>
+
+              <!-- ESCALA DE RECESSO DE FIM DE ANO (MGI) -->
+              <div class="pt-2 border-t border-slate-200/60 space-y-1.5">
+                <div class="flex items-center justify-between">
+                  <label class="block text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                    <i data-lucide="gift" class="w-3.5 h-3.5 text-sky-600"></i>
+                    <span>Recesso de Fim de Ano (MGI)</span>
+                  </label>
+                  <span class="text-[10px] text-slate-400 font-mono">Revezamento</span>
+                </div>
+                <p class="text-[10px] text-slate-500 leading-tight" id="recessShiftDescription">
+                  Sem escala de revezamento. 25/Dez e 01/Jan são feriados para todos.
+                </p>
+                <div class="grid grid-cols-3 gap-1 bg-slate-200/70 p-1 rounded-xl border border-slate-200/80">
+                  <button type="button" onclick="setRecessShift('none')" id="btnRecess_none"
+                    class="py-1.5 px-1.5 rounded-lg text-[11px] font-bold transition-all text-center flex items-center justify-center bg-white text-slate-900 shadow-2xs cursor-pointer">
+                    <span>Sem Escala</span>
+                  </button>
+                  <button type="button" onclick="setRecessShift('natal')" id="btnRecess_natal"
+                    class="py-1.5 px-1.5 rounded-lg text-[11px] font-medium transition-all text-center flex items-center justify-center gap-1 text-slate-600 hover:text-slate-900 cursor-pointer">
+                    <i data-lucide="tree-pine" class="w-3 h-3 text-sky-600"></i>
+                    <span>Natal</span>
+                  </button>
+                  <button type="button" onclick="setRecessShift('ano_novo')" id="btnRecess_ano_novo"
+                    class="py-1.5 px-1.5 rounded-lg text-[11px] font-medium transition-all text-center flex items-center justify-center gap-1 text-slate-600 hover:text-slate-900 cursor-pointer">
+                    <i data-lucide="sparkles" class="w-3 h-3 text-amber-600"></i>
+                    <span>Ano Novo</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- RODAPÉ DO CARD 3 -->
+            <div class="pt-2 border-t border-slate-200/60 text-[10px] text-slate-400 flex items-center justify-between">
+              <span>Portaria MGI & Revezamento</span>
+              <span class="font-semibold text-slate-500">Sem Desperdício</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- BARRA DE STATUS DE FERIADOS & EXPANSOR -->
+        <div class="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-xl bg-slate-900 text-white flex items-center justify-center shrink-0">
+              <i data-lucide="calendar-check" class="w-4 h-4"></i>
+            </div>
+            <div>
+              <span class="font-bold text-slate-800" id="holidayCountDisplay">Calculando calendário da UFBA...</span>
+              <p class="text-[11px] text-slate-500">Inclui São João, 2 de Julho, Conceição da Praia, Consciência Negra e Dia do Servidor.</p>
+            </div>
+          </div>
+          <button type="button" onclick="toggleHolidayList()"
+            class="px-3.5 py-2 bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 font-bold rounded-xl shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer shrink-0">
+            <i data-lucide="list" class="w-3.5 h-3.5 text-slate-500"></i>
+            <span id="btnHolidayToggleText">Ver / Customizar Feriados</span>
+          </button>
+        </div>
+
+        <!-- LISTA EXPANSÍVEL DE FERIADOS -->
+        <div id="holidayListSection" class="hidden bg-slate-50/80 border border-slate-200 rounded-2xl p-4 space-y-4">
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-slate-200">
+            <div>
+              <h4 class="font-bold text-xs text-slate-800">Feriados e Recessos Cadastrados</h4>
+              <p class="text-[11px] text-slate-500">Adicione recessos ou folgas do seu setor acadêmico/administrativo.</p>
+            </div>
+            <div class="flex items-center gap-2 w-full sm:w-auto">
+              <input type="text" id="newHolidayDate" placeholder="DD/MM/AAAA" class="text-xs px-3 py-1.5 rounded-xl border border-slate-200 w-28 bg-white font-mono"/>
+              <input type="text" id="newHolidayName" placeholder="Nome da Folga / Recesso" class="text-xs px-3 py-1.5 rounded-xl border border-slate-200 flex-1 sm:w-48 bg-white"/>
+              <button type="button" onclick="addCustomHoliday()" class="px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold text-xs flex items-center gap-1 cursor-pointer">
+                <i data-lucide="plus" class="w-3.5 h-3.5"></i> Inserir
+              </button>
+            </div>
+          </div>
+
+          <div id="holidayTableContainer" class="max-h-60 overflow-y-auto custom-scrollbar space-y-1.5 pr-1">
+            <!-- Renderizado via JS -->
+          </div>
+        </div>
+
+        <!-- BOTÃO HERO DE CÁLCULO PRINCIPAL -->
+        <div class="pt-2">
+          <button type="submit"
+            class="w-full py-4 px-6 bg-slate-950 hover:bg-slate-900 active:scale-[0.99] text-white font-black text-base rounded-2xl shadow-xl shadow-slate-950/20 transition-all duration-200 flex items-center justify-center gap-3 cursor-pointer">
+            <i data-lucide="sparkles" class="w-5 h-5 text-amber-400"></i>
+            <span>Calcular Melhores Cenários de Férias</span>
+          </button>
+        </div>
+
+      </form>
+    </section>
+
+    <!-- SEÇÃO DE RESULTADOS -->
+    <section id="resultsSection" class="space-y-6">
+
+      <!-- CABEÇALHO DE RESULTADOS -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-200">
+        <div>
+          <h3 class="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+            <i data-lucide="trophy" class="w-5 h-5 text-amber-500"></i>
+            Cenários de Férias Otimizados • Servidor UFBA
+          </h3>
+          <p class="text-xs text-slate-500">Clique em qualquer cenário para expandir a trilha detalhada, calendários e exportações.</p>
+        </div>
+        <div id="resultsSummaryBadge" class="self-start sm:self-auto"></div>
+      </div>
+
+      <!-- CONTAINER DA FITA ANUAL DO TEMPO (ANNUAL RHYTHM RIBBON) -->
+      <div id="annualRibbonContainer">
+        <!-- Renderizado dinamicamente pelo ribbon.js -->
+      </div>
+
+      <!-- CONTAINER DOS CARDS DE CENÁRIOS (BOARDING PASS STYLE) -->
+      <div id="scenariosContainer" class="space-y-4">
+        <!-- Renderizado via JS -->
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- FOOTER ELEGANTE -->
+  <footer class="bg-white border-t border-slate-200/80 mt-16 py-8 text-center text-xs text-slate-400">
+    <div class="max-w-6xl mx-auto px-4 space-y-2">
+      <p class="font-semibold text-slate-600">Otimiza Férias • Planejador Inteligente para Servidores Públicos Federais (Lei 8.112/1990)</p>
+      <p class="text-[11px] text-slate-400">Cálculo astronômico pelo algoritmo do Computus • Respeita o calendário acadêmico da UFBA e feriados de Salvador/BA.</p>
+    </div>
+  </footer>
+
+  <!-- DOCK FLUTUANTE INFERIOR DE COMPARAÇÃO (DESACOPLADA) -->
+  <aside id="comparatorDock" 
+    aria-label="Barra flutuante de comparação" 
+    class="fixed bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-40 w-[95%] sm:w-auto max-w-2xl transition-all duration-300 transform translate-y-28 opacity-0 pointer-events-none">
+    
+    <div class="bg-slate-900/95 backdrop-blur-md text-white border border-slate-700/80 shadow-2xl shadow-slate-950/40 rounded-2xl sm:rounded-full px-4 py-3 sm:px-5 sm:py-2.5 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-5">
+      
+      <!-- LADO ESQUERDO: ÍCONE, STATUS E CHIPS -->
+      <div class="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-start">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-amber-400 shrink-0">
+            <i data-lucide="columns-2" class="w-4 h-4 text-amber-400"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-1.5">
+              <span class="text-xs font-bold text-slate-200">Comparar</span>
+              <span id="dockCounter" class="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 font-mono font-black text-[10px]">
+                0 / 3
+              </span>
+            </div>
+            <p class="text-[10px] text-slate-400 font-medium sm:hidden">Cenários selecionados</p>
+          </div>
+        </div>
+
+        <!-- CHIPS DINÂMICOS DOS CENÁRIOS SELECIONADOS -->
+        <div id="dockSelectedChips" class="flex items-center gap-1.5 overflow-x-auto custom-scrollbar max-w-[200px] sm:max-w-none">
+        </div>
+      </div>
+
+      <!-- LADO DIREITO: BOTÕES DE AÇÃO -->
+      <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+        <button type="button" 
+          onclick="window.OtimizaApp ? window.OtimizaApp.clearComparison() : clearComparison()" 
+          class="px-2.5 py-2 sm:py-1.5 rounded-xl sm:rounded-full text-slate-400 hover:text-white hover:bg-slate-800 text-xs font-semibold transition-colors flex items-center gap-1 cursor-pointer">
+          <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+          <span class="hidden sm:inline">Limpar</span>
+        </button>
+
+        <div class="h-4 w-px bg-slate-700 hidden sm:block"></div>
+
+        <button type="button" 
+          id="btnOpenComparatorDrawer"
+          onclick="window.OtimizaApp ? window.OtimizaApp.openComparatorDrawer() : openComparatorDrawer()" 
+          class="w-full sm:w-auto px-4 py-2 sm:py-2 rounded-xl sm:rounded-full bg-amber-400 hover:bg-amber-300 active:scale-95 text-slate-950 font-black text-xs transition-all shadow-md shadow-amber-400/20 flex items-center justify-center gap-2 cursor-pointer shrink-0">
+          <span>Ver Comparativo</span>
+          <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-slate-950"></i>
+        </button>
+      </div>
+
+    </div>
+  </aside>
+
+  <!-- BACKDROP DO SLIDE-OVER DRAWER -->
+  <div id="comparatorBackdrop" 
+    onclick="window.OtimizaApp ? window.OtimizaApp.closeComparatorDrawer() : closeComparatorDrawer()" 
+    class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 transition-opacity duration-300 opacity-0 pointer-events-none">
+  </div>
+
+  <!-- SLIDE-OVER DRAWER LATERAL -->
+  <aside id="comparatorDrawer" 
+    role="dialog" 
+    aria-modal="true" 
+    aria-labelledby="comparatorDrawerTitle"
+    class="fixed inset-y-0 right-0 z-50 w-full max-w-2xl lg:max-w-4xl xl:max-w-5xl bg-white shadow-2xl flex flex-col h-full transform transition-transform duration-300 ease-in-out translate-x-full border-l border-slate-200">
+    
+    <!-- 1. STICKY HEADER DO DRAWER -->
+    <header class="sticky top-0 z-20 bg-white/95 backdrop-blur-md border-b border-slate-200 px-5 sm:px-6 py-4 flex items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-2xl bg-slate-900 text-amber-400 flex items-center justify-center shrink-0 shadow-sm">
+          <i data-lucide="columns-2" class="w-5 h-5 text-amber-400"></i>
+        </div>
+        <div>
+          <h3 id="comparatorDrawerTitle" class="text-base sm:text-lg font-black text-slate-950 tracking-tight flex items-center gap-2">
+            Comparador Técnico de Cenários
+          </h3>
+          <p class="text-[11px] sm:text-xs text-slate-500 font-medium">
+            Análise analítica de descanso real, alavancagem líquida e eficiência de calendário.
+          </p>
+        </div>
+      </div>
+
+      <!-- AÇÕES DO HEADER: COPIAR E FECHAR -->
+      <div class="flex items-center gap-2">
+        <button type="button" 
+          onclick="window.OtimizaApp ? window.OtimizaApp.copyComparisonSummary(this) : copyComparisonSummary(this)" 
+          class="px-3 py-1.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer">
+          <i data-lucide="copy" class="w-3.5 h-3.5 text-slate-500"></i>
+          <span class="hidden sm:inline">Copiar Comparativo</span>
+        </button>
+
+        <button type="button" 
+          onclick="window.OtimizaApp ? window.OtimizaApp.closeComparatorDrawer() : closeComparatorDrawer()" 
+          aria-label="Fechar comparador" 
+          class="w-9 h-9 rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-500 hover:text-slate-900 flex items-center justify-center transition-colors cursor-pointer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- 2. SCROLLABLE BODY DO DRAWER -->
+    <main id="comparatorDrawerContent" class="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6 space-y-6 bg-slate-50/60">
+      <!-- Renderizado dinamicamente via JS -->
+    </main>
+
+    <!-- 3. STICKY FOOTER DO DRAWER -->
+    <footer class="sticky bottom-0 z-20 bg-white border-t border-slate-200 px-5 sm:px-6 py-3.5 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-lg">
+      <div class="text-[11px] text-slate-400 font-medium flex items-center gap-1.5">
+        <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600"></i>
+        <span>Regime Estatutário UFBA (Lei 8.112/90) • Calendário Salvador / BA</span>
+      </div>
+      <div class="flex items-center gap-2 w-full sm:w-auto">
+        <button type="button" 
+          onclick="window.OtimizaApp ? window.OtimizaApp.closeComparatorDrawer() : closeComparatorDrawer()" 
+          class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-slate-950 hover:bg-slate-900 active:scale-95 text-white font-bold text-xs transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer">
+          <i data-lucide="check" class="w-4 h-4 text-emerald-400"></i>
+          <span>Concluir Comparação</span>
+        </button>
+      </div>
+    </footer>
+
+  </aside>
+
+  <!-- SCRIPTS MODULARES (ESTRUTURA DESACOPLADA) -->
+  <script src="js/holidays.js"></script>
+  <script src="js/optimizer.js"></script>
+  <script src="js/ribbon.js"></script>
+  <script src="js/mini-calendar.js"></script>
+  <script src="js/app.js"></script>
+
+  <!-- PWA REGISTRATION & INSTALL PROMPT HANDLER -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(reg => console.log('Folga Extra PWA: Service Worker ativo.', reg.scope))
+          .catch(err => console.warn('Folga Extra PWA: Falha ao registrar Service Worker:', err));
+      });
+    }
+
+    let deferredPrompt;
+    const installBtn = document.getElementById('btnInstallPwa');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      if (installBtn) {
+        installBtn.classList.remove('hidden');
+        if (window.lucide) window.lucide.createIcons();
+      }
+    });
+
+    if (installBtn) {
+      installBtn.addEventListener('click', async () => {
+        if (!deferredPrompt) return;
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+          installBtn.classList.add('hidden');
+        }
+        deferredPrompt = null;
+      });
+    }
+
+    window.addEventListener('appinstalled', () => {
+      if (installBtn) installBtn.classList.add('hidden');
+      console.log('Folga Extra PWA instalado com sucesso!');
+    });
+  </script>
+</body>
+</html>

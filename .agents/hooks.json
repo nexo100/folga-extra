@@ -1,0 +1,16 @@
+{
+  "network-privacy-guard": {
+    "PreToolUse": [
+      {
+        "matcher": "run_command",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node security_gate.js",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}
