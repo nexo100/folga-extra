@@ -138,6 +138,46 @@
       return this.workingDays[date.getDay()];
     }
 
+    /**
+     * Retorna as datas da Quarta-feira de Cinzas para todos os anos presentes nos feriados carregados.
+     * Usado para detectar a "armadilha pós-Cinzas" (Quinta + Sexta sem feriado à esquerda).
+     */
+    _getQuartaCinzasDates() {
+      if (this._quartaCinzasCache) return this._quartaCinzasCache;
+      this._quartaCinzasCache = this.holidays
+        .filter(h => h.name && h.name.toLowerCase().includes('cinzas'))
+        .map(h => {
+          const d = h.date instanceof Date ? h.date : new Date(h.date);
+          return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+        });
+      return this._quartaCinzasCache;
+    }
+
+    /**
+     * Detecta se uma data de início de parcela cai na "armadilha pós-Cinzas":
+     * Quinta ou Sexta imediatamente após a Quarta de Cinzas, com parcela pequena (≤ 3 dias).
+     * Nesses casos, o Carnaval já passou e não há feriado à esquerda para emendar —
+     * gastar 2 dias de férias apenas para "descansar" o fim de semana seguinte é ineficiente.
+     * @param {Date} startDate
+     * @param {number} length
+     * @returns {boolean}
+     */
+    _isPostCinzasTrap(startDate, length) {
+      if (length > 3) return false; // Parcelas maiores têm valor estratégico próprio
+      const cinzasDates = this._getQuartaCinzasDates();
+      for (const cinzas of cinzasDates) {
+        // Os 2 primeiros dias úteis após a Cinzas são Quinta e Sexta pós-Carnaval
+        // Cinzas é Quarta → Quinta = cinzas+1, Sexta = cinzas+2
+        const quinta = addDays(cinzas, 1);
+        const sexta = addDays(cinzas, 2);
+        const sISO = formatISODate(startDate);
+        if (sISO === formatISODate(quinta) || sISO === formatISODate(sexta)) {
+          return true;
+        }
+      }
+      return false;
+    }
+
     isHoliday(date) {
       const dateStr = formatISODate(date);
       return this.holidays.some(h => formatISODate(h.date) === dateStr);
@@ -227,7 +267,12 @@
       // Score de qualidade:
       // - Prioriza alto descanso total e emendas de feriados
       // - Aplica penalização suave a dias de repouso no fim da fração (sem bloqueios cegos)
-      const qualityScore = (totalOff * 10) + (totalHolidaysJoined * 3) - (wastedEndDays * 8);
+      // - Penalização severa: "armadilha pós-Cinzas" — parcela pequena (≤3d) iniciando
+      //   na Quinta ou Sexta imediatamente após a Quarta de Cinzas. O Carnaval já passou,
+      //   não há feriado à esquerda para emendar. Gastar carta de férias aqui é ineficiente.
+      const isPostCinzasTrap = this._isPostCinzasTrap(startDate, length);
+      const qualityScore = (totalOff * 10) + (totalHolidaysJoined * 3) - (wastedEndDays * 8)
+        - (isPostCinzasTrap ? 9999 : 0);
 
       const effectiveTotalDays = length + compDays;
 
@@ -244,6 +289,7 @@
         isWeekendEnd: endDate.getDay() === 0 || endDate.getDay() === 6,
         isHolidayEnd: this.isHoliday(endDate),
         qualityScore,
+        isPostCinzasTrap,
         totalOff,
         leverage: (totalOff / effectiveTotalDays).toFixed(1),
         holidaysBefore,
@@ -749,8 +795,14 @@
       }
     }
 
-    // Ordena cenários pelo descanso total (1º) e menor desperdício no fim (2º)
+    // Ordena cenários pelo descanso total (1º), menor desperdício no fim (2º)
+    // e penaliza cenários com "armadilha pós-Cinzas" (parcela ineficiente na Quinta/Sexta pós-Carnaval)
+    validScenarios.forEach(s => {
+      s.hasPostCinzasTrap = s.periods.some(p => p.isPostCinzasTrap);
+    });
     validScenarios.sort((a, b) => {
+      // Cenários com armadilha pós-Cinzas vão para o fundo do ranking
+      if (a.hasPostCinzasTrap !== b.hasPostCinzasTrap) return a.hasPostCinzasTrap ? 1 : -1;
       if (b.totalOff !== a.totalOff) return b.totalOff - a.totalOff;
       return a.totalWasted - b.totalWasted;
     });
