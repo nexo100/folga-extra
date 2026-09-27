@@ -2,12 +2,12 @@
  * mini-calendar.js - Renderizador Visual da Grade 7xN do Mês (Design System Elevado)
  * Responsabilidade única:
  * - Grade mensal 7xN com contraste aprimorado e tipografia limpa
- * - Destaques visuais elegantes:
- *   - Índigo Profundo: Férias
- *   - Âmbar Solar: Feriado
- *   - Verde-azulado: Ponto Facultativo
- *   - Azul Céu: Fim de Semana
- *   - Esmeralda Vivo: Retorno ao Trabalho
+ * - Destaques visuais elegantes (Design System Oficial):
+ *   - Slate-900 (Preenchimento Escuro Único): Férias Regulamentares
+ *   - Borda Âmbar-400: Feriado Oficial (Nacional, Estadual ou Municipal)
+ *   - Borda Azul-400: Ponto Facultativo / Recesso MGI / Pontes
+ *   - Borda Índigo-400: Repouso Semanal (Sábado e Domingo)
+ *   - Fundo Esmeralda-600: 1º Dia Útil de Retorno ao Trabalho
  * - Zero dependência de DOM / HTML
  */
 

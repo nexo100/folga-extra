@@ -1,7 +1,7 @@
 # Sistema de Design e Mapeamento Refinado de Cores • Folga Extra (UFBA)
-> **Versão:** 2.0 • **Data de Auditoria:** 25/09/2026  
-> **Arquivos Analisados:** `index.html`, `js/app.js`, `js/mini-calendar.js`, `js/ribbon.js`, `js/holidays.js`  
-> **Status dos Testes:** 19/19 Testes Aprovados (`node test_suite.js`)
+> **Versão:** 3.2 • **Data de Auditoria:** 27/09/2026  
+> **Arquivos Analisados:** `index.html`, `js/app.js`, `js/mini-calendar.js`, `js/ribbon.js`, `js/holidays.js`, `js/tags.js`  
+> **Status dos Testes:** 33/33 Testes Aprovados (`node test_suite.js`)
 
 Este documento é o inventário exaustivo de todas as cores, tonalidades, tokens utilitários, papéis semânticos e inconsistências detectadas na interface do **Folga Extra**.
 

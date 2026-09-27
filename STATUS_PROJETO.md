@@ -1,7 +1,7 @@
 # DOCUMENTO DE TRANSIÇÃO E ESTADO DO PROJETO (HANDOFF)
 **Projeto:** Folga Extra (UFBA) — Otimizador Inteligente de Férias e Descanso  
-**Versão Atual:** v3.1  
-**Data de Atualização:** 25/09/2026  
+**Versão Atual:** v3.2  
+**Data de Atualização:** 27/09/2026  
 **Caminho Local Oficial:** `C:\Users\nexo\github\folga-extra`  
 **Repositório GitHub:** `https://github.com/nexo100/folga-extra`  
 **Conversa de Origem:** [🔗 Análise e Reprodução de Site](conversation://f1f763d6-076e-4543-a905-f0eaa0736efd)  
@@ -11,7 +11,7 @@
 
 ## 1. RESUMO EXECUTIVO DO ESTADO ATUAL
 
-O projeto encontra-se em estado maduro, com arquitetura desacoplada, alta fidelidade à legislação (Lei 8.112/90) e suíte de testes 100% verde (**32 / 32 testes aprovados**). Todas as regras de negócio, interface visual, PWA offline e diretrizes de governança/segurança estão plenamente implementadas e gravadas em disco.
+O projeto encontra-se em estado maduro, com arquitetura desacoplada, alta fidelidade à legislação (Lei 8.112/90) e suíte de testes 100% verde (**33 / 33 testes aprovados**). Todas as regras de negócio, interface visual, PWA offline e diretrizes de governança/segurança estão plenamente implementadas e gravadas em disco.
 
 ---
 
@@ -97,6 +97,15 @@ O painel de controle superior foi reestruturado de forma harmoniosa, com alturas
 
 ---
 
+### I. Modularização de Temas & Refinamento de UX (v3.2)
+- **Extração Oficial de `js/tags.js`:** O motor de roteiros temáticos e 30+ arquétipos culturais/sazonais foi oficialmente desacoplado em `js/tags.js` (UMD), unificando a arquitetura física com toda a documentação histórica do projeto.
+- **Substituição de Alertas Nativos por Notificações Toast:** Criação da função `showToast()` para substituir popups bloqueantes de `alert()` por toasts elegantes, translúcidos e não-invasivos no padrão visual do Design System.
+- **Preservação Inteligente da Comparação de Cenários:** O recálculo ou alternância de parâmetros finos (pontes, banco de horas) agora filtra e preserva os cenários já selecionados no Comparador que continuam válidos no novo cálculo, eliminando o atrito de perder o estado de comparação.
+- **Sincronização Dinâmica do Widget do Hero:** O bilhete de potencial do Hero (`+25 Dias` / `Alavancagem`) agora é reativo e reflete o ganho e alavancagem reais encontrados para o ano selecionado e cota solicitada.
+- **Confetti com Cooldown Inteligente:** Adicionado intervalo mínimo (12s) para a celebração de confetes, mantendo a experiência solar e recompensadora sem ruído visual em ajustes contínuos.
+
+---
+
 ## 3. SUÍTE DE TESTES AUTOMATIZADOS (`test_suite.js`)
 
 - **Total:** 33 testes automatizados cobrindo todo o ciclo do sistema.
@@ -134,7 +143,7 @@ O repositório e a máquina possuem 3 camadas de blindagem ativas:
 | `js/holidays.js` | Computus móvel, feriados fixos e recesso MGI interanual. |
 | `js/ribbon.js` | Linha do tempo panorâmica, fitas mensais e mini-calendários. |
 | `js/tags.js` | Motor de 30+ arquétipos temáticos para os cenários. |
-| `test_suite.js` | Suíte de testes automatizados com 32 asserções. |
+| `test_suite.js` | Suíte de testes automatizados com 33 asserções. |
 | `GUIA_CORES_SISTEMA.md` | Design System com a paleta oficial corporativa. |
 | `REGRAS_ALGORITMO.md` | Especificação formal dos algoritmos e base legal (Lei 8.112/90). |
 | `GEMINI.md` | Diretrizes de segurança, governança e integridade técnica. |
@@ -146,7 +155,7 @@ O repositório e a máquina possuem 3 camadas de blindagem ativas:
 Ao abrir a nova conversa no Antigravity:
 1. Verifique se o projeto ativo é `C:\Users\nexo\github\folga-extra`.
 2. Envie o seguinte prompt inicial:
-   > *"Estou retomando o projeto Folga Extra a partir de @STATUS_PROJETO.md e @conversation://f1f763d6-076e-4543-a905-f0eaa0736efd. O ambiente está com 32/32 testes aprovados. Vamos definir o próximo passo do desenvolvimento."*
+   > *"Estou retomando o projeto Folga Extra a partir de @STATUS_PROJETO.md e @conversation://f1f763d6-076e-4543-a905-f0eaa0736efd. O ambiente está com 33/33 testes aprovados. Vamos definir o próximo passo do desenvolvimento."*
 
 ---
 

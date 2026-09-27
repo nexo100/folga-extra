@@ -3,7 +3,7 @@
  * Versão 3.1.0 - Suporte Completo a Funcionamento 100% Offline (Cache-First)
  */
 
-const CACHE_NAME = 'folga-extra-v3.1.0';
+const CACHE_NAME = 'folga-extra-v3.2.0';
 
 const STATIC_ASSETS = [
   './',
@@ -14,7 +14,8 @@ const STATIC_ASSETS = [
   './js/holidays.js',
   './js/optimizer.js',
   './js/ribbon.js',
-  './js/mini-calendar.js'
+  './js/mini-calendar.js',
+  './js/tags.js'
 ];
 
 // Instalação do Service Worker e pré-cache de ativos fundamentais

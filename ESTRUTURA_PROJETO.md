@@ -2,7 +2,7 @@
 > **Papel deste Documento:** Hub central de referência do projeto.  
 > **Localização Física Oficial:** `C:\Users\nexo\github\folga-extra`  
 > **Repositório GitHub:** `https://github.com/nexo100/folga-extra`  
-> **Estado de Qualidade:** 32 / 32 Testes Aprovados (100% Green)
+> **Estado de Qualidade:** 33 / 33 Testes Aprovados (100% Green)
 
 ---
 
@@ -23,7 +23,7 @@ C:\Users\nexo\github\folga-extra\
 ├── 📄 index.html                     # Interface SPA completa: Cockpit (3 Cards), Fita Anual, Cards de Cenário, Dock & Drawer
 ├── 📄 sw.js                           # Service Worker PWA (Offline-First, Cache-First para fontes, Tailwind CDN e JS locais)
 ├── 📄 manifest.json                   # Manifesto PWA com metadados para instalação desktop e mobile
-├── 📄 test_suite.js                   # Bateria de 32 testes automatizados (Core, UI, Tags, Design Linter)
+├── 📄 test_suite.js                   # Bateria de 33 testes automatizados (Core, UI, Tags, Design Linter)
 │
 ├── 📁 js/                             # Módulos JavaScript (Vanilla ES6, Zero dependências de build)
 │   ├── 📄 app.js                      # Orquestrador do estado global, reatividade, filtros e chamadas ao otimizador
@@ -62,9 +62,9 @@ C:\Users\nexo\github\folga-extra\
 
 ## 🧪 COMANDOS DE TESTE E AUDITORIA
 
-* **Execução Geral:** `node test_suite.js` *(32/32 asserções aprovadas)*
+* **Execução Geral:** `node test_suite.js` *(33/33 asserções aprovadas)*
 * **Por Domínio:**
-  * `node test_suite.js --core` *(23 testes: regras jurídicas e motor de DP)*
+  * `node test_suite.js --core` *(24 testes: regras jurídicas e motor de DP)*
   * `node test_suite.js --ui` *(7 testes: Fita, Calendário, Comparador, PWA)*
   * `node test_suite.js --tags` *(1 teste: arquétipos temáticos)*
   * `node test_suite.js --colors` *(1 teste: linter do Design System)*

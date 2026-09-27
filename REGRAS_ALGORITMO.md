@@ -263,11 +263,12 @@ folga-extra/
 │   ├── optimizer.js      # Motor matemático de Programação Dinâmica multi-ano, buffer adaptativo e exclusão de períodos
 │   ├── ribbon.js         # Motor da Fita Anual do Tempo dinâmica (panorama contínuo de meses sincronizado)
 │   ├── mini-calendar.js  # Renderizador visual em grade 7xN dos meses de férias
-│   └── app.js            # Controlador reativo, janela personalizada, períodos a evitar, comparador e exportações
+│   ├── tags.js           # Motor de 30+ roteiros temáticos e arquétipos culturais/sazonais
+│   └── app.js            # Controlador reativo, toasts, janela personalizada, períodos a evitar, comparador e exportações
 ├── icons/
 │   └── icon.svg          # Ícone vetorial oficial PWA
 ├── manifest.json         # Manifesto PWA para instalação no celular e desktop
 ├── sw.js                 # Service Worker (Estratégia Cache-First para funcionamento 100% offline)
 ├── index.html            # Interface moderna, offline-first com Tailwind CSS e Lucide Icons
-└── test_suite.js         # Bateria de 32 testes unitários automatizados com 100% de aprovação
+└── test_suite.js         # Bateria de 33 testes unitários automatizados com 100% de aprovação
 ```

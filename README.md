@@ -1,7 +1,7 @@
 # Folga Extra • Otimizador Inteligente de Férias (UFBA / Salvador)
 
-> **Versão:** 3.1 • **Compatibilidade:** Navegadores Modernos (Offline-First / Zero Dependência de Build)  
-> **Status de Qualidade:** 100% dos Testes Automatizados Aprovados (32/32 em `node test_suite.js`)  
+> **Versão:** 3.2 • **Compatibilidade:** Navegadores Modernos (Offline-First / Zero Dependência de Build)  
+> **Status de Qualidade:** 100% dos Testes Automatizados Aprovados (33/33 em `node test_suite.js`)  
 > **Documentos de Referência:** [`REGRAS_ALGORITMO.md`](./REGRAS_ALGORITMO.md) • [`GUIA_CORES_SISTEMA.md`](./GUIA_CORES_SISTEMA.md)
 
 ---
@@ -92,13 +92,14 @@ folga-extra/
 │   ├── optimizer.js      # Motor matemático de Programação Dinâmica multi-ano, buffer adaptativo e exclusão de períodos
 │   ├── ribbon.js         # Motor da Fita Anual do Tempo dinâmica (panorama contínuo de meses sincronizado)
 │   ├── mini-calendar.js  # Renderizador de grade mensal 7xN com bordas de destaque
-│   └── app.js            # Controlador reativo da interface, janela personalizada, exclusão de períodos e exportações
+│   ├── tags.js           # Motor de 30+ roteiros temáticos e arquétipos culturais/sazonais
+│   └── app.js            # Controlador reativo da interface, toasts, janela personalizada e exportações
 ├── icons/
 │   └── icon.svg          # Ícone vetorial oficial PWA
 ├── manifest.json         # Manifesto PWA para instalação no celular e desktop
 ├── sw.js                 # Service Worker (Estratégia Cache-First para funcionamento 100% offline)
 ├── index.html            # Estrutura HTML semântica com Tailwind CDN e ícones Lucide
-├── test_suite.js         # Bateria de 32 testes automatizados de regras de negócio
+├── test_suite.js         # Bateria de 33 testes automatizados de regras de negócio
 ├── GUIA_CORES_SISTEMA.md # Inventário e auditoria exaustiva de todas as 8 famílias de cores
 ├── REGRAS_ALGORITMO.md   # Fonte única da verdade das regras jurídicas e matemáticas
 └── README.md             # Este documento
@@ -111,17 +112,17 @@ folga-extra/
 Para garantir que nenhuma alteração de layout ou interface quebre a precisão dos cálculos jurídicos e matemáticos, o projeto conta com uma suíte de testes rigorosa executada via Node.js nativo (sem dependências externas):
 
 ```bash
-# Execução completa (todas as suítes - 32 testes)
+# Execução completa (todas as suítes - 33 testes)
 node test_suite.js
 
 # Execuções focadas e ultrarrápidas por domínio:
-node test_suite.js --core     # Regras jurídicas, computus e motor matemático (23 testes)
+node test_suite.js --core     # Regras jurídicas, computus e motor matemático (24 testes)
 node test_suite.js --ui       # Componentes visuais, Fita Anual, Calendários, PWA e Comparador (7 testes)
 node test_suite.js --tags     # Motor do catálogo de 30+ Roteiros Temáticos (1 teste)
 node test_suite.js --colors   # Linter de Integridade do Guia de Cores / Design System (1 teste)
 ```
 
-### Resultados Validados (32/32 Aprovados):
+### Resultados Validados (33/33 Aprovados):
 * ✅ **Teste 1:** Cálculo exato da Páscoa e Carnaval móveis
 * ✅ **Teste 2:** Quinta-feira Santa NÃO deve constar como feriado (dia útil normal)
 * ✅ **Teste 3:** 20 de Novembro (Consciência Negra) obrigatório por lei federal
@@ -154,6 +155,7 @@ node test_suite.js --colors   # Linter de Integridade do Guia de Cores / Design 
 * ⚖️ **Teste 30:** Exclusão Estrita de Períodos a Evitar (Colegas / Projetos / Bloqueios)
 * 🎨 **Teste 31:** Interface Reativa, Fita Panorâmica e Contagem Escopada de Feriados (Ponto 2)
 * ⚖️ **Teste 32:** Robustez de Parsing ISO, Exclusão Estrita sem Falhas e Fita Dinâmica (Ponto 2 Reforçado)
+* ⚖️ **Teste 33:** Penalização da Armadilha Pós-Cinzas (Inibição de parcelas $\le 3$d na Quinta/Sexta pós-Carnaval)
 
 ---
 
