@@ -88,6 +88,15 @@ O painel de controle superior foi reestruturado de forma harmoniosa, com alturas
 
 ---
 
+### H. Fita Anual do Tempo Fixa (Sticky HUD Glassmorphism)
+- **Fixação no Topo durante Rolagem:** A Fita Anual do Tempo agora permanece travada (*sticky top*) abaixo do cabeçalho da página enquanto o servidor navega e rola pelos 10 cenários de férias recomendados.
+- **Liberação Automática:** Ao rolar além da última opção de cenário (fim de `#resultsSection`), a fita se destrava naturalmente acompanhando a saída da seção, sem invadir o rodapé.
+- **Efeito Visual Glassmorphism:** Implementado acabamento em vidro translúcido (`bg-white/95 backdrop-blur-md border-2 border-slate-200/90 shadow-xl`) com micro-indicadores luminosos, mantendo legibilidade total dos dados enquanto os cards de opções passam suavemente por baixo.
+- **Layout Semestral Responsivo no Mobile:** No celular, a grade dos meses quebra de forma intuitiva em 6 colunas por 2 linhas (1º Semestre em cima, 2º Semestre embaixo), mantendo altura esguia (~135px) que preserva mais de 65% do visor para leitura das opções.
+- **Atualização Instantânea sem Salto de Tela:** Ao clicar em qualquer opção da lista (seja a 3ª, a 6ª ou a 10ª), a fita no topo reage instantaneamente sem disparar saltos bruscos de tela (`scrollIntoView` controlado), permitindo comparar a distribuição dos meses com zero atrito de navegação.
+
+---
+
 ## 3. SUÍTE DE TESTES AUTOMATIZADOS (`test_suite.js`)
 
 - **Total:** 33 testes automatizados cobrindo todo o ciclo do sistema.

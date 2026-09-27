@@ -516,7 +516,12 @@
     if (window.lucide) window.lucide.createIcons();
 
     if (shouldScroll && ribbonContainer) {
-      ribbonContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      const rect = ribbonContainer.getBoundingClientRect();
+      // Se a fita já está visível (fixada no topo via position: sticky), não faz scroll brusco para cima
+      const isStickyVisible = rect.top >= 0 && rect.top <= 160 && rect.bottom > 100;
+      if (!isStickyVisible) {
+        ribbonContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
     }
   }
 

@@ -153,36 +153,36 @@
       : `${year}`;
 
     let html = `
-      <div class="bg-white text-slate-900 rounded-3xl p-5 sm:p-6 shadow-card border border-slate-200/90 space-y-4 transition-all duration-300">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3.5">
-          <div class="flex items-center gap-3">
-            <span class="w-9 h-9 rounded-xl bg-slate-100 text-slate-700 border border-slate-200 flex items-center justify-center shrink-0 shadow-2xs">
+      <div class="bg-white/95 backdrop-blur-md text-slate-900 rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 shadow-xl shadow-slate-950/10 border-2 border-slate-200/90 space-y-3 sm:space-y-4 transition-all duration-300">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 border-b border-slate-100 pb-3">
+          <div class="flex items-center gap-2.5 sm:gap-3">
+            <span class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-slate-100 text-slate-700 border border-slate-200 flex items-center justify-center shrink-0 shadow-2xs">
               <i data-lucide="activity" class="w-4 h-4 text-slate-700"></i>
             </span>
             <div>
               <div class="flex items-center gap-2 flex-wrap">
-                <h4 class="font-extrabold text-sm sm:text-base text-slate-950 tracking-tight">
+                <h4 class="font-extrabold text-xs sm:text-base text-slate-950 tracking-tight">
                   Fita Anual do Tempo • Distribuição em ${yearHeaderText}
                 </h4>
-                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${isChampion ? 'bg-amber-100 text-amber-950 border border-amber-300' : 'bg-slate-100 text-slate-800 border border-slate-200'} shadow-2xs">
-                  ${isChampion ? '<i data-lucide="crown" class="w-3 h-3 text-amber-600"></i>' : ''}
+                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${isChampion ? 'bg-amber-100 text-amber-950 border border-amber-300 ring-2 ring-amber-400/20' : 'bg-slate-100 text-slate-800 border border-slate-200'} shadow-2xs transition-all duration-300">
+                  ${isChampion ? '<i data-lucide="crown" class="w-3 h-3 text-amber-600"></i>' : '<i data-lucide="check" class="w-3 h-3 text-emerald-600"></i>'}
                   Visualizando: Opção ${scenarioIndex + 1} (${splitText} dias)
                 </span>
               </div>
-              <p class="text-[11px] text-slate-500 mt-0.5">Mostrando a cadência real da opção selecionada abaixo (${scenario.totalOff} dias livres no total).</p>
+              <p class="text-[10px] sm:text-[11px] text-slate-500 mt-0.5">Mostrando a cadência real da opção selecionada abaixo (${scenario.totalOff} dias livres no total).</p>
             </div>
           </div>
           
           <div class="flex items-center gap-2 text-xs self-start sm:self-auto">
-            <span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 font-mono text-[11px] font-bold shadow-2xs">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 font-mono text-[10px] sm:text-[11px] font-bold shadow-2xs">
               <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
               ${scenario.totalOff} Dias Sem Trabalhar (${scenario.extraGain >= 0 ? '+' : ''}${scenario.extraGain}d Ganho)
             </span>
           </div>
         </div>
 
-        <!-- GRADE DOS MESES DA JANELA -->
-        <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-12 gap-2 text-center">
+        <!-- GRADE DOS MESES DA JANELA (6 COLUNAS NO MOBILE = 2 SEMESTRES; 12 NO DESKTOP) -->
+        <div class="grid grid-cols-6 lg:grid-cols-12 gap-1 sm:gap-1.5 md:gap-2 text-center">
     `;
 
     monthsData.forEach((m) => {
@@ -190,7 +190,7 @@
       const hCount = m.holidaysCount;
 
       const stageLabels = m.activeStages.map(s => {
-        return `<span class="px-1.5 py-0.5 rounded-md bg-slate-900 text-white font-bold text-[9px] shadow-2xs whitespace-nowrap" title="Etapa ${s.stageIndex} (${s.length}d)">${s.stageIndex}ª Parcela</span>`;
+        return `<span class="px-1 sm:px-1.5 py-0.5 rounded-md bg-slate-900 text-white font-bold text-[8px] sm:text-[9px] shadow-2xs whitespace-nowrap" title="Etapa ${s.stageIndex} (${s.length}d)">${s.stageIndex}ª Parcela</span>`;
       }).join(' ');
 
       const daysInMonth = new Date(m.year, m.monthIndex + 1, 0).getDate();
@@ -200,42 +200,42 @@
       const holidayPct = Math.round((holidayDays / daysInMonth) * 100);
 
       html += `
-        <div class="flex flex-col justify-between rounded-2xl p-2.5 transition-all duration-300 ${
+        <div class="flex flex-col justify-between rounded-xl sm:rounded-2xl p-1.5 sm:p-2.5 transition-all duration-300 ${
           hasVacation 
-            ? 'bg-gradient-to-br from-amber-100/90 via-sky-50/90 to-indigo-100/80 border-2 border-amber-400 shadow-md scale-[1.02]' 
+            ? 'bg-gradient-to-br from-amber-100/90 via-sky-50/90 to-indigo-100/80 border-2 border-amber-400 shadow-md scale-[1.02] ring-2 ring-amber-400/20' 
             : 'bg-slate-50/70 border border-slate-200/70 hover:border-slate-300'
         }" title="${hasVacation ? `${m.totalOffInMonth} dias livres de ${daysInMonth} dias (${vacationPct}% do mês)` : (hCount > 0 ? `${hCount} feriado(s) de ${daysInMonth} dias (${holidayPct}% do mês)` : `${daysInMonth} dias de expediente pleno`)}">
-          <div class="flex items-center justify-between gap-1 mb-1.5">
-            <span class="font-extrabold text-[11px] tracking-wider ${hasVacation ? 'text-slate-950 font-black' : 'text-slate-400'}">
+          <div class="flex items-center justify-between gap-1 mb-1">
+            <span class="font-extrabold text-[10px] sm:text-[11px] tracking-wider ${hasVacation ? 'text-slate-950 font-black' : 'text-slate-400'}">
               ${m.monthName}
             </span>
-            ${hasVacation ? '<i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-600"></i>' : ''}
+            ${hasVacation ? '<i data-lucide="sparkles" class="w-3 h-3 text-amber-600"></i>' : ''}
           </div>
 
-          <div class="min-h-[46px] flex flex-col items-center justify-center gap-1 py-1">
+          <div class="min-h-[38px] sm:min-h-[46px] flex flex-col items-center justify-center gap-0.5 sm:gap-1 py-0.5">
             ${hasVacation ? `
-              <div class="flex flex-col items-center gap-1 w-full">
+              <div class="flex flex-col items-center gap-0.5 sm:gap-1 w-full">
                 ${stageLabels}
-                <span class="text-[10px] text-slate-950 font-mono font-black">
+                <span class="text-[9px] sm:text-[10px] text-slate-950 font-mono font-black">
                   ${m.totalOffInMonth}d folga
                 </span>
               </div>
             ` : `
-              <div class="flex flex-col items-center gap-1 w-full">
-                <span class="text-[10px] text-slate-400 font-medium">Expediente</span>
+              <div class="flex flex-col items-center gap-0.5 sm:gap-1 w-full">
+                <span class="text-[9px] sm:text-[10px] text-slate-400 font-medium">Expediente</span>
                 ${hCount > 0 ? `
-                  <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[9px] font-bold bg-amber-50 text-amber-800 border border-amber-200/70 shadow-2xs">
-                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                  <span class="inline-flex items-center gap-0.5 sm:gap-1 px-1 sm:px-1.5 py-0.5 rounded-md text-[8px] sm:text-[9px] font-bold bg-amber-50 text-amber-800 border border-amber-200/70 shadow-2xs">
+                    <span class="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-amber-500"></span>
                     ${hCount} ${hCount === 1 ? 'feriado' : 'feriados'}
                   </span>
                 ` : `
-                  <span class="text-[9px] text-slate-300 font-mono">0 feriados</span>
+                  <span class="text-[8px] sm:text-[9px] text-slate-300 font-mono">0 feriados</span>
                 `}
               </div>
             `}
           </div>
 
-          <div class="mt-1 w-full bg-slate-200/60 rounded-full h-1.5 overflow-hidden">
+          <div class="mt-1 w-full bg-slate-200/60 rounded-full h-1 sm:h-1.5 overflow-hidden">
             <div class="${hasVacation ? 'bg-amber-500' : (hCount > 0 ? 'bg-amber-400/80' : 'bg-transparent')} h-full rounded-full transition-all duration-500"
               style="width: ${hasVacation ? vacationPct : (hCount > 0 ? Math.max(6, holidayPct) : 0)}%;">
             </div>
