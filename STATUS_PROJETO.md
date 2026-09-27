@@ -81,12 +81,19 @@ O painel de controle superior foi reestruturado de forma harmoniosa, com alturas
 
 ---
 
+### G. Prevenção da "Armadilha Pós-Cinzas" (`_isPostCinzasTrap`)
+- **Detecção de Frações Ineficientes:** Identifica frações curtas ($\le 3$ dias) agendadas para iniciar na Quinta ou Sexta-feira imediatamente após a Quarta-feira de Cinzas.
+- **Motivação Estatutária:** Como as atividades da UFBA são suspensas até a Quarta de Cinzas, a Quinta e Sexta são dias de expediente normal sem feriado à esquerda para emenda. Gastar 2 ou 3 dias de férias apenas para alcançar o fim de semana queima uma das 3 parcelas legais em um microdescanso comum, sem ganho marginal real.
+- **Penalização e Rebaixamento no Ranking:** O método `_isPostCinzasTrap()` aplica penalidade de `-9999` pontos no `qualityScore`, e a ordenação final (`hasPostCinzasTrap`) subordina qualquer cenário com essa ocorrência ao fundo do ranking, assegurando que o Top 10 recomende exclusivamente combinações de alta alavancagem. Parcelas longas ($> 3$ dias) continuam elegíveis.
+
+---
+
 ## 3. SUÍTE DE TESTES AUTOMATIZADOS (`test_suite.js`)
 
-- **Total:** 32 testes automatizados cobrindo todo o ciclo do sistema.
+- **Total:** 33 testes automatizados cobrindo todo o ciclo do sistema.
 - **Execução:** `node test_suite.js` (executado via terminal).
-- **Status:** **32 / 32 APROVADOS (100% GREEN)**.
-  - *Core & Algoritmo (23 testes):* Cálculos móveis (Gauss/Meeus), feriados nacionais e Salvador, Carnaval UFBA, pontes, repouso semanal, não-sobreposição, divisões 10+10+10 e 15+10+5, espaçamento saudável (>=60d / >=75d), recesso MGI, contagem escopada, janela de 1/2 anos e exclusão estrita.
+- **Status:** **33 / 33 APROVADOS (100% GREEN)**.
+  - *Core & Algoritmo (24 testes):* Cálculos móveis (Gauss/Meeus), feriados nacionais e Salvador, Carnaval UFBA, pontes, repouso semanal, não-sobreposição, divisões 10+10+10 e 15+10+5, espaçamento saudável (>=60d / >=75d), recesso MGI, contagem escopada, janela de 1/2 anos, exclusão estrita e penalização da armadilha pós-Cinzas.
   - *UI & DOM (7 testes):* Fita anual proporcional, desacoplamento de cores, boarding pass, integridade PWA, comparador desacoplado, fita dinâmica.
   - *Tags & Roteiros (1 teste):* Motor de 30+ arquétipos temáticos.
   - *Design System (1 teste):* Linter de conformidade estrita com `GUIA_CORES_SISTEMA.md`.

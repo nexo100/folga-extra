@@ -8,12 +8,12 @@
 - **Zero Ações Paralelas Ocultas**: Nenhuma tarefa em segundo plano, processo daemon ou chamada de rede externa pode ser iniciada sem autorização prévia e explicação detalhada do que será feito.
 
 ## 2. DIRETRIZES TÉCNICAS E DE DESEMPENHO DO PROJETO
-- **Integridade da Suíte de Testes**: A suíte de testes automatizados (`test_suite.js`) é a guardiã do sistema. Todas as 32 asserções devem permanecer 100% aprovadas a cada alteração.
+- **Integridade da Suíte de Testes**: A suíte de testes automatizados (`test_suite.js`) é a guardiã do sistema. Todas as 33 asserções devem permanecer 100% aprovadas a cada alteração.
 - **Regra Crítica de Desempenho**: NUNCA execute a ferramenta `view_file` diretamente no arquivo `test_suite.js`. Use scripts de teste pontuais ou edições cirúrgicas se necessário.
 - **Fidelidade Arquitetural**: Manter a consistência com as regras da Lei 8.112/90 descritas em `REGRAS_ALGORITMO.md` e a paleta de cores corporativa documentada em `GUIA_CORES_SISTEMA.md`.
 
 ## 3. SINCRONIZAÇÃO GIT E REPOSITÓRIO GITHUB
-1. Sempre que finalizar com sucesso um pedido do usuário (nova funcionalidade, ajuste visual, correção de bug ou criação de script), e após testar/validar que o código está estável (32/32 testes aprovados):
+1. Sempre que finalizar com sucesso um pedido do usuário (nova funcionalidade, ajuste visual, correção de bug ou criação de script), e após testar/validar que o código está estável (33/33 testes aprovados):
    - Crie um commit claro no Git (ex: `feat: ...`, `fix: ...`, `chore: ...`).
    - Execute `git push origin main` para manter o GitHub sincronizado.
 2. Nunca execute commits ou push com código pela metade ou com testes falhando.

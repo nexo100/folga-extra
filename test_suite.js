@@ -1244,6 +1244,38 @@ runTest('Teste 32: Robustez de Parsing ISO, Exclusão Estrita sem Falhas e Fita 
   });
 });
 
+// ---------------------------------------------------------------------
+// TESTE 33: Penalização da Armadilha Pós-Cinzas (Inibição de parcelas <= 3d na Quinta/Sexta pós-Carnaval)
+// ---------------------------------------------------------------------
+runTest('Teste 33: Penalização da Armadilha Pós-Cinzas (Inibição de parcelas <= 3d na Quinta/Sexta pós-Carnaval)', 'core', () => {
+  const holidays = generateHolidays(2027, 'UFBA_SALVADOR', true, true);
+  const opt = new VacationOptimizer({
+    vacationDays: 30,
+    selectedYear: 2027,
+    selectedLocation: 'UFBA_SALVADOR',
+    workingDays: [false, true, true, true, true, true, false],
+    profile: 'servidor_ufba',
+    holidays: holidays
+  });
+
+  // Em 2027, Quarta de Cinzas é 10/02/2027 (mês 1 indexado a 0).
+  // Quinta pós-cinzas é 11/02/2027; Sexta é 12/02/2027.
+  const trapQuinta = opt._isPostCinzasTrap(new Date(2027, 1, 11), 2);
+  const trapSexta = opt._isPostCinzasTrap(new Date(2027, 1, 12), 3);
+  const noTrapLong = opt._isPostCinzasTrap(new Date(2027, 1, 11), 10);
+  const noTrapOtherMonth = opt._isPostCinzasTrap(new Date(2027, 5, 28), 2);
+
+  assert.strictEqual(trapQuinta, true, 'Quinta pós-cinzas com 2 dias deve ser identificada como armadilha');
+  assert.strictEqual(trapSexta, true, 'Sexta pós-cinzas com 3 dias deve ser identificada como armadilha');
+  assert.strictEqual(noTrapLong, false, 'Parcela de 10 dias ou mais não é armadilha');
+  assert.strictEqual(noTrapOtherMonth, false, 'Data fora do pós-cinzas não deve ser marcada como armadilha');
+
+  // No ranking dos cenários gerados para 2027, nenhum cenário com hasPostCinzasTrap deve constar no Top de recomendações
+  const scenarios = opt.optimize(30, 3);
+  const hasTrapInTop = scenarios.some(s => s.hasPostCinzasTrap);
+  assert.strictEqual(hasTrapInTop, false, 'Nenhum cenário com armadilha pós-cinzas deve estar no Top de recomendações');
+});
+
 console.log('\n========================================================');
 console.log(`🎉 RESULTADO: ${passedTests} / ${totalTests} TESTES APROVADOS! (${skippedTests} ignorados pelo filtro)`);
 console.log('========================================================');

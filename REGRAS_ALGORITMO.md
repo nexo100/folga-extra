@@ -62,6 +62,10 @@ Este documento é a **fonte única de verdade (Single Source of Truth)** para o 
      * Terça-feira de Carnaval (Data do Carnaval)
      * Quarta-feira de Cinzas (Carnaval + 1 dia - expediente integral suspenso na UFBA)
    * **Retorno obrigatório ao trabalho:** Quinta-feira pós-Cinzas (Carnaval + 2 dias).
+   * **Prevenção da "Armadilha Pós-Cinzas" (`_isPostCinzasTrap`):**
+     * Quando as atividades da UFBA são suspensas até a Quarta-feira de Cinzas, a Quinta e a Sexta-feira subsequentes são dias úteis normais de expediente regular.
+     * **Inibição de Desperdício de Cota:** Iniciar uma fração curta ($\le 3$ dias) na Quinta ou Sexta-feira pós-Cinzas consome 2 ou 3 dias de férias do servidor apenas para alcançar o sábado e domingo seguintes, sem nenhum feriado à esquerda para alavancagem marginal (pois o Carnaval já cessou na Quarta). Isso queima uma das 3 parcelas legais anuais em um microdescanso comum.
+     * **Tratamento Algorítmico:** O otimizador detecta essas parcelas via `_isPostCinzasTrap()`, aplica penalidade severa de qualidade (`qualityScore -= 9999`) e subordina qualquer cenário com essa ocorrência ao fundo do ranking (`hasPostCinzasTrap`), impedindo que cenários espúrios ocupem as opções recomendadas ao servidor. Parcelas mais longas ($> 3$ dias) continuam permitidas, pois representam férias plenas contínuas que atravessam as semanas seguintes.
 2. **28 de Outubro:** **Dia do Servidor Público** (Art. 236 da Lei 8.112/90 - Ponto Facultativo Federal).
 3. **Pontes Oficiais / Decretos de "Enforcamento" (MGI / UFBA):**
    * Sempre que um feriado oficial cai em **Quinta-feira**, o governo habitualmente decreta a **Sexta-feira** como ponto facultativo/ponte.
@@ -173,7 +177,7 @@ Quando o servidor informa possuir $B$ dias de **banco de horas** (ex: $B = 2$):
 
 O algoritmo opera via **Programação Dinâmica com tabelas de prefixo**, apresentando complexidade assintótica linear $O(N)$ em relação ao número de dias do ano, operando puramente em memória e sem dependências externas.
 
-A integridade matemática e legal é validada por uma bateria de **27 testes unitários e de integração automatizados** em `test_suite.js` (executável de forma completa ou seletiva via flags `--core`, `--ui`, `--tags`, `--colors`):
+A integridade matemática e legal é validada por uma bateria de **33 testes unitários e de integração automatizados** em `test_suite.js` (executável de forma completa ou seletiva via flags `--core`, `--ui`, `--tags`, `--colors`):
 * ⚖️ **Teste 1:** Cálculo exato da Páscoa e Carnaval móveis (Meeus/Computus)
 * ⚖️ **Teste 2:** Quinta-feira Santa NÃO é feriado (dia útil normal)
 * ⚖️ **Teste 3:** 20 de Novembro (Consciência Negra - Lei 14.759/2023)
@@ -206,6 +210,7 @@ A integridade matemática e legal é validada por uma bateria de **27 testes uni
 * ⚖️ **Teste 30:** Exclusão Estrita de Períodos a Evitar (Colegas / Projetos / Bloqueios)
 * 🎨 **Teste 31:** Interface Reativa, Fita Panorâmica e Contagem Escopada de Feriados (Ponto 2)
 * ⚖️ **Teste 32:** Robustez de Parsing ISO, Exclusão Estrita sem Falhas e Fita Dinâmica (Ponto 2 Reforçado)
+* ⚖️ **Teste 33:** Penalização da Armadilha Pós-Cinzas (Inibição de parcelas $\le 3$d na Quinta/Sexta pós-Carnaval)
 
 ---
 
