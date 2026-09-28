@@ -249,7 +249,7 @@
       : `<span class="font-mono font-black text-xs px-2.5 py-1 rounded-lg bg-slate-900 text-amber-300 border border-slate-700 shadow-2xs">OPÇÃO ${String(sIdx + 1).padStart(2, '0')}</span>`;
 
     const datesSummary = sc.periods.map(p => `${formatDate(p.startDate).slice(0, 5)} a ${formatDate(p.endDate).slice(0, 5)}`).join('  •  ');
-    const hiddenAttr = isHidden ? 'style="display: none;" data-extra-scenario="true"' : 'data-extra-scenario="false"';
+    const hiddenAttr = `${isHidden ? 'style="display: none;" ' : ''}data-extra-scenario="${sIdx >= 5 ? 'true' : 'false'}"`;
 
     const MONTH_SHORT = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
     const routeSteps = sc.periods.map((p, idx) => {

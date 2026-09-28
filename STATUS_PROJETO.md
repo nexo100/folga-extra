@@ -175,6 +175,18 @@ O painel de controle superior foi reestruturado de forma harmoniosa, com alturas
 
 ---
 
+### O. Resolução de Bloqueio Fantasma de Cliques & Sincronização do Expansor (v3.5.2)
+- **Eliminação do 'Modal Fantasma' Bloqueador de Cliques:**
+  * *Diagnóstico:* O modal `#boardingPassModal` no `index.html` possuía `opacity-0 pointer-events-none` em seu contêiner pai, mas seu card filho direto continha `pointer-events-auto` sem `display: none` (`hidden`). Como a propriedade `pointer-events: auto` no filho anula o `pointer-events: none` do ancestral, uma caixa invisível de 576px no centro da tela interceptava cliques nos botões do Cockpit (especialmente `btnSplit3`), filtros e campos de formulário, fazendo com que parecessem intermitentes ou inclicáveis dependendo do scroll.
+  * *Solução:* Adicionada a classe `hidden` nativa nos elementos fechados (`#boardingPassBackdrop` e `#boardingPassModal`), removendo-os 100% da árvore de hit-testing até que sejam explicitamente invocados via `openBoardingPassModal()`.
+- **Sincronização Robusta do Botão 'Ver Mais / Recolher Alternativas' (`toggleShowAllScenarios`):**
+  * *Diagnóstico:* O botão dependia de `data-extra-scenario="true"`, que era omitido caso a simulação rodasse com `showAllScenarios` ativo. Ao alternar parâmetros ou recalcular, o seletor retornava lista vazia e o clique falhava silenciosamente sem mostrar novos cards.
+  * *Solução:* O método `toggleShowAllScenarios()` passou a delegar diretamente para `setScenarioFilter()`, aplicando filtragem determinística por índice de card (`sIdx < 5`) e sincronizando em tempo real os ícones e contadores de opções visíveis.
+- **Otimização Reativa do Cockpit com Resposta Instantânea e Throttling:**
+  * Controles de clique rápido no Cockpit (adição/subtração de banco de horas, parcelas 1x/2x/3x, dias úteis da semana e recesso) agora atualizam o estado visual na hora ($O(1)$) e realizam o recálculo do otimizador com debounce de 100ms (`runSimulationDebounced`), eliminando qualquer sensação de travamento ou lag.
+
+---
+
 ## 3. SUÍTE DE TESTES AUTOMATIZADOS (`test_suite.js`)
 
 - **Total:** 33 testes automatizados cobrindo todo o ciclo do sistema.

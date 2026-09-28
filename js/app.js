@@ -363,30 +363,38 @@
     });
   }
 
+  let _simulationDebounceTimer = null;
+  function runSimulationDebounced(delay = 100) {
+    if (!state.hasCalculated) return;
+    if (_simulationDebounceTimer) clearTimeout(_simulationDebounceTimer);
+    _simulationDebounceTimer = setTimeout(() => {
+      runSimulation(false);
+    }, delay);
+  }
+
   function toggleWorkingDay(idx) {
     state.workingDays[idx] = !state.workingDays[idx];
     initWorkingDaysUI();
+    runSimulationDebounced(100);
   }
 
   // ----------------------------------------------------
   // PRESETS RÁPIDOS DE DIAS DE FÉRIAS (30, 20, 15)
   // ----------------------------------------------------
   function setVacationDays(days) {
+    if (state.vacationDays === days) return;
     state.vacationDays = days;
     const el = document.getElementById('vacationDays');
     if (el) el.value = days;
-    runSimulation(false);
+    runSimulationDebounced(100);
   }
 
-  let _vacationInputTimer = null;
   function onVacationDaysInput(e) {
     let val = parseInt(e.target.value, 10);
     if (!isNaN(val) && val >= 1 && val <= 30) {
+      if (state.vacationDays === val) return;
       state.vacationDays = val;
-      if (_vacationInputTimer) clearTimeout(_vacationInputTimer);
-      _vacationInputTimer = setTimeout(() => {
-        runSimulation(false);
-      }, 250);
+      runSimulationDebounced(200);
     }
   }
 
@@ -397,6 +405,7 @@
     let val = (state.compensationDays || 0) + delta;
     if (val < 0) val = 0;
     if (val > 15) val = 15;
+    if (val === state.compensationDays) return;
     state.compensationDays = val;
 
     const inputEl = document.getElementById('compensationDays');
@@ -405,13 +414,14 @@
     if (displayEl) {
       displayEl.innerText = `${val} dia${val === 1 ? '' : 's'}`;
     }
-    runSimulation(false);
+    runSimulationDebounced(100);
   }
 
   // ----------------------------------------------------
   // DIVISÃO DE PARCELAS (1, 2 OU 3 ETAPAS)
   // ----------------------------------------------------
   function setSplit(count) {
+    if (state.vacationSplit === count) return;
     state.vacationSplit = count;
     [1, 2, 3].forEach(i => {
       const btn = document.getElementById(`btnSplit${i}`);
@@ -422,13 +432,14 @@
         btn.className = 'py-2.5 px-2 rounded-xl border font-black text-sm transition-all flex items-center justify-center border-slate-200 bg-white hover:bg-slate-50 text-slate-700 cursor-pointer';
       }
     });
-    runSimulation(false);
+    runSimulationDebounced(100);
   }
 
   // ----------------------------------------------------
   // ESCALA DE RECESSO DE FIM DE ANO (MGI / PORTARIA SRT & UFBA)
   // ----------------------------------------------------
   function setRecessShift(shift) {
+    if (state.recessShift === shift) return;
     state.recessShift = shift;
 
     ['none', 'natal', 'ano_novo'].forEach(s => {
@@ -441,6 +452,7 @@
         }
       }
     });
+    runSimulationDebounced(100);
 
     const desc = document.getElementById('recessShiftDescription');
     if (desc) {
@@ -660,17 +672,7 @@
 
   function toggleShowAllScenarios() {
     state.showAllScenarios = !state.showAllScenarios;
-    const extraCards = document.querySelectorAll('[data-extra-scenario="true"]');
-    extraCards.forEach(c => {
-      c.style.display = state.showAllScenarios ? '' : 'none';
-    });
-    const btn = document.getElementById('btnToggleAllScenarios');
-    if (btn) {
-      btn.innerHTML = state.showAllScenarios
-        ? `<i data-lucide="chevron-up" class="w-4 h-4 text-amber-500"></i><span>Recolher para os 5 Melhores Cenários</span><span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-mono text-[10px]">10 de 10 visíveis</span>`
-        : `<i data-lucide="chevron-down" class="w-4 h-4 text-amber-500"></i><span>Ver Mais 5 Alternativas Sazonais (Opções 06 a 10)</span><span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-mono text-[10px]">+5 opções</span>`;
-      if (window.lucide) window.lucide.createIcons({ root: btn });
-    }
+    setScenarioFilter(state.activeFilter || 'all');
   }
 
   // ----------------------------------------------------
@@ -1305,10 +1307,17 @@
       }
     }
 
-    // 4. Se houver o wrapper de toggle "Ver Mais", gerencia visibilidade
+    // 4. Se houver o wrapper de toggle "Ver Mais", gerencia visibilidade e sincroniza botão
     const toggleWrapper = typeof document !== 'undefined' ? document.getElementById('toggleAllScenariosWrapper') : null;
     if (toggleWrapper) {
-      toggleWrapper.style.display = filterKey === 'all' ? '' : 'none';
+      toggleWrapper.style.display = (filterKey === 'all' && totalCards > 5) ? '' : 'none';
+      const toggleBtn = document.getElementById('btnToggleAllScenarios');
+      if (toggleBtn) {
+        toggleBtn.innerHTML = state.showAllScenarios
+          ? `<i data-lucide="chevron-up" class="w-4 h-4 text-amber-500"></i><span>Recolher para os 5 Melhores Cenários</span><span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-mono text-[10px]">${totalCards} de ${totalCards} visíveis</span>`
+          : `<i data-lucide="chevron-down" class="w-4 h-4 text-amber-500"></i><span>Ver Mais Alternativas Sazonais (Opções 06 a ${String(totalCards).padStart(2, '0')})</span><span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-mono text-[10px]">+${Math.max(0, totalCards - 5)} opções</span>`;
+        if (window.lucide) window.lucide.createIcons({ root: toggleBtn });
+      }
     }
     // Nenhuma alteração de ícone necessária: cards já possuem SVGs renderizados
   }
@@ -1440,9 +1449,13 @@
     const backdrop = typeof document !== 'undefined' ? document.getElementById('boardingPassBackdrop') : null;
     const modal = typeof document !== 'undefined' ? document.getElementById('boardingPassModal') : null;
     if (backdrop && modal) {
+      backdrop.classList.remove('hidden');
+      modal.classList.remove('hidden');
+      void modal.offsetWidth; // Força reflow para transição suave
       backdrop.classList.remove('opacity-0', 'pointer-events-none');
+      backdrop.classList.add('opacity-100');
       modal.classList.remove('opacity-0', 'pointer-events-none', 'scale-95');
-      modal.classList.add('scale-100');
+      modal.classList.add('opacity-100', 'scale-100');
     }
 
     if (typeof window !== 'undefined' && window.lucide && modal) window.lucide.createIcons({ root: modal });
@@ -1452,9 +1465,14 @@
     const backdrop = typeof document !== 'undefined' ? document.getElementById('boardingPassBackdrop') : null;
     const modal = typeof document !== 'undefined' ? document.getElementById('boardingPassModal') : null;
     if (backdrop && modal) {
+      backdrop.classList.remove('opacity-100');
       backdrop.classList.add('opacity-0', 'pointer-events-none');
+      modal.classList.remove('opacity-100', 'scale-100');
       modal.classList.add('opacity-0', 'pointer-events-none', 'scale-95');
-      modal.classList.remove('scale-100');
+      setTimeout(() => {
+        backdrop.classList.add('hidden');
+        modal.classList.add('hidden');
+      }, 300);
     }
   }
 
