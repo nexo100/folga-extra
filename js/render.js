@@ -175,10 +175,10 @@
               </div>
             </div>
 
-            <!-- COLUNA 2: 📋 OFICIAL NO SOUGOV / SIGRH -->
+            <!-- COLUNA 2: 📋 PERÍODO OFICIAL DE FÉRIAS (LEI 8.112/90) -->
             <div class="space-y-1 md:border-l md:border-r border-amber-200/80 md:px-5 relative">
               <div class="flex items-center justify-between gap-2 text-[10px] font-black uppercase tracking-wider text-slate-700">
-                <span class="flex items-center gap-1">📋 PERÍODO NO SIGRH</span>
+                <span class="flex items-center gap-1">📋 FÉRIAS OFICIAIS (LEI 8.112)</span>
                 <div class="flex items-center gap-1.5">
                   <span class="px-2 py-0.5 rounded-md bg-slate-900 text-white font-mono font-bold text-[10px]">
                     ${p.length}d
@@ -321,17 +321,17 @@
           </div>
 
           <div class="flex items-center gap-2 sm:gap-2.5 self-end md:self-auto flex-wrap">
-            <div class="bg-slate-950 text-amber-400 border border-slate-800 px-3 py-1.5 rounded-2xl shadow-xs text-right min-w-[76px]">
-              <span class="text-[9px] uppercase font-bold text-slate-400 block tracking-wider">Descanso</span>
-              <span class="text-base sm:text-lg font-black text-amber-300 font-mono leading-none">${sc.totalOff}d</span>
+            <div class="bg-slate-950 text-amber-300 border-2 border-slate-800 px-3 py-1.5 rounded-2xl shadow-xs text-right min-w-[80px]">
+              <span class="text-[9px] uppercase font-black text-amber-400/90 block tracking-wider">Descanso</span>
+              <span class="text-base sm:text-xl font-black text-amber-300 font-mono leading-none">${sc.totalOff}d</span>
             </div>
-            <div class="bg-emerald-50 text-emerald-950 border border-emerald-300 px-3 py-1.5 rounded-2xl shadow-2xs text-right min-w-[76px]">
-              <span class="text-[9px] uppercase font-bold text-emerald-700 block tracking-wider">Ganho</span>
-              <span class="text-base sm:text-lg font-black text-emerald-700 font-mono leading-none">+${sc.extraGain}d</span>
+            <div class="bg-emerald-600 text-white border-2 border-emerald-500 px-3 py-1.5 rounded-2xl shadow-sm text-right min-w-[80px]">
+              <span class="text-[9px] uppercase font-black text-emerald-100 block tracking-wider">Ganho</span>
+              <span class="text-base sm:text-xl font-black text-white font-mono leading-none">+${sc.extraGain}d</span>
             </div>
-            <div class="bg-amber-50 text-amber-950 border border-amber-300 px-3 py-1.5 rounded-2xl shadow-2xs text-right min-w-[76px]">
-              <span class="text-[9px] uppercase font-bold text-amber-800 block tracking-wider">Alavanc.</span>
-              <span class="text-base sm:text-lg font-black text-amber-800 font-mono leading-none">${sc.leverage}x</span>
+            <div class="bg-amber-400 text-slate-950 border-2 border-amber-500 px-3 py-1.5 rounded-2xl shadow-sm text-right min-w-[80px]">
+              <span class="text-[9px] uppercase font-black text-slate-900 block tracking-wider">Alavanc.</span>
+              <span class="text-base sm:text-xl font-black text-slate-950 font-mono leading-none">${sc.leverage}x</span>
             </div>
             <div class="pl-1 flex items-center gap-2">
               <!-- BOTÃO DO COMPARADOR DESACOPLADO -->
@@ -410,7 +410,7 @@
           <thead>
             <tr style="background-color: #0f172a; color: #ffffff;">
               <th style="padding: 8px 12px; text-align: center; border: 1px solid #cbd5e1; font-weight: bold; width: 50px;">Etapa</th>
-              <th style="padding: 8px 12px; text-align: left; border: 1px solid #cbd5e1; font-weight: bold;">Período Oficial no SIGRH / SouGov</th>
+              <th style="padding: 8px 12px; text-align: left; border: 1px solid #cbd5e1; font-weight: bold;">Período Oficial de Férias (Lei 8.112/90)</th>
               <th style="padding: 8px 12px; text-align: center; border: 1px solid #cbd5e1; font-weight: bold; width: 60px;">Dias</th>
               <th style="padding: 8px 12px; text-align: left; border: 1px solid #cbd5e1; font-weight: bold;">Retorno ao Trabalho</th>
               <th style="padding: 8px 12px; text-align: center; border: 1px solid #cbd5e1; font-weight: bold; width: 85px;">Descanso</th>

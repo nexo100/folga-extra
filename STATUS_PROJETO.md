@@ -1,6 +1,6 @@
 # DOCUMENTO DE TRANSIÇÃO E ESTADO DO PROJETO (HANDOFF)
 **Projeto:** Folga Extra (UFBA) — Otimizador Inteligente de Férias e Descanso  
-**Versão Atual:** v3.4.1  
+**Versão Atual:** v3.5.0  
 **Data de Atualização:** 28/09/2026  
 **Caminho Local Oficial:** `C:\Users\nexo\github\folga-extra`  
 **Repositório GitHub:** `https://github.com/nexo100/folga-extra`  
@@ -137,6 +137,25 @@ O painel de controle superior foi reestruturado de forma harmoniosa, com alturas
 - **Botões de Filtros Rápidos (Minimalistas Inativos / Dourado Radiante Ativo):**
   * Botões inativos mantidos em estilo neutro e clean com fundo branco e contorno sutil.
   * Botão ativo elevado para contraste máximo de autoridade (`bg-slate-950 text-amber-300 border-2 border-amber-400 shadow-md shadow-amber-400/20 ring-2 ring-amber-400/30`).
+
+---
+
+### M. Top Bar Única com Fita Anual Integrada & Purificação Estatutária (v3.5.0)
+- **Extinção Definitiva do "Vício em SIGRH":** Substituição integral de referências a softwares transitórios por redação estatutária estrita fundamentada na Lei nº 8.112/1990:
+  * "Período Oficial de Férias (Lei 8.112/90)";
+  * "Férias Regulamentares (Lei 8.112/90)";
+  * "Conforme Regime da Lei 8.112/1990";
+  * "Período Oficial".
+- **Top Bar Única (Fim da Barra Dupla e do Espaço em Branco Ocioso):**
+  * O `<header>` principal do site deixou de ser sticky (`relative`), rolando naturalmente para fora do visor ao inspecionar as opções.
+  * O `#annualRibbonContainer` passou a ancorar diretamente em `top-0 z-40`, assumindo com autoridade a função de Top Bar Única do aplicativo.
+  * Zero barra intermediária, zero espaço vazio e mais de 85% do viewport livre para leitura das opções.
+  * Incorporação da identidade compacta ("Folga Extra • UFBA") tanto no modo completo quanto na cápsula ultra-slim de 36px.
+- **Badges Numéricos Dourados de Passo no Cockpit:** Inserção de badges circulares táteis (`1`, `2`, `3`) nos 3 cartões do painel de controle superior.
+- **Placas de Métricas com Saturação Pura e Textura Tátil:**
+  * Descanso: Obsidian & Gold (`bg-slate-950 text-amber-300 border-2 border-slate-800`).
+  * Ganho: Solid Emerald (`bg-emerald-600 text-white border-2 border-emerald-500`).
+  * Alavancagem: Sun Gold (`bg-amber-400 text-slate-950 border-2 border-amber-500`).
 
 ---
 

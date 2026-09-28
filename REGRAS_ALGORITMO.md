@@ -225,7 +225,7 @@ Para permitir a análise lado a lado dos cenários gerados pela Fronteira de Par
    * Abre em gaveta lateral direita (*Slide-Over Drawer*) com fundo translúcido e foco analítico integral.
    * Fechamento ágil via tecla `ESC`, clique no backdrop ou botão de fechar.
 3. **Diretrizes Estritas de Design Analítico:**
-   * **Sem Botão "Adotar Cenário":** O comparador não força decisões de preenchimento; o servidor mantém total autonomia para transcrever as datas no SIGRH.
+   * **Sem Botão "Adotar Cenário":** O comparador não força decisões de preenchimento; o servidor mantém total autonomia para transcrever as datas no seu requerimento oficial de férias.
    * **Sem Tags Temáticas no Comparador:** O painel omite badges e etiquetas lúdicas, focando 100% nas métricas técnicas:
      * Total de Dias Livres Contínuos (com destaque na melhor marca);
      * Dias de Repouso Semanal (Sáb/Dom) absorvidos;

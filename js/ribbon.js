@@ -177,8 +177,11 @@
         <div id="annualRibbonCapsule" title="Fita Anual do Tempo • Opção ${scenarioIndex + 1}" class="w-full bg-slate-950/95 backdrop-blur-md text-white rounded-full px-3.5 py-1.5 border-2 border-amber-400 shadow-xl shadow-amber-500/10 ring-2 ring-amber-400/20 flex items-center justify-between gap-2 sm:gap-3 transition-all duration-300 select-none">
           <span class="sr-only">Fita Anual do Tempo • Opção ${scenarioIndex + 1} • JAN a DEZ • 1ª Parcela</span>
           
-          <!-- LADO ESQUERDO: BADGE OPÇÃO + DIAS LIVRES -->
+          <!-- LADO ESQUERDO: BRAND + BADGE OPÇÃO + DIAS LIVRES -->
           <div class="flex items-center gap-2 shrink-0">
+            <span class="hidden sm:inline-flex items-center gap-1 font-black text-xs text-amber-300 pr-1.5 border-r border-slate-700/80 cursor-pointer" onclick="window.scrollTo({ top: 0, behavior: 'smooth' })" title="Voltar ao início">
+              <i data-lucide="sun" class="w-3.5 h-3.5 text-amber-400"></i> Folga Extra
+            </span>
             <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 shadow-xs">
               ${isChampion ? '<i data-lucide="crown" class="w-3 h-3 text-slate-950"></i>' : '<i data-lucide="sparkles" class="w-3 h-3 text-slate-950"></i>'}
               Opção ${scenarioIndex + 1}
@@ -218,11 +221,11 @@
     }
 
     let html = `
-      <div class="bg-white/95 backdrop-blur-md text-slate-900 rounded-2xl sm:rounded-3xl p-3 sm:p-4 shadow-xl shadow-slate-950/10 border-2 border-slate-200/90 space-y-2.5 sm:space-y-3 transition-all duration-300">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
+      <div class="bg-white/95 backdrop-blur-md text-slate-900 rounded-2xl sm:rounded-3xl p-3 sm:p-4 shadow-xl shadow-slate-950/10 border-2 border-amber-300/80 space-y-2.5 sm:space-y-3 transition-all duration-300">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-amber-100 pb-2.5">
           <div class="flex items-center gap-2.5">
-            <span class="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-amber-50 text-amber-600 border border-amber-200 flex items-center justify-center shrink-0 shadow-2xs">
-              <i data-lucide="activity" class="w-4 h-4 text-amber-600"></i>
+            <span class="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-slate-900 text-amber-400 border border-slate-800 flex items-center justify-center shrink-0 shadow-xs cursor-pointer" onclick="window.scrollTo({ top: 0, behavior: 'smooth' })" title="Voltar ao início">
+              <i data-lucide="sun" class="w-4 h-4 text-amber-400"></i>
             </span>
             <div>
               <div class="flex items-center gap-2 flex-wrap">

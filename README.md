@@ -1,6 +1,6 @@
 # Folga Extra • Otimizador Inteligente de Férias (UFBA / Salvador)
 
-> **Versão:** 3.4.1 • **Compatibilidade:** Navegadores Modernos (Offline-First / Zero Dependência de Build)  
+> **Versão:** 3.5.0 • **Compatibilidade:** Navegadores Modernos (Offline-First / Zero Dependência de Build)  
 > **Status de Qualidade:** 100% dos Testes Automatizados Aprovados (33/33 em `node test_suite.js`)  
 > **Documentos de Referência:** [`REGRAS_ALGORITMO.md`](./REGRAS_ALGORITMO.md) • [`GUIA_CORES_SISTEMA.md`](./GUIA_CORES_SISTEMA.md) • [`STATUS_PROJETO.md`](./STATUS_PROJETO.md)
 
@@ -43,7 +43,7 @@ Utilizando um motor matemático exato de **Programação Dinâmica** e **Frontei
 
 ### 5. Itinerários em Formato "Linear Boarding Pass"
 * Estrutura horizontal limpa de 3 colunas direcionais com setas de transição executiva:
-  $$\text{🛫 1º DIA LIVRE REAL} \quad \longrightarrow \quad \text{📋 PERÍODO NO SIGRH (10d)} \quad \longrightarrow \quad \text{💼 VOLTA AO TRABALHO}$$
+  $$\text{🛫 1º DIA LIVRE REAL} \quad \longrightarrow \quad \text{📋 PERÍODO OFICIAL DE FÉRIAS (10d)} \quad \longrightarrow \quad \text{💼 VOLTA AO TRABALHO}$$
 * Identificação clara do primeiro dia útil de retorno ao expediente e selo de segurança contra indeferimento pelo RH.
 
 ### 6. Exportação Corporativa de Resumo em Tabela HTML (SEI-UFBA / Word / E-mail)

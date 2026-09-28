@@ -720,8 +720,8 @@
 
     if (shouldScroll && ribbonContainer) {
       const rect = ribbonContainer.getBoundingClientRect();
-      // Se a fita já está visível (fixada no topo via position: sticky), não faz scroll brusco para cima
-      const isStickyVisible = rect.top >= 0 && rect.top <= 160 && rect.bottom > 100;
+      // Se a fita já está visível (fixada no topo via position: sticky em top: 0), não faz scroll brusco para cima
+      const isStickyVisible = rect.top >= -20 && rect.top <= 80 && rect.bottom > 40;
       if (!isStickyVisible) {
         ribbonContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       }
@@ -1426,7 +1426,7 @@
             <span class="text-emerald-700 font-bold block flex items-center justify-center sm:justify-end gap-1">
               <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-600"></i> Planejamento Validado
             </span>
-            <span>Pronto para lançar no SouGov / SIGRH</span>
+            <span>Conforme Regime da Lei 8.112/1990</span>
           </div>
         </div>
 
@@ -1784,7 +1784,7 @@
 
             <div class="space-y-1 text-xs">
               <div class="flex items-center justify-between text-slate-600">
-                <span>Período SIGRH:</span>
+                <span>Período Oficial:</span>
                 <strong class="font-mono text-slate-900">${formatDate(p.startDate)} a ${formatDate(p.endDate)}</strong>
               </div>
               <div class="flex items-center justify-between text-slate-600">
@@ -1957,7 +1957,7 @@
       text += `• Etapas:\n`;
       sc.periods.forEach((p, pIdx) => {
         text += `  [Etapa ${pIdx + 1}: ${p.length}d marcados | ${p.totalOff}d livres]\n`;
-        text += `    Período SIGRH: ${formatDate(p.startDate)} a ${formatDate(p.endDate)}\n`;
+        text += `    Período Oficial: ${formatDate(p.startDate)} a ${formatDate(p.endDate)}\n`;
         text += `    1º Dia Livre: ${formatDate(p.effectiveStart)} (${DAYS_NAME[p.effectiveStart.getDay()]})\n`;
         text += `    Volta ao Trabalho: ${formatDate(p.returnDate)} (${DAYS_NAME[p.returnDate.getDay()]})\n`;
         if (p.compDaysApplied > 0) {
