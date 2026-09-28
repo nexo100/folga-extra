@@ -1,6 +1,6 @@
 # Folga Extra • Otimizador Inteligente de Férias (UFBA / Salvador)
 
-> **Versão:** 3.3.1 • **Compatibilidade:** Navegadores Modernos (Offline-First / Zero Dependência de Build)  
+> **Versão:** 3.4.0 • **Compatibilidade:** Navegadores Modernos (Offline-First / Zero Dependência de Build)  
 > **Status de Qualidade:** 100% dos Testes Automatizados Aprovados (33/33 em `node test_suite.js`)  
 > **Documentos de Referência:** [`REGRAS_ALGORITMO.md`](./REGRAS_ALGORITMO.md) • [`GUIA_CORES_SISTEMA.md`](./GUIA_CORES_SISTEMA.md) • [`STATUS_PROJETO.md`](./STATUS_PROJETO.md)
 
@@ -88,6 +88,13 @@ Utilizando um motor matemático exato de **Programação Dinâmica** e **Frontei
 * **Períodos a Evitar (Opcional):** Inserção simples de intervalos com colegas de férias ou projetos em andamento, descartando essas datas da escolha sem presets rígidos.
 * **Buffer Dinâmico de DP & Fita Panorâmica:** Matriz combinatória com buffer estendido (`maxDay = totalWindowDays + offset + 140`) suportando janelas de até 24 meses sem perda de candidatos tardios.
 * **Zero Falsa Equivalência:** Contagem escopada de feriados sincronizada estritamente com a janela temporal ativa.
+
+### 12. Agregador de Passagens de Férias & Gamificação (v3.4.0)
+* **Filtros Rápidos de Rotas:** Pílulas táteis no topo dos resultados (`Todas as Opções`, `👑 Top 3 Melhores`, `🏖️ Férias de Julho`, `🎄 Fim de Ano`, `⚖️ 10+10+10`, `🎯 Desperdício Zero`) no padrão dos grandes buscadores de voos.
+* **Mini-Rota de Voo em Linha Única:** Rota visual compacta no card (`Rota: 🛫 Jan: 10d ➔ 🛫 Jun: 10d ➔ 🛫 Dez: 10d ➔ 51d livres`), evitando poluição de badges e focando no itinerário.
+* **Memória do Navegador (`localStorage`):** Salva automaticamente as preferências do servidor (cota, exercício, lotação, parcelamento, jornada e restrições) para que o sistema já abra configurado.
+* **Cartão de Embarque Oficial de Férias:** Pop-up gamificado em formato de bilhete de companhia aérea, com código de barras, trechos, conexões e validação legal.
+* **Compartilhamento para WhatsApp:** Mensagem comemorativa com emojis festivos formatada para envio imediato à família, amigos ou cônjuge.
 
 ---
 

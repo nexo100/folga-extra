@@ -99,8 +99,117 @@
     customWindowEnabled: false,
     windowStartDate: '2027-05-03',
     windowYears: 1,
-    excludedPeriods: []
+    excludedPeriods: [],
+
+    // Agregador de Passagens & Filtros Rápidos
+    activeFilter: 'all',
+    activeBoardingPassIdx: 0
   };
+
+  // ----------------------------------------------------
+  // PERSISTÊNCIA EM MEMÓRIA DO NAVEGADOR (LOCALSTORAGE)
+  // ----------------------------------------------------
+  const PREFERENCES_STORAGE_KEY = 'folga_extra_v3_preferences';
+
+  function savePreferences() {
+    if (typeof window === 'undefined' || !window.localStorage) return;
+    try {
+      const prefs = {
+        vacationDays: state.vacationDays,
+        selectedYear: state.selectedYear,
+        selectedLocation: state.selectedLocation,
+        autoBridgeHolidays: state.autoBridgeHolidays,
+        includeCarnavalCircuito: state.includeCarnavalCircuito,
+        includeVesperas: state.includeVesperas,
+        compensationDays: state.compensationDays,
+        distributeThroughoutYear: state.distributeThroughoutYear,
+        recessShift: state.recessShift,
+        vacationSplit: state.vacationSplit,
+        workingDays: state.workingDays,
+        customWindowEnabled: state.customWindowEnabled,
+        windowStartDate: state.windowStartDate,
+        windowYears: state.windowYears,
+        excludedPeriods: state.excludedPeriods,
+        activeFilter: state.activeFilter || 'all'
+      };
+      window.localStorage.setItem(PREFERENCES_STORAGE_KEY, JSON.stringify(prefs));
+    } catch (e) {
+      // Falha silenciosa para ambientes sem permissão de storage
+    }
+  }
+
+  function loadPreferences() {
+    if (typeof window === 'undefined' || !window.localStorage || typeof document === 'undefined') return false;
+    try {
+      const raw = window.localStorage.getItem(PREFERENCES_STORAGE_KEY);
+      if (!raw) return false;
+      const prefs = JSON.parse(raw);
+      if (!prefs || typeof prefs !== 'object') return false;
+
+      if (typeof prefs.vacationDays === 'number') state.vacationDays = prefs.vacationDays;
+      if (typeof prefs.selectedYear === 'number') state.selectedYear = prefs.selectedYear;
+      if (typeof prefs.selectedLocation === 'string') state.selectedLocation = prefs.selectedLocation;
+      if (typeof prefs.autoBridgeHolidays === 'boolean') state.autoBridgeHolidays = prefs.autoBridgeHolidays;
+      if (typeof prefs.includeCarnavalCircuito === 'boolean') state.includeCarnavalCircuito = prefs.includeCarnavalCircuito;
+      if (typeof prefs.includeVesperas === 'boolean') state.includeVesperas = prefs.includeVesperas;
+      if (typeof prefs.compensationDays === 'number') state.compensationDays = prefs.compensationDays;
+      if (typeof prefs.distributeThroughoutYear === 'boolean') state.distributeThroughoutYear = prefs.distributeThroughoutYear;
+      if (typeof prefs.recessShift === 'string') state.recessShift = prefs.recessShift;
+      if (typeof prefs.vacationSplit === 'number') state.vacationSplit = prefs.vacationSplit;
+      if (Array.isArray(prefs.workingDays) && prefs.workingDays.length === 7) state.workingDays = prefs.workingDays;
+      if (typeof prefs.customWindowEnabled === 'boolean') state.customWindowEnabled = prefs.customWindowEnabled;
+      if (typeof prefs.windowStartDate === 'string') state.windowStartDate = prefs.windowStartDate;
+      if (typeof prefs.windowYears === 'number') state.windowYears = prefs.windowYears;
+      if (Array.isArray(prefs.excludedPeriods)) state.excludedPeriods = prefs.excludedPeriods;
+      if (typeof prefs.activeFilter === 'string') state.activeFilter = prefs.activeFilter;
+
+      // Sincroniza campos do formulário no DOM
+      const yrEl = document.getElementById('selectedYear');
+      if (yrEl) yrEl.value = state.selectedYear;
+      const yrDisp = document.getElementById('currentYearDisplay');
+      if (yrDisp) yrDisp.innerText = state.selectedYear;
+
+      const locEl = document.getElementById('selectedLocation');
+      if (locEl) locEl.value = state.selectedLocation;
+
+      const vacDaysEl = document.getElementById('vacationDays');
+      if (vacDaysEl) vacDaysEl.value = state.vacationDays;
+
+      const compDaysEl = document.getElementById('compensationDays');
+      if (compDaysEl) compDaysEl.value = state.compensationDays;
+      const compValEl = document.getElementById('compensationDaysValue');
+      if (compValEl) compValEl.innerText = `${state.compensationDays}d`;
+
+      const bridgeEl = document.getElementById('autoBridgeHolidays');
+      if (bridgeEl) bridgeEl.checked = state.autoBridgeHolidays;
+
+      const carnavalEl = document.getElementById('includeCarnavalCircuito');
+      if (carnavalEl) carnavalEl.checked = state.includeCarnavalCircuito;
+
+      const vEl = document.getElementById('includeVesperas');
+      if (vEl) vEl.checked = state.includeVesperas;
+
+      const distEl = document.getElementById('distributeThroughoutYear');
+      if (distEl) distEl.checked = state.distributeThroughoutYear;
+
+      const winCheck = document.getElementById('enableCustomWindow');
+      if (winCheck) {
+        winCheck.checked = state.customWindowEnabled;
+        toggleEnableCustomWindow(state.customWindowEnabled);
+      }
+      const winInput = document.getElementById('windowStartDateInput');
+      if (winInput && state.windowStartDate) winInput.value = state.windowStartDate;
+      setWindowYears(state.windowYears);
+
+      setRecessShift(state.recessShift || 'none');
+      setSplit(state.vacationSplit || 3);
+      renderExcludedPeriods();
+      return true;
+    } catch (e) {
+      console.warn('Folga Extra: Erro ao carregar preferências do localStorage', e);
+      return false;
+    }
+  }
 
   // ----------------------------------------------------
   // JANELA PERSONALIZADA & PERÍODOS A EVITAR (PONTO 2)
@@ -995,6 +1104,8 @@
     }
 
     state.currentScenarios = scenarios;
+    setScenarioFilter(state.activeFilter || 'all');
+    savePreferences();
 
     if (window.lucide) window.lucide.createIcons();
 
@@ -1123,6 +1234,282 @@
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+  }
+
+  // ----------------------------------------------------
+  // FILTRAGEM RÁPIDA DE CENÁRIOS (AGREGADOR DE BILHETES)
+  // ----------------------------------------------------
+  function setScenarioFilter(filterKey) {
+    state.activeFilter = filterKey || 'all';
+    savePreferences();
+
+    // 1. Atualiza botões visuais das abas de filtro
+    const filterButtons = typeof document !== 'undefined' ? document.querySelectorAll('.filter-pill') : [];
+    filterButtons.forEach(btn => {
+      btn.className = 'filter-pill px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer bg-white hover:bg-slate-100 text-slate-700 border border-slate-200/80 shrink-0';
+    });
+
+    const activeBtnId = filterKey === '10+10+10' ? 'filterBtn_10_10_10' : `filterBtn_${filterKey}`;
+    const activeBtn = typeof document !== 'undefined' ? document.getElementById(activeBtnId) : null;
+    if (activeBtn) {
+      activeBtn.className = 'filter-pill px-3 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 cursor-pointer bg-slate-950 text-amber-400 shadow-2xs shrink-0';
+    }
+
+    // 2. Filtra os cards renderizados no container
+    const cards = typeof document !== 'undefined' ? document.querySelectorAll('#scenariosContainer > [id^="scenarioCard_"]') : [];
+    let visibleCount = 0;
+    const totalCards = cards.length;
+
+    cards.forEach(card => {
+      const sIdx = parseInt(card.getAttribute('data-sidx') || '0', 10);
+      const category = (card.getAttribute('data-category') || '').toLowerCase();
+      const split = card.getAttribute('data-split') || '';
+      const partition = card.getAttribute('data-partition') || '';
+      const wasted = parseInt(card.getAttribute('data-wasted') || '0', 10);
+
+      let match = false;
+      if (filterKey === 'all') {
+        match = state.showAllScenarios ? true : sIdx < 5;
+      } else if (filterKey === 'top3') {
+        match = sIdx < 3;
+      } else if (filterKey === 'julho') {
+        match = category.includes('julho');
+      } else if (filterKey === 'fim_de_ano') {
+        match = category.includes('fim de ano') || category.includes('recesso');
+      } else if (filterKey === '10+10+10') {
+        match = split === '10+10+10' || partition === '10+10+10';
+      } else if (filterKey === 'zero_waste') {
+        match = wasted === 0;
+      }
+
+      if (match) {
+        card.style.display = '';
+        visibleCount++;
+      } else {
+        card.style.display = 'none';
+      }
+    });
+
+    // 3. Atualiza o texto de contagem no container
+    const countEl = typeof document !== 'undefined' ? document.getElementById('filterResultCount') : null;
+    if (countEl) {
+      if (filterKey === 'all') {
+        countEl.innerText = `${visibleCount} de ${totalCards} opções exibidas`;
+      } else {
+        countEl.innerText = `${visibleCount} ${visibleCount === 1 ? 'opção encontrada' : 'opções encontradas'}`;
+      }
+    }
+
+    // 4. Se houver o wrapper de toggle "Ver Mais", gerencia visibilidade
+    const toggleWrapper = typeof document !== 'undefined' ? document.getElementById('toggleAllScenariosWrapper') : null;
+    if (toggleWrapper) {
+      toggleWrapper.style.display = filterKey === 'all' ? '' : 'none';
+    }
+
+    if (typeof window !== 'undefined' && window.lucide) window.lucide.createIcons();
+  }
+
+  // ----------------------------------------------------
+  // CARTÃO DE EMBARQUE OFICIAL DE FÉRIAS (GAMIFICAÇÃO & CONFIRMAÇÃO)
+  // ----------------------------------------------------
+  function openBoardingPassModal(sIdx) {
+    if (typeof sIdx !== 'number' || !state.currentScenarios || !state.currentScenarios[sIdx]) return;
+    state.activeBoardingPassIdx = sIdx;
+    const sc = state.currentScenarios[sIdx];
+
+    const contentEl = typeof document !== 'undefined' ? document.getElementById('boardingPassContent') : null;
+    if (!contentEl) return;
+
+    // Trechos do itinerário
+    const legsHtml = sc.periods.map((p, idx) => {
+      const returnDow = DAYS_NAME[p.returnDate.getDay()];
+      let gapHtml = '';
+      if (idx > 0) {
+        const prevP = sc.periods[idx - 1];
+        const gapDays = Math.round((p.effectiveStart - prevP.returnDate) / (1000 * 60 * 60 * 24));
+        const monthsVal = (gapDays / 30.4).toFixed(1);
+        gapHtml = `
+          <div class="my-3 py-1.5 px-3 rounded-xl bg-slate-100 border border-dashed border-slate-300 flex items-center justify-between text-[11px] text-slate-600">
+            <span class="flex items-center gap-1.5 font-bold"><i data-lucide="clock" class="w-3.5 h-3.5 text-slate-500"></i> Intervalo de Trabalho em Salvador:</span>
+            <span class="font-mono font-black text-slate-900">${gapDays} dias (~${monthsVal}m de recarga)</span>
+          </div>
+        `;
+      }
+
+      return `
+        ${gapHtml}
+        <div class="p-3.5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs space-y-2">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-900 text-amber-400 font-mono font-black text-[10px] uppercase">
+              <i data-lucide="plane" class="w-3 h-3 text-amber-400"></i> Trecho ${idx + 1} • ${p.length} Dias Oficiais
+            </span>
+            <span class="text-xs font-black text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+              ${p.totalOff} dias de descanso
+            </span>
+          </div>
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <div>
+              <span class="text-[10px] uppercase font-bold text-slate-400 block">Embarque (Início Oficial):</span>
+              <span class="font-mono font-black text-slate-900">${formatDate(p.startDate)}</span>
+            </div>
+            <div>
+              <span class="text-[10px] uppercase font-bold text-slate-400 block">Desembarque (Último Dia):</span>
+              <span class="font-mono font-black text-slate-900">${formatDate(p.endDate)}</span>
+            </div>
+          </div>
+          <div class="pt-1.5 border-t border-slate-100 flex items-center justify-between text-xs">
+            <span class="text-[11px] text-slate-600 font-medium">Volta ao trabalho:</span>
+            <span class="font-mono font-black text-emerald-800">${formatDate(p.returnDate)} (${returnDow})</span>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    contentEl.innerHTML = `
+      <!-- CARTÃO PRINCIPAL ESTILO PASSAGEM AÉREA -->
+      <div class="bg-gradient-to-br from-amber-500/10 via-white to-sky-500/10 rounded-2xl border-2 border-amber-300/80 p-4 sm:p-5 space-y-4">
+        
+        <!-- CABEÇALHO DO TICKET -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b-2 border-dashed border-amber-300 pb-4">
+          <div>
+            <span class="text-[10px] font-black uppercase tracking-wider text-amber-800 block">Servidor Público Federal • UFBA</span>
+            <div class="text-lg font-black text-slate-950 flex items-center gap-2">
+              <span>SALVADOR (SSA)</span>
+              <i data-lucide="arrow-right" class="w-4 h-4 text-amber-600"></i>
+              <span class="text-emerald-700">FÉRIAS MERECIDAS</span>
+            </div>
+            <p class="text-xs text-slate-500 mt-0.5">Voo Estatutário: Lei 8.112/1990 • Exercício ${state.selectedYear}</p>
+          </div>
+          <div class="text-left sm:text-right shrink-0">
+            <span class="text-[10px] font-bold text-slate-400 uppercase block">Opção Escolhida</span>
+            <span class="text-2xl font-black font-mono text-slate-950">#${String(sIdx + 1).padStart(2, '0')}</span>
+            <span class="text-xs font-extrabold text-amber-700 block">${sc.split.join(' + ')} dias</span>
+          </div>
+        </div>
+
+        <!-- PLACAR DE DESCANSO REAL -->
+        <div class="grid grid-cols-3 gap-2 py-2 px-3 rounded-xl bg-white/80 border border-amber-200 text-center">
+          <div>
+            <span class="text-[10px] uppercase font-bold text-slate-500 block">Cota Gasta</span>
+            <span class="text-base sm:text-lg font-black font-mono text-slate-900">${sc.vacationDays}d</span>
+          </div>
+          <div class="border-x border-slate-200">
+            <span class="text-[10px] uppercase font-bold text-emerald-800 block">Descanso Real</span>
+            <span class="text-base sm:text-lg font-black font-mono text-emerald-700">${sc.totalOff}d livres</span>
+          </div>
+          <div>
+            <span class="text-[10px] uppercase font-bold text-amber-800 block">Alavancagem</span>
+            <span class="text-base sm:text-lg font-black font-mono text-amber-700">${sc.leverage}x</span>
+          </div>
+        </div>
+
+        <!-- TRECHOS DO ITINERÁRIO -->
+        <div class="space-y-2">
+          <h4 class="text-xs font-black uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+            <i data-lucide="map-pin" class="w-3.5 h-3.5 text-amber-600"></i> Itinerário de Trechos das Férias
+          </h4>
+          ${legsHtml}
+        </div>
+
+        <!-- CÓDIGO DE BARRAS ESTILIZADO / SELO ESTATUTÁRIO -->
+        <div class="pt-3 border-t-2 border-dashed border-amber-300 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left select-none">
+          <div class="space-y-1">
+            <div class="flex items-center justify-center sm:justify-start gap-1 font-mono text-[9px] tracking-widest text-slate-400">
+              <span>UFBA</span>•<span>LEI-8112</span>•<span>OPC-${sIdx + 1}</span>•<span>${state.selectedYear}</span>
+            </div>
+            <!-- BARRAS DO CÓDIGO DE BARRAS EM CSS -->
+            <div class="h-6 flex items-center justify-center sm:justify-start gap-0.5 opacity-70">
+              <span class="w-1 h-full bg-slate-900"></span><span class="w-0.5 h-full bg-slate-900"></span><span class="w-2 h-full bg-slate-900"></span><span class="w-1 h-full bg-slate-900"></span><span class="w-0.5 h-full bg-slate-900"></span><span class="w-1.5 h-full bg-slate-900"></span><span class="w-0.5 h-full bg-slate-900"></span><span class="w-2 h-full bg-slate-900"></span><span class="w-1 h-full bg-slate-900"></span><span class="w-0.5 h-full bg-slate-900"></span><span class="w-1.5 h-full bg-slate-900"></span><span class="w-2 h-full bg-slate-900"></span><span class="w-0.5 h-full bg-slate-900"></span><span class="w-1 h-full bg-slate-900"></span>
+            </div>
+          </div>
+          <div class="text-[10px] text-slate-500 font-medium">
+            <span class="text-emerald-700 font-bold block flex items-center justify-center sm:justify-end gap-1">
+              <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-600"></i> Planejamento Validado
+            </span>
+            <span>Pronto para lançar no SouGov / SIGRH</span>
+          </div>
+        </div>
+
+      </div>
+    `;
+
+    const backdrop = typeof document !== 'undefined' ? document.getElementById('boardingPassBackdrop') : null;
+    const modal = typeof document !== 'undefined' ? document.getElementById('boardingPassModal') : null;
+    if (backdrop && modal) {
+      backdrop.classList.remove('opacity-0', 'pointer-events-none');
+      modal.classList.remove('opacity-0', 'pointer-events-none', 'scale-95');
+      modal.classList.add('scale-100');
+    }
+
+    if (typeof window !== 'undefined' && window.lucide) window.lucide.createIcons();
+  }
+
+  function closeBoardingPassModal() {
+    const backdrop = typeof document !== 'undefined' ? document.getElementById('boardingPassBackdrop') : null;
+    const modal = typeof document !== 'undefined' ? document.getElementById('boardingPassModal') : null;
+    if (backdrop && modal) {
+      backdrop.classList.add('opacity-0', 'pointer-events-none');
+      modal.classList.add('opacity-0', 'pointer-events-none', 'scale-95');
+      modal.classList.remove('scale-100');
+    }
+  }
+
+  function generateWhatsAppMessage(sc, year) {
+    if (!sc || !sc.periods) return '';
+    let msg = `🏖️✈️ *NOSSO PLANO DE FÉRIAS • ${year}* 🌴\n`;
+    msg += `Conseguimos transformar *${sc.vacationDays} dias* de férias em *${sc.totalOff} dias livres* (+${sc.extraGain} dias de alavancagem com feriados e pontes)! 🔥\n\n`;
+    msg += `📋 *ITINERÁRIO DAS ETAPAS:*\n`;
+
+    sc.periods.forEach((p, idx) => {
+      const returnDow = DAYS_NAME[p.returnDate.getDay()];
+      msg += `\n🛫 *Etapa ${idx + 1} (${p.length} dias):*\n`;
+      msg += `• Férias: ${formatDate(p.startDate)} a ${formatDate(p.endDate)}\n`;
+      msg += `• Retorno ao trabalho: ${formatDate(p.returnDate)} (${returnDow})\n`;
+      msg += `• Descanso total contínuo: *${p.totalOff} dias livres*\n`;
+    });
+
+    if (sc.compensationDays > 0) {
+      msg += `\n⏰ Inclui ${sc.compensationDays} dia(s) de banco de horas alocados cirurgicamente.\n`;
+    }
+
+    msg += `\n⚖️ Calculado pelo Folga Extra (UFBA / Lei 8.112/90).\n`;
+    msg += `Já podemos marcar as viagens e reservar as passagens! 🧳✈️🎉`;
+    return msg;
+  }
+
+  function copyWhatsAppMessage() {
+    const sIdx = state.activeBoardingPassIdx || 0;
+    const sc = state.currentScenarios && state.currentScenarios[sIdx];
+    if (!sc) return;
+
+    const text = generateWhatsAppMessage(sc, state.selectedYear);
+    const btn = typeof document !== 'undefined' ? document.getElementById('btnCopyWhatsAppModal') : null;
+
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(text).then(() => {
+        if (btn) {
+          const original = btn.innerHTML;
+          btn.innerHTML = `<i data-lucide="check" class="w-4 h-4 text-white"></i><span>Mensagem Copiada!</span>`;
+          btn.classList.add('bg-emerald-700');
+          if (typeof window !== 'undefined' && window.lucide) window.lucide.createIcons();
+          showToast('Mensagem festiva pronta para o WhatsApp copiada com sucesso!', 'success');
+          setTimeout(() => {
+            btn.innerHTML = original;
+            btn.classList.remove('bg-emerald-700');
+            if (typeof window !== 'undefined' && window.lucide) window.lucide.createIcons();
+          }, 2500);
+        }
+      }).catch(err => {
+        console.error(err);
+        showToast('Não foi possível copiar diretamente para a área de transferência.', 'warning');
+      });
+    }
+  }
+
+  function copyBoardingPassTable() {
+    const sIdx = state.activeBoardingPassIdx || 0;
+    const btn = typeof document !== 'undefined' ? document.getElementById('btnCopySeiModal') : null;
+    copyScenarioSummary(sIdx, btn);
   }
 
   // ----------------------------------------------------
@@ -1657,7 +2044,15 @@
       toggleShowAllScenarios,
       buildBadgesHtml,
       buildPeriodHtml,
-      buildScenarioCardHtml
+      buildScenarioCardHtml,
+      setScenarioFilter,
+      openBoardingPassModal,
+      closeBoardingPassModal,
+      generateWhatsAppMessage,
+      copyWhatsAppMessage,
+      copyBoardingPassTable,
+      savePreferences,
+      loadPreferences
     };
 
     // Atalhos globais para eventos inline do HTML
@@ -1696,11 +2091,20 @@
     window.renderExcludedPeriods = renderExcludedPeriods;
     window.toggleRibbonCollapse = toggleRibbonCollapse;
     window.toggleShowAllScenarios = toggleShowAllScenarios;
+    window.setScenarioFilter = setScenarioFilter;
+    window.openBoardingPassModal = openBoardingPassModal;
+    window.closeBoardingPassModal = closeBoardingPassModal;
+    window.generateWhatsAppMessage = generateWhatsAppMessage;
+    window.copyWhatsAppMessage = copyWhatsAppMessage;
+    window.copyBoardingPassTable = copyBoardingPassTable;
+    window.savePreferences = savePreferences;
+    window.loadPreferences = loadPreferences;
   }
 
   // Inicialização na carga do DOM (apenas no navegador)
   if (typeof document !== 'undefined') {
     document.addEventListener('DOMContentLoaded', () => {
+      loadPreferences();
       initWorkingDaysUI();
       onYearOrLocationChange();
       // Não executa simulação na carga inicial: os resultados permanecem 100% ocultos até o clique em Calcular
@@ -1734,6 +2138,13 @@
       buildBadgesHtml,
       buildPeriodHtml,
       buildScenarioCardHtml,
+      setScenarioFilter,
+      openBoardingPassModal,
+      closeBoardingPassModal,
+      generateWhatsAppMessage,
+      copyWhatsAppMessage,
+      savePreferences,
+      loadPreferences,
       state
     };
   }

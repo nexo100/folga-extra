@@ -1,9 +1,9 @@
 /**
  * sw.js - Service Worker Oficial • Folga Extra (UFBA)
- * Versão 3.3.2 - Suporte Completo a Funcionamento 100% Offline (Cache-First)
+ * Versão 3.4.0 - Suporte Completo a Funcionamento 100% Offline (Cache-First)
  */
 
-const CACHE_NAME = 'folga-extra-v3.3.2';
+const CACHE_NAME = 'folga-extra-v3.4.0';
 
 const STATIC_ASSETS = [
   './',

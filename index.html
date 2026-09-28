@@ -618,6 +618,47 @@
         <!-- Renderizado dinamicamente pelo ribbon.js -->
       </div>
 
+      <!-- BARRA DE FILTROS RÁPIDOS DE ROTAS (AGREGADOR DE BILHETES) -->
+      <div id="scenarioFiltersBar" class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white/90 backdrop-blur-md p-2 sm:p-2.5 rounded-2xl border border-slate-200/90 shadow-2xs">
+        <div class="flex items-center gap-1.5 overflow-x-auto custom-scrollbar pb-1 sm:pb-0">
+          <span class="text-[10px] uppercase font-bold tracking-wider text-slate-400 pl-2 pr-1 flex items-center gap-1 shrink-0 select-none">
+            <i data-lucide="filter" class="w-3.5 h-3.5 text-slate-400"></i> Filtros:
+          </span>
+          <button type="button" onclick="window.OtimizaApp ? window.OtimizaApp.setScenarioFilter('all') : setScenarioFilter('all')" id="filterBtn_all"
+            class="filter-pill px-3 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 cursor-pointer bg-slate-950 text-amber-400 shadow-2xs shrink-0">
+            <span>Todas as Opções</span>
+          </button>
+          <button type="button" onclick="window.OtimizaApp ? window.OtimizaApp.setScenarioFilter('top3') : setScenarioFilter('top3')" id="filterBtn_top3"
+            class="filter-pill px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer bg-white hover:bg-slate-100 text-slate-700 border border-slate-200/80 shrink-0">
+            <i data-lucide="crown" class="w-3.5 h-3.5 text-amber-500"></i>
+            <span>Top 3 Melhores</span>
+          </button>
+          <button type="button" onclick="window.OtimizaApp ? window.OtimizaApp.setScenarioFilter('julho') : setScenarioFilter('julho')" id="filterBtn_julho"
+            class="filter-pill px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer bg-white hover:bg-slate-100 text-slate-700 border border-slate-200/80 shrink-0">
+            <i data-lucide="sun" class="w-3.5 h-3.5 text-sky-600"></i>
+            <span>Férias de Julho</span>
+          </button>
+          <button type="button" onclick="window.OtimizaApp ? window.OtimizaApp.setScenarioFilter('fim_de_ano') : setScenarioFilter('fim_de_ano')" id="filterBtn_fim_de_ano"
+            class="filter-pill px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer bg-white hover:bg-slate-100 text-slate-700 border border-slate-200/80 shrink-0">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5 text-purple-600"></i>
+            <span>Fim de Ano</span>
+          </button>
+          <button type="button" onclick="window.OtimizaApp ? window.OtimizaApp.setScenarioFilter('10+10+10') : setScenarioFilter('10+10+10')" id="filterBtn_10_10_10"
+            class="filter-pill px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer bg-white hover:bg-slate-100 text-slate-700 border border-slate-200/80 shrink-0">
+            <i data-lucide="star" class="w-3.5 h-3.5 text-slate-500"></i>
+            <span>10+10+10</span>
+          </button>
+          <button type="button" onclick="window.OtimizaApp ? window.OtimizaApp.setScenarioFilter('zero_waste') : setScenarioFilter('zero_waste')" id="filterBtn_zero_waste"
+            class="filter-pill px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer bg-white hover:bg-slate-100 text-slate-700 border border-slate-200/80 shrink-0">
+            <i data-lucide="check-check" class="w-3.5 h-3.5 text-emerald-600"></i>
+            <span>Desperdício Zero</span>
+          </button>
+        </div>
+        <div id="filterResultCount" class="text-[11px] font-mono text-slate-500 pr-2 shrink-0 select-none text-right">
+          Mostrando todas as opções
+        </div>
+      </div>
+
       <!-- CONTAINER DOS CARDS DE CENÁRIOS (BOARDING PASS STYLE) -->
       <div id="scenariosContainer" class="space-y-4">
         <!-- Renderizado via JS -->
@@ -756,6 +797,78 @@
     </footer>
 
   </aside>
+
+  <!-- BACKDROP DO MODAL DE CARTÃO DE EMBARQUE -->
+  <div id="boardingPassBackdrop"
+    onclick="window.OtimizaApp ? window.OtimizaApp.closeBoardingPassModal() : closeBoardingPassModal()"
+    class="fixed inset-0 bg-slate-950/70 backdrop-blur-xs z-50 transition-opacity duration-300 opacity-0 pointer-events-none">
+  </div>
+
+  <!-- MODAL CARTÃO DE EMBARQUE OFICIAL DE FÉRIAS (GAMIFICAÇÃO & CONFIRMAÇÃO) -->
+  <div id="boardingPassModal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="boardingPassTitle"
+    class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 pointer-events-none transition-all duration-300 opacity-0 scale-95">
+    
+    <div class="pointer-events-auto max-w-xl w-full max-h-[92vh] flex flex-col bg-white rounded-3xl border-2 border-amber-400 shadow-2xl overflow-hidden">
+      
+      <!-- 1. HEADER DO BILHETE (ESTILO CIA AÉREA / TICKET LUXO) -->
+      <div class="bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 p-4 sm:p-5 text-slate-950 flex items-center justify-between gap-3 shrink-0">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-slate-950 text-amber-400 flex items-center justify-center shrink-0 shadow-sm">
+            <i data-lucide="plane-takeoff" class="w-5 h-5 text-amber-400"></i>
+          </div>
+          <div>
+            <span class="text-[10px] font-black uppercase tracking-widest text-slate-900 block">Cartão de Embarque Oficial</span>
+            <h3 id="boardingPassTitle" class="text-base sm:text-lg font-black tracking-tight leading-none text-slate-950">
+              Bilhete de Férias • UFBA
+            </h3>
+          </div>
+        </div>
+        <button type="button"
+          onclick="window.OtimizaApp ? window.OtimizaApp.closeBoardingPassModal() : closeBoardingPassModal()"
+          aria-label="Fechar bilhete"
+          class="w-8 h-8 rounded-xl bg-slate-950/10 hover:bg-slate-950/20 text-slate-950 flex items-center justify-center transition-colors cursor-pointer">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- 2. CORPO DO BILHETE ROLÁVEL -->
+      <div id="boardingPassContent" class="flex-1 overflow-y-auto custom-scrollbar p-5 space-y-4 bg-slate-50/50">
+        <!-- Preenchido dinamicamente via JS -->
+      </div>
+
+      <!-- 3. FOOTER DE AÇÕES DO BILHETE -->
+      <div class="bg-white border-t border-slate-200 p-4 flex flex-col sm:flex-row items-center justify-between gap-2.5 shrink-0 shadow-md">
+        <button type="button"
+          id="btnCopyWhatsAppModal"
+          onclick="window.OtimizaApp ? window.OtimizaApp.copyWhatsAppMessage() : copyWhatsAppMessage()"
+          class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-black text-xs transition-all shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2 cursor-pointer">
+          <i data-lucide="share-2" class="w-4 h-4 text-white"></i>
+          <span>Copiar p/ WhatsApp</span>
+        </button>
+
+        <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+          <button type="button"
+            id="btnCopySeiModal"
+            onclick="window.OtimizaApp ? window.OtimizaApp.copyBoardingPassTable() : copyBoardingPassTable()"
+            class="px-3 py-2.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold transition-all shadow-2xs flex items-center justify-center gap-1.5 cursor-pointer">
+            <i data-lucide="clipboard-copy" class="w-3.5 h-3.5 text-slate-500"></i>
+            <span>Copiar Tabela SEI</span>
+          </button>
+
+          <button type="button"
+            onclick="window.print()"
+            class="px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer">
+            <i data-lucide="printer" class="w-3.5 h-3.5 text-slate-600"></i>
+            <span>Imprimir</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
 
   <!-- SCRIPTS MODULARES (ESTRUTURA DESACOPLADA) -->
   <script src="js/holidays.js"></script>

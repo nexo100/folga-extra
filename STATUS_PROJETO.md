@@ -1,7 +1,7 @@
 # DOCUMENTO DE TRANSIÇÃO E ESTADO DO PROJETO (HANDOFF)
 **Projeto:** Folga Extra (UFBA) — Otimizador Inteligente de Férias e Descanso  
-**Versão Atual:** v3.3.2  
-**Data de Atualização:** 27/09/2026  
+**Versão Atual:** v3.4.0  
+**Data de Atualização:** 28/09/2026  
 **Caminho Local Oficial:** `C:\Users\nexo\github\folga-extra`  
 **Repositório GitHub:** `https://github.com/nexo100/folga-extra`  
 **Conversa de Origem:** [🔗 Análise e Reprodução de Site](conversation://f1f763d6-076e-4543-a905-f0eaa0736efd)  
@@ -106,6 +106,21 @@ O painel de controle superior foi reestruturado de forma harmoniosa, com alturas
 - **Harmonização de Inconsistências:** Tom dinâmico da Turma Ano Novo unificado para `text-amber-600` em sincronia com o botão no HTML; eliminação de discrepâncias e alinhamento total com `GUIA_CORES_SISTEMA.md`.
 - **Exportação Corporativa em Tabela HTML (SEI-UFBA / Word / E-mail):** O botão **Copiar Resumo de Férias** gera um payload duplo na área de transferência (`ClipboardItem` com `text/html` e `text/plain`). Ao colar no SEI-UFBA, no Microsoft Word ou no cliente de e-mail, o usuário obtém uma tabela oficial formatada com cabeçalhos escuros, colunas dimensionadas, destaques em verde e totais consolidados.
 - **Service Worker v3.3.2:** Adição de `./js/render.js` aos ativos estáticos pré-cacheados em `sw.js` com limpeza automática de versões legadas de cache.
+
+---
+
+### K. Agregador de Passagens de Férias & Gamificação (v3.4.0)
+- **Filtros Rápidos de Rotas (`#scenarioFiltersBar`):** Barra de abas horizontais com pílulas táteis no estilo de buscadores de passagens aéreas (`[Todas as Opções]`, `[👑 Top 3 Melhores]`, `[🏖️ Férias de Julho]`, `[🎄 Fim de Ano]`, `[⚖️ 10+10+10]`, `[🎯 Desperdício Zero]`), permitindo filtrar instantaneamente as opções calculadas sem recálculo pesado.
+- **Mini-Rota de Voo em Linha Única nos Cards:** Exibição compacta e horizontal do itinerário de voo logo abaixo das datas oficiais (ex.: `Rota: 🛫 Fev: 10d (16d) ➔ 🛫 Jun: 10d (16d) ➔ 🛫 Dez: 10d (20d) ➔ 52d livres`), eliminando poluição visual de múltiplas linhas de badges e mantendo leitura instantânea.
+- **Persistência Automática em Memória do Navegador (`localStorage`):** O sistema agora memoriza automaticamente todos os parâmetros ajustados pelo servidor (cota de férias, exercício, perfil institucional, parcelamento, dias de trabalho, tolerância a pontes, recesso MGI, janelas personalizadas e datas proibidas) na chave `folga_extra_v3_preferences`. Ao recarregar ou retornar ao site, todas as configurações prévias são restauradas como padrão.
+- **Cartão de Embarque Oficial de Férias (`#boardingPassModal`):** Modal de confirmação e gamificação com design lúdico de bilhete de companhia aérea:
+  * Cabeçalho de voo estilizado (`Voo Estatutário: Lei 8.112/1990`, origem Salvador/SSA e destino Descanso Merecido).
+  * Placar consolidado de dias oficiais gastos, dias de descanso real conquistados e multiplicador de alavancagem.
+  * Detalhamento de trechos e conexões (intervalos de trabalho).
+  * Código de barras decorativo e selo regulatório para SouGov/SIGRH.
+- **Compartilhamento Festivo para WhatsApp (`generateWhatsAppMessage`):** Botão `[📲 Copiar p/ WhatsApp]` que gera uma mensagem formatada com emojis solares e itinerário detalhado, pronta para colar em conversas familiares ou com cônjuge para planejar viagens com antecedência.
+- **Cópia para o SEI-UFBA e Impressão:** Ações integradas de cópia de tabela corporativa e impressão nativa do bilhete.
+- **Service Worker Atualizado para v3.4.0:** Atualização do manifesto e cache com invalidação de versões prévias.
 
 ---
 
