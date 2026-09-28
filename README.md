@@ -1,6 +1,6 @@
 # Folga Extra • Otimizador Inteligente de Férias (UFBA / Salvador)
 
-> **Versão:** 3.3 • **Compatibilidade:** Navegadores Modernos (Offline-First / Zero Dependência de Build)  
+> **Versão:** 3.3.1 • **Compatibilidade:** Navegadores Modernos (Offline-First / Zero Dependência de Build)  
 > **Status de Qualidade:** 100% dos Testes Automatizados Aprovados (33/33 em `node test_suite.js`)  
 > **Documentos de Referência:** [`REGRAS_ALGORITMO.md`](./REGRAS_ALGORITMO.md) • [`GUIA_CORES_SISTEMA.md`](./GUIA_CORES_SISTEMA.md) • [`STATUS_PROJETO.md`](./STATUS_PROJETO.md)
 
@@ -31,10 +31,10 @@ Utilizando um motor matemático exato de **Programação Dinâmica** e **Frontei
 * **Jornada de Trabalho:** Grid perfeitamente alinhado de 7 colunas proporcionais (`DOM`, `SEG`, `TER`, `QUA`, `QUI`, `SEX`, `SÁB`) em linha única.
 * **Coluna de Alavancagem & Bem-Estar:** Destaque visual refinado com badge `✨ Otimizadores`, controle tátil de Banco de Horas (+ / -), enforcamento de pontes e o filtro **Combate à Fadiga** (garantia de $\ge 60$ dias úteis de trabalho entre as parcelas).
 
-### 3. Fita Anual do Tempo Panorâmica (12 Meses) com Modo Compacto
+### 3. Fita Anual do Tempo Panorâmica (12 Meses) & Cápsula Flutuante Ultra-Slim 36px (Proposta B)
 * **Cadência Real & Fixação Inteligente:** Linha do tempo panorâmica sincronizada com o cenário ativo, fixada no topo com acabamento em vidro translúcido durante a navegação pelos resultados.
-* **Modo Compacto / Minimizável:** Botão `Compactar` / `Expandir Meses` que recolhe os 12 blocos mensais para uma fita esguia de resumo de distribuição, economizando espaço vertical de rolagem em telas menores e notebooks.
-* **Meses com Férias:** Destaque com gradiente solar, borda dourada e etiquetas em linha única (**`1ª Parcela`**, **`2ª Parcela`**, **`3ª Parcela`**).
+* **Cápsula Flutuante Ultra-Slim 36px (Proposta B):** Botão `⚡ Modo Cápsula (36px)` / `Ver 12 Meses` que transforma a barra em uma cápsula de apenas 36-38px de altura com selo da opção (`👑 Opção 01`), contador de dias livres (`🔥 42d Livres (+12d)`), sparkline de 12 micro-pontos pulsantes e chips das parcelas, liberando mais de 85% do espaço vertical de rolagem da tela.
+* **Meses com Férias:** Destaque com gradiente solar tropical, borda dourada e etiquetas em linha única (**`1ª Parcela`**, **`2ª Parcela`**, **`3ª Parcela`**).
 * **Meses sem Férias:** Micro-indicador discreto de feriados do mês (`X feriados`) e barra estritamente proporcional aos dias exatos de cada mês (`daysInMonth`), sem distorções visuais.
 
 ### 4. Curadoria em Top 5 com Expansão até 10 Alternativas

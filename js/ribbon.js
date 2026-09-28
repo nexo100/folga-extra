@@ -152,16 +152,81 @@
       ? `${formatDate(winStart)} a ${formatDate(winEnd)}`
       : `${year}`;
 
+    if (isCollapsed) {
+      const stagePills = scenario.periods.map((p, idx) => `
+        <span class="px-2 py-0.5 rounded-md bg-slate-900 text-white font-mono font-bold text-[10px] border border-slate-700 whitespace-nowrap flex items-center gap-1 shadow-2xs" title="Etapa ${idx + 1} (${p.length}d oficiais • ${p.totalOff}d descanso • Retorno: ${formatDate ? formatDate(p.returnDate) : p.returnDate})">
+          <span class="text-amber-400 font-black">${idx + 1}ª</span> ${p.length}d (${MONTH_SHORT[p.startDate.getMonth()]})
+        </span>
+      `).join(' ');
+
+      const microDots = monthsData.map(m => {
+        const hasVac = m.activeStages.length > 0;
+        const hasHol = m.holidaysCount > 0;
+        if (hasVac) {
+          const stagesNames = m.activeStages.map(s => `${s.stageIndex}ª Parcela`).join(', ');
+          return `<span class="w-2.5 h-2.5 rounded-full bg-amber-400 ring-2 ring-amber-300 shadow-sm animate-pulse shrink-0 cursor-help" title="${m.monthName}: ${m.totalOffInMonth}d folga (${stagesNames})"></span>`;
+        } else if (hasHol) {
+          return `<span class="w-2 h-2 rounded-full bg-sky-400 shrink-0 cursor-help" title="${m.monthName}: ${m.holidaysCount} feriado(s)"></span>`;
+        } else {
+          return `<span class="w-1.5 h-1.5 rounded-full bg-slate-700 shrink-0 cursor-help" title="${m.monthName}: Expediente"></span>`;
+        }
+      }).join('');
+
+      return `
+        <!-- PROPOSTA B: CÁPSULA FLUTUANTE ULTRA-SLIM (36px) -->
+        <div id="annualRibbonCapsule" title="Fita Anual do Tempo • Opção ${scenarioIndex + 1}" class="w-full bg-slate-950/95 backdrop-blur-md text-white rounded-full px-3.5 py-1.5 border-2 border-amber-400 shadow-xl shadow-amber-500/10 ring-2 ring-amber-400/20 flex items-center justify-between gap-2 sm:gap-3 transition-all duration-300 select-none">
+          <span class="sr-only">Fita Anual do Tempo • Opção ${scenarioIndex + 1} • JAN a DEZ • 1ª Parcela</span>
+          
+          <!-- LADO ESQUERDO: BADGE OPÇÃO + DIAS LIVRES -->
+          <div class="flex items-center gap-2 shrink-0">
+            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 shadow-xs">
+              ${isChampion ? '<i data-lucide="crown" class="w-3 h-3 text-slate-950"></i>' : '<i data-lucide="sparkles" class="w-3 h-3 text-slate-950"></i>'}
+              Opção ${scenarioIndex + 1}
+            </span>
+            <span class="font-mono font-black text-amber-300 text-xs flex items-center gap-1">
+              🔥 ${scenario.totalOff}d Livres
+              <span class="text-emerald-400 font-bold text-[10px] hidden xs:inline">(+${scenario.extraGain}d)</span>
+            </span>
+          </div>
+
+          <!-- CENTRO: SPARKLINE DE 12 MICRO-DOTS + CHIPS DAS ETAPAS -->
+          <div class="flex items-center gap-2 overflow-hidden">
+            <!-- 12 MICRO-DOTS DOS MESES -->
+            <div class="hidden sm:flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-slate-900 border border-slate-800 shadow-inner shrink-0" title="Cadência anual (Jan a Dez)">
+              ${microDots}
+            </div>
+
+            <!-- CHIPS DAS ETAPAS -->
+            <div class="hidden md:flex items-center gap-1.5 overflow-x-auto custom-scrollbar py-0.5">
+              ${stagePills}
+            </div>
+          </div>
+
+          <!-- LADO DIREITO: BOTÃO DE EXPANSÃO PARA 12 MESES -->
+          <div class="flex items-center gap-1.5 shrink-0">
+            <button type="button"
+              id="btnToggleRibbonCollapse"
+              onclick="event.stopPropagation(); window.OtimizaApp ? window.OtimizaApp.toggleRibbonCollapse() : toggleRibbonCollapse()"
+              class="px-2.5 py-1 rounded-full bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black text-[10px] sm:text-xs transition-all flex items-center gap-1.5 cursor-pointer shadow-md shrink-0"
+              title="Expandir para visualização panorâmica de 12 meses">
+              <i data-lucide="maximize-2" class="w-3.5 h-3.5 text-slate-950"></i>
+              <span>Ver 12 Meses</span>
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
     let html = `
-      <div class="bg-white/95 backdrop-blur-md text-slate-900 rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 shadow-xl shadow-slate-950/10 border-2 border-slate-200/90 space-y-3 sm:space-y-4 transition-all duration-300">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 border-b border-slate-100 pb-3">
-          <div class="flex items-center gap-2.5 sm:gap-3">
-            <span class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-slate-100 text-slate-700 border border-slate-200 flex items-center justify-center shrink-0 shadow-2xs">
-              <i data-lucide="activity" class="w-4 h-4 text-slate-700"></i>
+      <div class="bg-white/95 backdrop-blur-md text-slate-900 rounded-2xl sm:rounded-3xl p-3 sm:p-4 shadow-xl shadow-slate-950/10 border-2 border-slate-200/90 space-y-2.5 sm:space-y-3 transition-all duration-300">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
+          <div class="flex items-center gap-2.5">
+            <span class="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-amber-50 text-amber-600 border border-amber-200 flex items-center justify-center shrink-0 shadow-2xs">
+              <i data-lucide="activity" class="w-4 h-4 text-amber-600"></i>
             </span>
             <div>
               <div class="flex items-center gap-2 flex-wrap">
-                <h4 class="font-extrabold text-xs sm:text-base text-slate-950 tracking-tight">
+                <h4 class="font-extrabold text-xs sm:text-sm text-slate-950 tracking-tight">
                   Fita Anual do Tempo • Distribuição em ${yearHeaderText}
                 </h4>
                 <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${isChampion ? 'bg-amber-100 text-amber-950 border border-amber-300 ring-2 ring-amber-400/20' : 'bg-slate-100 text-slate-800 border border-slate-200'} shadow-2xs transition-all duration-300">
@@ -174,40 +239,23 @@
           </div>
           
           <div class="flex items-center gap-2 text-xs self-start sm:self-auto flex-wrap">
-            <span class="inline-flex items-center gap-1.5 px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 font-mono text-[10px] sm:text-[11px] font-bold shadow-2xs">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 font-mono text-[10px] sm:text-[11px] font-bold shadow-2xs">
               <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
               ${scenario.totalOff} Dias Sem Trabalhar (${scenario.extraGain >= 0 ? '+' : ''}${scenario.extraGain}d Ganho)
             </span>
             <button type="button"
               id="btnToggleRibbonCollapse"
               onclick="event.stopPropagation(); window.OtimizaApp ? window.OtimizaApp.toggleRibbonCollapse() : toggleRibbonCollapse()"
-              class="px-2.5 py-1 rounded-xl bg-white hover:bg-slate-100 text-slate-700 hover:text-slate-950 font-bold text-[10px] sm:text-xs transition-all flex items-center gap-1.5 cursor-pointer border border-slate-300 shadow-2xs"
-              title="${isCollapsed ? 'Expandir para visualização panorâmica de 12 meses' : 'Minimizar a fita para economizar espaço de rolagem'}">
-              <i data-lucide="${isCollapsed ? 'maximize-2' : 'minimize-2'}" class="w-3.5 h-3.5 text-slate-600"></i>
-              <span>${isCollapsed ? 'Expandir Meses' : 'Compactar'}</span>
+              class="px-2.5 py-1 rounded-full bg-slate-900 hover:bg-slate-800 text-amber-400 font-bold text-[10px] sm:text-xs transition-all flex items-center gap-1.5 cursor-pointer border border-slate-700 shadow-2xs"
+              title="Fixar cápsula ultra-fina (36px) para economizar espaço de rolagem">
+              <i data-lucide="minimize-2" class="w-3.5 h-3.5 text-amber-400"></i>
+              <span>⚡ Modo Cápsula (36px)</span>
             </button>
           </div>
         </div>
 
-        <!-- FAIXA RESUMO COMPACTA (QUANDO MINIMIZADA) -->
-        <div id="ribbonCompactStrip" class="${isCollapsed ? 'flex' : 'hidden'} items-center justify-between gap-2 px-3.5 py-2 bg-slate-50/90 rounded-2xl border border-slate-200/90 text-xs">
-          <div class="flex items-center gap-2 overflow-x-auto custom-scrollbar py-0.5">
-            <span class="text-[10px] uppercase font-bold text-slate-500 tracking-wider shrink-0 flex items-center gap-1">
-              <i data-lucide="calendar" class="w-3.5 h-3.5 text-slate-400"></i> Distribuição:
-            </span>
-            ${scenario.periods.map((p, idx) => `
-              <span class="px-2.5 py-1 rounded-lg bg-slate-900 text-white font-mono font-bold text-[10px] shadow-2xs whitespace-nowrap flex items-center gap-1">
-                <span class="text-amber-400 font-black">${idx + 1}ª</span> ${p.length}d (${MONTH_SHORT[p.startDate.getMonth()]})
-              </span>
-            `).join(' ')}
-          </div>
-          <span class="text-[10px] font-bold text-slate-500 shrink-0 font-mono hidden sm:inline-flex items-center gap-1">
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Modo Compacto Ativo
-          </span>
-        </div>
-
         <!-- GRADE DOS MESES DA JANELA (6 COLUNAS NO MOBILE = 2 SEMESTRES; 12 NO DESKTOP) -->
-        <div id="ribbonMonthsGrid" class="${isCollapsed ? 'hidden' : 'grid'} grid-cols-6 lg:grid-cols-12 gap-1 sm:gap-1.5 md:gap-2 text-center transition-all duration-300">
+        <div id="ribbonMonthsGrid" class="grid grid-cols-6 lg:grid-cols-12 gap-1 sm:gap-1.5 md:gap-2 text-center transition-all duration-300">
     `;
 
     monthsData.forEach((m) => {
