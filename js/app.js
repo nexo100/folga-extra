@@ -338,7 +338,7 @@
       </div>
     `).join('');
 
-    if (window.lucide) window.lucide.createIcons();
+    if (window.lucide && container) window.lucide.createIcons({ root: container });
   }
 
   // ----------------------------------------------------
@@ -378,14 +378,15 @@
     runSimulation(false);
   }
 
-  // ----------------------------------------------------
-  // MANIPULAÇÃO DO INPUT DE DIAS DE FÉRIAS
-  // ----------------------------------------------------
+  let _vacationInputTimer = null;
   function onVacationDaysInput(e) {
     let val = parseInt(e.target.value, 10);
     if (!isNaN(val) && val >= 1 && val <= 30) {
       state.vacationDays = val;
-      runSimulation(false);
+      if (_vacationInputTimer) clearTimeout(_vacationInputTimer);
+      _vacationInputTimer = setTimeout(() => {
+        runSimulation(false);
+      }, 250);
     }
   }
 
@@ -600,7 +601,7 @@
       container.appendChild(row);
     });
 
-    if (window.lucide) window.lucide.createIcons();
+    if (window.lucide && container) window.lucide.createIcons({ root: container });
   }
 
   function removeHoliday(idx) {
@@ -653,7 +654,7 @@
         state.customWindowEnabled ? { windowStartDate: state.windowStartDate, windowYears: state.windowYears } : null,
         state.ribbonCollapsed
       );
-      if (window.lucide) window.lucide.createIcons();
+      if (window.lucide) window.lucide.createIcons({ root: ribbonContainer });
     }
   }
 
@@ -668,7 +669,7 @@
       btn.innerHTML = state.showAllScenarios
         ? `<i data-lucide="chevron-up" class="w-4 h-4 text-amber-500"></i><span>Recolher para os 5 Melhores Cenários</span><span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-mono text-[10px]">10 de 10 visíveis</span>`
         : `<i data-lucide="chevron-down" class="w-4 h-4 text-amber-500"></i><span>Ver Mais 5 Alternativas Sazonais (Opções 06 a 10)</span><span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-mono text-[10px]">+5 opções</span>`;
-      if (window.lucide) window.lucide.createIcons();
+      if (window.lucide) window.lucide.createIcons({ root: btn });
     }
   }
 
@@ -716,7 +717,11 @@
       }
     });
 
-    if (window.lucide) window.lucide.createIcons();
+    if (window.lucide) {
+      if (ribbonContainer) window.lucide.createIcons({ root: ribbonContainer });
+      const curBtn = document.getElementById(`ribbonActiveBtn_${sIdx}`);
+      if (curBtn) window.lucide.createIcons({ root: curBtn });
+    }
 
     if (shouldScroll && ribbonContainer) {
       const rect = ribbonContainer.getBoundingClientRect();
@@ -768,14 +773,14 @@
       if (btnText) btnText.innerText = 'Ocultar Calendário';
       if (btnIcon) {
         btnIcon.setAttribute('data-lucide', 'chevron-up');
-        if (window.lucide) window.lucide.createIcons();
+        if (window.lucide && btnIcon.parentElement) window.lucide.createIcons({ root: btnIcon.parentElement });
       }
     } else {
       el.classList.add('hidden');
       if (btnText) btnText.innerText = 'Ver Calendário';
       if (btnIcon) {
         btnIcon.setAttribute('data-lucide', 'calendar');
-        if (window.lucide) window.lucide.createIcons();
+        if (window.lucide && btnIcon.parentElement) window.lucide.createIcons({ root: btnIcon.parentElement });
       }
     }
   }
@@ -853,7 +858,7 @@
       }
     }
 
-    if (window.lucide) window.lucide.createIcons();
+    if (window.lucide && infoEl) window.lucide.createIcons({ root: infoEl });
   }
 
   // ----------------------------------------------------
@@ -974,7 +979,7 @@
         </div>
       `;
       if (ribbonContainer) ribbonContainer.innerHTML = '';
-      if (window.lucide) window.lucide.createIcons();
+      if (window.lucide && scenariosContainer) window.lucide.createIcons({ root: scenariosContainer });
       return;
     }
 
@@ -1107,7 +1112,7 @@
     setScenarioFilter(state.activeFilter || 'all');
     savePreferences();
 
-    if (window.lucide) window.lucide.createIcons();
+    if (window.lucide && resultsSection) window.lucide.createIcons({ root: resultsSection });
 
     // Sincroniza dinamicamente o bilhete de potencial do Hero com o melhor cenário real encontrado
     if (best) {
@@ -1177,12 +1182,12 @@
       const originalHtml = btnEl.innerHTML;
       btnEl.innerHTML = `<i data-lucide="check" class="w-4 h-4 text-emerald-600"></i><span class="text-emerald-700">Tabela Copiada (SEI/Texto)!</span>`;
       btnEl.classList.add('bg-emerald-50', 'border-emerald-200');
-      if (window.lucide) window.lucide.createIcons();
+      if (window.lucide && btnEl) window.lucide.createIcons({ root: btnEl });
       showToast('Resumo copiado com formatação de tabela (pronto para colar no SEI-UFBA, Word ou E-mail).', 'success');
       setTimeout(() => {
         btnEl.innerHTML = originalHtml;
         btnEl.classList.remove('bg-emerald-50', 'border-emerald-200');
-        if (window.lucide) window.lucide.createIcons();
+        if (window.lucide && btnEl) window.lucide.createIcons({ root: btnEl });
       }, 2500);
     }).catch(err => {
       console.error('Falha ao copiar:', err);
@@ -1305,8 +1310,7 @@
     if (toggleWrapper) {
       toggleWrapper.style.display = filterKey === 'all' ? '' : 'none';
     }
-
-    if (typeof window !== 'undefined' && window.lucide) window.lucide.createIcons();
+    // Nenhuma alteração de ícone necessária: cards já possuem SVGs renderizados
   }
 
   // ----------------------------------------------------
@@ -1441,7 +1445,7 @@
       modal.classList.add('scale-100');
     }
 
-    if (typeof window !== 'undefined' && window.lucide) window.lucide.createIcons();
+    if (typeof window !== 'undefined' && window.lucide && modal) window.lucide.createIcons({ root: modal });
   }
 
   function closeBoardingPassModal() {
@@ -1491,12 +1495,12 @@
           const original = btn.innerHTML;
           btn.innerHTML = `<i data-lucide="check" class="w-4 h-4 text-white"></i><span>Mensagem Copiada!</span>`;
           btn.classList.add('bg-emerald-700');
-          if (typeof window !== 'undefined' && window.lucide) window.lucide.createIcons();
+          if (typeof window !== 'undefined' && window.lucide && btn) window.lucide.createIcons({ root: btn });
           showToast('Mensagem festiva pronta para o WhatsApp copiada com sucesso!', 'success');
           setTimeout(() => {
             btn.innerHTML = original;
             btn.classList.remove('bg-emerald-700');
-            if (typeof window !== 'undefined' && window.lucide) window.lucide.createIcons();
+            if (typeof window !== 'undefined' && window.lucide && btn) window.lucide.createIcons({ root: btn });
           }, 2500);
         }
       }).catch(err => {
@@ -1576,7 +1580,7 @@
       btn.setAttribute('aria-label', `Adicionar Opção ${sIdx + 1} à comparação`);
       btn.innerHTML = `<i data-lucide="plus" class="w-3.5 h-3.5 text-slate-500"></i><span>Comparar</span>`;
     }
-    if (window.lucide) window.lucide.createIcons();
+    if (window.lucide && btn) window.lucide.createIcons({ root: btn });
   }
 
   function clearComparison() {
@@ -1650,7 +1654,7 @@
       }
     }
 
-    if (window.lucide) window.lucide.createIcons();
+    if (window.lucide && dock) window.lucide.createIcons({ root: dock });
   }
 
   function renderComparatorDrawer() {
@@ -1667,7 +1671,7 @@
               <p class="text-xs text-slate-500 max-w-sm mx-auto">Selecione até 3 opções clicando em "+ Comparar" nos cards para analisar lado a lado.</p>
             </div>
           `;
-          if (window.lucide) window.lucide.createIcons();
+          if (window.lucide && contentEl) window.lucide.createIcons({ root: contentEl });
         }
       }
       return '';
@@ -1918,7 +1922,7 @@
       if (contentEl) {
         contentEl.innerHTML = fullHtml;
       }
-      if (window.lucide) window.lucide.createIcons();
+      if (window.lucide && contentEl) window.lucide.createIcons({ root: contentEl });
     }
 
     return fullHtml;
@@ -1975,11 +1979,11 @@
         const originalHtml = btnEl.innerHTML;
         btnEl.innerHTML = `<i data-lucide="check" class="w-3.5 h-3.5 text-emerald-600"></i><span class="text-emerald-700">Copiado!</span>`;
         btnEl.classList.add('bg-emerald-50', 'border-emerald-200');
-        if (window.lucide) window.lucide.createIcons();
+        if (window.lucide && btnEl) window.lucide.createIcons({ root: btnEl });
         setTimeout(() => {
           btnEl.innerHTML = originalHtml;
           btnEl.classList.remove('bg-emerald-50', 'border-emerald-200');
-          if (window.lucide) window.lucide.createIcons();
+          if (window.lucide && btnEl) window.lucide.createIcons({ root: btnEl });
         }, 2000);
       }).catch(err => {
         console.error('Falha ao copiar:', err);

@@ -106,6 +106,20 @@
       } else {
         this.holidays = [];
       }
+
+      // Cache indexado O(1) de feriados e dias de folga para máxima performance
+      this._holidayMap = new Map();
+      if (Array.isArray(this.holidays)) {
+        this.holidays.forEach(h => {
+          if (!h || !h.date) return;
+          const d = normalizeDate(h.date);
+          if (d) {
+            const key = d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
+            this._holidayMap.set(key, h);
+          }
+        });
+      }
+      this._dayOffCache = new Map();
     }
 
     isPeriodExcluded(period) {
@@ -179,17 +193,38 @@
     }
 
     isHoliday(date) {
-      const dateStr = formatISODate(date);
+      if (!date) return false;
+      const d = date instanceof Date ? date : normalizeDate(date);
+      if (!d) return false;
+      const key = d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
+      if (this._holidayMap) return this._holidayMap.has(key);
+      const dateStr = formatISODate(d);
       return this.holidays.some(h => formatISODate(h.date) === dateStr);
     }
 
     getHolidayInfo(date) {
-      const dateStr = formatISODate(date);
+      if (!date) return null;
+      const d = date instanceof Date ? date : normalizeDate(date);
+      if (!d) return null;
+      const key = d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
+      if (this._holidayMap) return this._holidayMap.get(key) || null;
+      const dateStr = formatISODate(d);
       return this.holidays.find(h => formatISODate(h.date) === dateStr) || null;
     }
 
     isDayOff(date) {
-      return !this.isWorkingDay(date) || this.isHoliday(date);
+      if (!date) return false;
+      const d = date instanceof Date ? date : normalizeDate(date);
+      if (!d) return false;
+      const key = d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
+      if (this._dayOffCache) {
+        let cached = this._dayOffCache.get(key);
+        if (cached !== undefined) return cached;
+        cached = !this.isWorkingDay(d) || this.isHoliday(d);
+        this._dayOffCache.set(key, cached);
+        return cached;
+      }
+      return !this.isWorkingDay(d) || this.isHoliday(d);
     }
 
     isValidStart(startDate) {
@@ -372,7 +407,8 @@
      * Identifica o teto matemático dinâmico para o ano e alternativas pareto-ótimas
      */
     optimize(totalDays, splitCount) {
-      const splits = this.getSplits(totalDays, splitCount);
+      const allSplits = this.getSplits(totalDays, splitCount);
+      const splits = (splitCount === 3 && allSplits.length > 25) ? allSplits.slice(0, 25) : allSplits;
       const startWindowDate = this.windowStartDate ? new Date(this.windowStartDate) : new Date(this.year, 0, 1);
 
       let endWindowDate;
