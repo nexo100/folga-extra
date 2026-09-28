@@ -1,6 +1,6 @@
 # DOCUMENTO DE TRANSIÇÃO E ESTADO DO PROJETO (HANDOFF)
 **Projeto:** Folga Extra (UFBA) — Otimizador Inteligente de Férias e Descanso  
-**Versão Atual:** v3.2  
+**Versão Atual:** v3.3  
 **Data de Atualização:** 27/09/2026  
 **Caminho Local Oficial:** `C:\Users\nexo\github\folga-extra`  
 **Repositório GitHub:** `https://github.com/nexo100/folga-extra`  
@@ -97,12 +97,13 @@ O painel de controle superior foi reestruturado de forma harmoniosa, com alturas
 
 ---
 
-### I. Modularização de Temas & Refinamento de UX (v3.2)
-- **Extração Oficial de `js/tags.js`:** O motor de roteiros temáticos e 30+ arquétipos culturais/sazonais foi oficialmente desacoplado em `js/tags.js` (UMD), unificando a arquitetura física com toda a documentação histórica do projeto.
-- **Substituição de Alertas Nativos por Notificações Toast:** Criação da função `showToast()` para substituir popups bloqueantes de `alert()` por toasts elegantes, translúcidos e não-invasivos no padrão visual do Design System.
-- **Preservação Inteligente da Comparação de Cenários:** O recálculo ou alternância de parâmetros finos (pontes, banco de horas) agora filtra e preserva os cenários já selecionados no Comparador que continuam válidos no novo cálculo, eliminando o atrito de perder o estado de comparação.
-- **Sincronização Dinâmica do Widget do Hero:** O bilhete de potencial do Hero (`+25 Dias` / `Alavancagem`) agora é reativo e reflete o ganho e alavancagem reais encontrados para o ano selecionado e cota solicitada.
-- **Confetti com Cooldown Inteligente:** Adicionado intervalo mínimo (12s) para a celebração de confetes, mantendo a experiência solar e recompensadora sem ruído visual em ajustes contínuos.
+### J. Desacoplamento Arquitetural, Top 5 Expansível e Exportação Corporativa SEI (v3.3)
+- **Extração Oficial do Motor de Renderização (`js/render.js`):** Desacoplamento completo dos geradores de HTML dos cards de cenários, badges de mérito, blocos de itinerário boarding pass e gerador de tabelas ricas para fora de `js/app.js`, reduzindo a complexidade ciclomática do controlador principal e viabilizando testes unitários dedicados de renderização.
+- **Curadoria em Top 5 com Expansão até 10 Alternativas:** Substituição da listagem longa inicial pela exibição padrão dos **5 Melhores Cenários Estratégicos** (Campeã, Campeã Alternativa, Julho, Fim de Ano e Clássicas). Foi adicionado o botão `#btnToggleAllScenarios` que expande suavemente as 5 alternativas complementares (totalizando até 10 opções).
+- **Fita Anual Compactável (Modo Minimizável):** Para economizar espaço vertical de rolagem ao navegar pelos resultados em telas menores ou notebooks, a Fita Anual do Tempo agora possui o botão interativo `#btnToggleRibbonCollapse` (`Compactar` / `Expandir Meses`) e a faixa resumo `#ribbonCompactStrip`, mantendo visíveis a cadência e datas sem poluição visual.
+- **Exportação Corporativa em Tabela HTML (SEI-UFBA / Word / E-mail):** O botão **Copiar Resumo de Férias** gera um payload duplo na área de transferência (`ClipboardItem` com `text/html` e `text/plain`). Ao colar no SEI-UFBA, no Microsoft Word ou no cliente de e-mail, o usuário obtém uma tabela oficial formatada com cabeçalhos escuros, colunas dimensionadas, destaques em verde e totais consolidados.
+- **Acessibilidade e Estabilização do Cockpit:** Adicionado `role="status"` e `aria-live="polite"` ao `#toastContainer` para compatibilidade com leitores de tela; adicionado `overscroll-contain` e `max-h-24` ao `#excludedPeriodsList` para evitar encadeamento de rolagem indesejado no Cockpit.
+- **Service Worker v3.3.0:** Adição de `./js/render.js` aos ativos estáticos pré-cacheados em `sw.js` com limpeza automática de versões legadas de cache.
 
 ---
 
@@ -138,11 +139,12 @@ O repositório e a máquina possuem 3 camadas de blindagem ativas:
 | Arquivo | Função |
 | :--- | :--- |
 | `index.html` | Interface completa, Cockpit em 3 cards, Dock e Drawer do comparador. |
-| `js/app.js` | Estado reativo, orquestração de eventos, filtros e renderização. |
+| `js/app.js` | Estado reativo, orquestração de eventos, filtros e controle da UI. |
 | `js/optimizer.js` | Motor de Programação Dinâmica, janela 1/2 anos, exclusão de períodos. |
 | `js/holidays.js` | Computus móvel, feriados fixos e recesso MGI interanual. |
-| `js/ribbon.js` | Linha do tempo panorâmica, fitas mensais e mini-calendários. |
+| `js/ribbon.js` | Linha do tempo panorâmica, fitas mensais e modo compacto. |
 | `js/tags.js` | Motor de 30+ arquétipos temáticos para os cenários. |
+| `js/render.js` | Motor desacoplado de templates, cards de cenário e tabela corporativa SEI. |
 | `test_suite.js` | Suíte de testes automatizados com 33 asserções. |
 | `GUIA_CORES_SISTEMA.md` | Design System com a paleta oficial corporativa. |
 | `REGRAS_ALGORITMO.md` | Especificação formal dos algoritmos e base legal (Lei 8.112/90). |

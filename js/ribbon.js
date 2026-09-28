@@ -32,7 +32,7 @@
    * @param {Array} holidaysList - Lista opcional de feriados para enriquecer meses sem férias
    * @returns {string} HTML da fita panorâmica
    */
-  function renderAnnualRibbon(scenario, year, scenarioIndex = 0, holidaysList = null, customWindow = null) {
+  function renderAnnualRibbon(scenario, year, scenarioIndex = 0, holidaysList = null, customWindow = null, isCollapsed = false) {
     if (!scenario || !scenario.periods) return '';
 
     let isCustomWindow = false;
@@ -173,16 +173,41 @@
             </div>
           </div>
           
-          <div class="flex items-center gap-2 text-xs self-start sm:self-auto">
+          <div class="flex items-center gap-2 text-xs self-start sm:self-auto flex-wrap">
             <span class="inline-flex items-center gap-1.5 px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 font-mono text-[10px] sm:text-[11px] font-bold shadow-2xs">
               <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
               ${scenario.totalOff} Dias Sem Trabalhar (${scenario.extraGain >= 0 ? '+' : ''}${scenario.extraGain}d Ganho)
             </span>
+            <button type="button"
+              id="btnToggleRibbonCollapse"
+              onclick="event.stopPropagation(); window.OtimizaApp ? window.OtimizaApp.toggleRibbonCollapse() : toggleRibbonCollapse()"
+              class="px-2.5 py-1 rounded-xl bg-white hover:bg-slate-100 text-slate-700 hover:text-slate-950 font-bold text-[10px] sm:text-xs transition-all flex items-center gap-1.5 cursor-pointer border border-slate-300 shadow-2xs"
+              title="${isCollapsed ? 'Expandir para visualização panorâmica de 12 meses' : 'Minimizar a fita para economizar espaço de rolagem'}">
+              <i data-lucide="${isCollapsed ? 'maximize-2' : 'minimize-2'}" class="w-3.5 h-3.5 text-slate-600"></i>
+              <span>${isCollapsed ? 'Expandir Meses' : 'Compactar'}</span>
+            </button>
           </div>
         </div>
 
+        <!-- FAIXA RESUMO COMPACTA (QUANDO MINIMIZADA) -->
+        <div id="ribbonCompactStrip" class="${isCollapsed ? 'flex' : 'hidden'} items-center justify-between gap-2 px-3.5 py-2 bg-slate-50/90 rounded-2xl border border-slate-200/90 text-xs">
+          <div class="flex items-center gap-2 overflow-x-auto custom-scrollbar py-0.5">
+            <span class="text-[10px] uppercase font-bold text-slate-500 tracking-wider shrink-0 flex items-center gap-1">
+              <i data-lucide="calendar" class="w-3.5 h-3.5 text-slate-400"></i> Distribuição:
+            </span>
+            ${scenario.periods.map((p, idx) => `
+              <span class="px-2.5 py-1 rounded-lg bg-slate-900 text-white font-mono font-bold text-[10px] shadow-2xs whitespace-nowrap flex items-center gap-1">
+                <span class="text-amber-400 font-black">${idx + 1}ª</span> ${p.length}d (${MONTH_SHORT[p.startDate.getMonth()]})
+              </span>
+            `).join(' ')}
+          </div>
+          <span class="text-[10px] font-bold text-slate-500 shrink-0 font-mono hidden sm:inline-flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Modo Compacto Ativo
+          </span>
+        </div>
+
         <!-- GRADE DOS MESES DA JANELA (6 COLUNAS NO MOBILE = 2 SEMESTRES; 12 NO DESKTOP) -->
-        <div class="grid grid-cols-6 lg:grid-cols-12 gap-1 sm:gap-1.5 md:gap-2 text-center">
+        <div id="ribbonMonthsGrid" class="${isCollapsed ? 'hidden' : 'grid'} grid-cols-6 lg:grid-cols-12 gap-1 sm:gap-1.5 md:gap-2 text-center transition-all duration-300">
     `;
 
     monthsData.forEach((m) => {
@@ -200,32 +225,32 @@
       const holidayPct = Math.round((holidayDays / daysInMonth) * 100);
 
       html += `
-        <div class="flex flex-col justify-between rounded-xl sm:rounded-2xl p-1.5 sm:p-2.5 transition-all duration-300 ${
+        <div class="flex flex-col justify-between rounded-xl sm:rounded-2xl p-1.5 sm:p-2 transition-all duration-300 ${
           hasVacation 
             ? 'bg-gradient-to-br from-amber-100/90 via-sky-50/90 to-indigo-100/80 border-2 border-amber-400 shadow-md scale-[1.02] ring-2 ring-amber-400/20' 
             : 'bg-slate-50/70 border border-slate-200/70 hover:border-slate-300'
         }" title="${hasVacation ? `${m.totalOffInMonth} dias livres de ${daysInMonth} dias (${vacationPct}% do mês)` : (hCount > 0 ? `${hCount} feriado(s) de ${daysInMonth} dias (${holidayPct}% do mês)` : `${daysInMonth} dias de expediente pleno`)}">
-          <div class="flex items-center justify-between gap-1 mb-1">
+          <div class="flex items-center justify-between gap-1 mb-0.5">
             <span class="font-extrabold text-[10px] sm:text-[11px] tracking-wider ${hasVacation ? 'text-slate-950 font-black' : 'text-slate-400'}">
               ${m.monthName}
             </span>
             ${hasVacation ? '<i data-lucide="sparkles" class="w-3 h-3 text-amber-600"></i>' : ''}
           </div>
 
-          <div class="min-h-[38px] sm:min-h-[46px] flex flex-col items-center justify-center gap-0.5 sm:gap-1 py-0.5">
+          <div class="min-h-[34px] sm:min-h-[40px] flex flex-col items-center justify-center gap-0.5 py-0.5">
             ${hasVacation ? `
-              <div class="flex flex-col items-center gap-0.5 sm:gap-1 w-full">
+              <div class="flex flex-col items-center gap-0.5 w-full">
                 ${stageLabels}
                 <span class="text-[9px] sm:text-[10px] text-slate-950 font-mono font-black">
                   ${m.totalOffInMonth}d folga
                 </span>
               </div>
             ` : `
-              <div class="flex flex-col items-center gap-0.5 sm:gap-1 w-full">
+              <div class="flex flex-col items-center gap-0.5 w-full">
                 <span class="text-[9px] sm:text-[10px] text-slate-400 font-medium">Expediente</span>
                 ${hCount > 0 ? `
-                  <span class="inline-flex items-center gap-0.5 sm:gap-1 px-1 sm:px-1.5 py-0.5 rounded-md text-[8px] sm:text-[9px] font-bold bg-amber-50 text-amber-800 border border-amber-200/70 shadow-2xs">
-                    <span class="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-amber-500"></span>
+                  <span class="inline-flex items-center gap-0.5 px-1 sm:px-1.5 py-0.5 rounded-md text-[8px] sm:text-[9px] font-bold bg-amber-50 text-amber-800 border border-amber-200/70 shadow-2xs">
+                    <span class="w-1 h-1 rounded-full bg-amber-500"></span>
                     ${hCount} ${hCount === 1 ? 'feriado' : 'feriados'}
                   </span>
                 ` : `

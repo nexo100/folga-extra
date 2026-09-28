@@ -16,6 +16,7 @@
   const { renderMiniCalendar } = root.MiniCalendarEngine || require('./mini-calendar.js');
   const { renderAnnualRibbon } = root.AnnualRibbonEngine || (typeof require !== 'undefined' ? require('./ribbon.js').renderAnnualRibbon : () => '');
   const { getScenarioStrategicTheme } = root.TagsEngine || (typeof require !== 'undefined' ? require('./tags.js') : {});
+  const { buildBadgesHtml: rBuildBadgesHtml, buildPeriodHtml: rBuildPeriodHtml, buildScenarioCardHtml: rBuildScenarioCardHtml, generateScenarioTableHtml } = root.RenderEngine || (typeof require !== 'undefined' ? require('./render.js') : {});
 
   /**
    * Notificação visual moderna e discreta (Toast), substituindo alertas nativos do navegador
@@ -32,13 +33,26 @@
       container = document.createElement('div');
       container.id = 'toastContainer';
       container.className = 'fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm w-full px-4 pointer-events-none';
+      container.setAttribute('role', 'status');
+      container.setAttribute('aria-live', 'polite');
       document.body.appendChild(container);
     }
     const toast = document.createElement('div');
     const isDanger = type === 'danger' || type === 'error';
-    const bgClass = isDanger ? 'bg-rose-900/95 border-rose-700 text-white' : 'bg-slate-900/95 border-amber-400 text-white';
-    const iconName = isDanger ? 'alert-octagon' : 'alert-circle';
-    const iconColor = isDanger ? 'text-rose-400' : 'text-amber-400';
+    const isSuccess = type === 'success';
+    let bgClass = 'bg-slate-900/95 border-amber-400 text-white';
+    let iconName = 'alert-circle';
+    let iconColor = 'text-amber-400';
+
+    if (isDanger) {
+      bgClass = 'bg-rose-900/95 border-rose-700 text-white';
+      iconName = 'alert-octagon';
+      iconColor = 'text-rose-400';
+    } else if (isSuccess) {
+      bgClass = 'bg-slate-950/95 border-emerald-500 text-white';
+      iconName = 'check-circle-2';
+      iconColor = 'text-emerald-400';
+    }
 
     toast.className = `flex items-center gap-3 p-3.5 rounded-2xl border shadow-xl backdrop-blur-md text-xs font-bold transition-all duration-300 transform translate-y-4 opacity-0 pointer-events-auto ${bgClass}`;
     toast.innerHTML = `
@@ -78,6 +92,8 @@
     currentScenarios: [],
     comparedScenarios: [],
     hasCalculated: false,
+    showAllScenarios: false,
+    ribbonCollapsed: false,
 
     // Ponto 2: Janela Personalizada & Períodos a Evitar
     customWindowEnabled: false,
@@ -515,6 +531,38 @@
     runSimulation(false);
   }
 
+  function toggleRibbonCollapse() {
+    state.ribbonCollapsed = !state.ribbonCollapsed;
+    const ribbonContainer = document.getElementById('annualRibbonContainer');
+    const sc = state.currentScenarios && state.currentScenarios[state.activeScenarioIndex || 0];
+    if (ribbonContainer && sc) {
+      ribbonContainer.innerHTML = renderAnnualRibbon(
+        sc,
+        state.selectedYear,
+        state.activeScenarioIndex || 0,
+        state.holidays,
+        state.customWindowEnabled ? { windowStartDate: state.windowStartDate, windowYears: state.windowYears } : null,
+        state.ribbonCollapsed
+      );
+      if (window.lucide) window.lucide.createIcons();
+    }
+  }
+
+  function toggleShowAllScenarios() {
+    state.showAllScenarios = !state.showAllScenarios;
+    const extraCards = document.querySelectorAll('[data-extra-scenario="true"]');
+    extraCards.forEach(c => {
+      c.style.display = state.showAllScenarios ? '' : 'none';
+    });
+    const btn = document.getElementById('btnToggleAllScenarios');
+    if (btn) {
+      btn.innerHTML = state.showAllScenarios
+        ? `<i data-lucide="chevron-up" class="w-4 h-4 text-amber-500"></i><span>Recolher para os 5 Melhores Cenários</span><span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-mono text-[10px]">10 de 10 visíveis</span>`
+        : `<i data-lucide="chevron-down" class="w-4 h-4 text-amber-500"></i><span>Ver Mais 5 Alternativas Sazonais (Opções 06 a 10)</span><span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-mono text-[10px]">+5 opções</span>`;
+      if (window.lucide) window.lucide.createIcons();
+    }
+  }
+
   // ----------------------------------------------------
   // SELEÇÃO DINÂMICA DO CENÁRIO NA FITA ANUAL DO TEMPO
   // ----------------------------------------------------
@@ -529,7 +577,8 @@
         state.selectedYear,
         sIdx,
         state.holidays,
-        state.customWindowEnabled ? { windowStartDate: state.windowStartDate, windowYears: state.windowYears } : null
+        state.customWindowEnabled ? { windowStartDate: state.windowStartDate, windowYears: state.windowYears } : null,
+        state.ribbonCollapsed
       );
     }
 
@@ -717,295 +766,26 @@
 
   // Gera os badges de mérito (Campeã, Campeã Alternativa, Férias de Julho, Fim de Ano, 10+10+10, Anti-Fadiga)
   function buildBadgesHtml(sc, sIdx, distributeThroughoutYear) {
-    let html = '';
-    const partitionKey = sc.partition ? sc.partition.join('+') : (sc.split ? sc.split.slice().sort((a, b) => b - a).join('+') : '');
-    const splitKey = sc.split ? sc.split.join('+') : '';
-
-    if (sIdx === 0 || sc.category === 'Campeã') {
-      html += `<span class="bg-amber-100 text-amber-950 border border-amber-300 px-2.5 py-0.5 rounded-full text-xs font-black uppercase tracking-wider shadow-2xs flex items-center gap-1.5"><i data-lucide="crown" class="w-3.5 h-3.5 text-amber-700"></i> Campeã</span>`;
-    } else if (sIdx === 1 || sc.category === 'Campeã Alternativa') {
-      html += `<span class="bg-amber-50 text-amber-900 border border-amber-300 px-2.5 py-0.5 rounded-full text-xs font-bold flex items-center gap-1.5 shadow-2xs"><i data-lucide="crown" class="w-3.5 h-3.5 text-amber-600"></i> Campeã Alternativa</span>`;
-    } else if (sc.category === 'Férias de Julho' || sc.category === 'Férias de Julho Alternativa') {
-      html += `<span class="bg-sky-50 text-sky-900 border border-sky-300 px-2.5 py-0.5 rounded-full text-xs font-bold flex items-center gap-1 shadow-2xs"><i data-lucide="sun" class="w-3.5 h-3.5 text-sky-600"></i> Férias de Julho</span>`;
-    } else if (sc.category === 'Recesso Fim de Ano' || sc.category === 'Recesso Fim de Ano Alternativo') {
-      html += `<span class="bg-purple-50 text-purple-900 border border-purple-300 px-2.5 py-0.5 rounded-full text-xs font-bold flex items-center gap-1 shadow-2xs"><i data-lucide="calendar-heart" class="w-3.5 h-3.5 text-purple-600"></i> Recesso Fim de Ano</span>`;
-    } else if (sc.category === 'Outono / Páscoa') {
-      html += `<span class="bg-orange-50 text-orange-900 border border-orange-300 px-2.5 py-0.5 rounded-full text-xs font-bold flex items-center gap-1 shadow-2xs"><i data-lucide="flower" class="w-3.5 h-3.5 text-orange-600"></i> Outono / Páscoa</span>`;
-    } else if (partitionKey === '10+10+10' || splitKey === '10+10+10') {
-      html += `<span class="bg-slate-100 text-slate-800 border border-slate-200 px-2.5 py-0.5 rounded-full text-xs font-bold flex items-center gap-1 shadow-2xs"><i data-lucide="star" class="w-3.5 h-3.5 text-slate-600"></i> 10+10+10</span>`;
-    } else if (partitionKey === '15+10+5') {
-      html += `<span class="bg-indigo-50 text-indigo-900 border border-indigo-200 px-2.5 py-0.5 rounded-full text-xs font-bold flex items-center gap-1 shadow-2xs"><i data-lucide="zap" class="w-3.5 h-3.5 text-indigo-600"></i> 15+10+5</span>`;
-    } else {
-      html += `<span class="bg-slate-100 text-slate-800 border border-slate-200 px-2.5 py-0.5 rounded-full text-xs font-bold flex items-center gap-1 shadow-2xs"><i data-lucide="sparkles" class="w-3.5 h-3.5 text-slate-600"></i> Alta Alavancagem</span>`;
+    if (typeof rBuildBadgesHtml === 'function') {
+      return rBuildBadgesHtml(sc, sIdx, distributeThroughoutYear);
     }
-
-    if (sc.totalWasted === 0) {
-      html += `<span class="bg-emerald-50 text-emerald-800 border border-emerald-200 px-2.5 py-0.5 rounded-full text-xs font-bold flex items-center gap-1 shadow-2xs"><i data-lucide="check-check" class="w-3.5 h-3.5 text-emerald-600"></i> Desperdício Zero</span>`;
-    }
-
-    if (distributeThroughoutYear) {
-      html += `<span class="bg-teal-50 text-teal-800 border border-teal-200 px-2.5 py-0.5 rounded-full text-xs font-bold flex items-center gap-1 shadow-2xs"><i data-lucide="shield-check" class="w-3.5 h-3.5 text-teal-600"></i> Anti-Fadiga</span>`;
-    }
-    return html;
+    return '';
   }
 
-  // Gera o bloco HTML de uma etapa individual (boarding pass + mini-calendário + navegação)
-  function buildPeriodHtml(sc, sIdx, p, pIdx, optimizer) {
-    const joinedHolidays = [...p.holidaysBefore, ...p.holidaysAfter, ...p.holidaysInside];
-    const holidayTags = joinedHolidays.map(h => {
-      const isFacultativo = h.type === 'recesso' || h.type === 'vespera' || h.type === 'ponte' || h.type === 'servidor' || (h.name && h.name.toLowerCase().includes('facultativo'));
-      const colorClass = isFacultativo
-        ? 'bg-blue-50 text-blue-900 border border-blue-300'
-        : 'bg-amber-100 text-amber-950 border border-amber-300';
-      return `<span class="${colorClass} px-2.5 py-0.5 rounded-lg text-[10px] font-bold shadow-2xs">${h.name}</span>`;
-    }).join(' ');
-
-    const endStatusHtml = p.wastedEndDays === 0
-      ? `<span class="text-emerald-700 font-bold text-[10px] flex items-center gap-1 mt-0.5"><i data-lucide="check" class="w-3 h-3 text-emerald-600"></i> Termina em dia útil (${DAYS_NAME[p.endDate.getDay()]})</span>`
-      : `<span class="text-amber-800 font-bold text-[10px] flex items-center gap-1 mt-0.5" title="O último dia oficial cai em repouso"><i data-lucide="alert-circle" class="w-3 h-3 text-amber-600"></i> Termina em ${DAYS_NAME[p.endDate.getDay()]} (${p.wastedEndDays}d em repouso)</span>`;
-
-    let gapHtml = '';
-    if (pIdx > 0) {
-      const prevP = sc.periods[pIdx - 1];
-      const gapDays = Math.round((p.effectiveStart - prevP.returnDate) / (1000 * 60 * 60 * 24));
-      const monthsVal = (gapDays / 30.4).toFixed(1);
-      const monthsStr = monthsVal.endsWith('.0') ? `${parseInt(monthsVal)} meses` : `${monthsVal} meses`;
-      gapHtml = `
-        <div id="gapConnector_${sIdx}_${pIdx}" class="hidden flex items-center justify-center my-4 relative select-none">
-          <div class="absolute inset-0 flex items-center" aria-hidden="true">
-            <div class="w-full border-t-2 border-dashed border-slate-400"></div>
-          </div>
-          <div class="relative z-10 inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-300 border-2 border-slate-400 text-slate-800 text-xs shadow-xs font-bold">
-            <div class="w-2 h-2 rounded-full ${state.distributeThroughoutYear ? 'bg-teal-500' : 'bg-slate-600'}"></div>
-            <i data-lucide="clock" class="w-3.5 h-3.5 text-slate-700"></i>
-            <span>Intervalo de Trabalho: <strong class="text-slate-950 font-mono font-bold">${gapDays} dias</strong> <span class="text-slate-700 font-medium">(~${monthsStr} de recarga)</span></span>
-            ${state.distributeThroughoutYear ? `
-              <span class="ml-1 px-2 py-0.5 rounded-md text-[10px] font-black bg-teal-50 text-teal-800 border border-teal-200/80 flex items-center gap-1 shadow-2xs">
-                <i data-lucide="shield-check" class="w-3 h-3 text-teal-600"></i> Espaçamento Anti-Fadiga
-              </span>
-            ` : ''}
-          </div>
-        </div>
-      `;
+  // Gera o bloco HTML de uma etapa individual (itinerário boarding pass + mini-calendário)
+  function buildPeriodHtml(sc, sIdx, p, pIdx, optimizer, optState, miniCalendarRenderer) {
+    if (typeof rBuildPeriodHtml === 'function') {
+      return rBuildPeriodHtml(sc, sIdx, p, pIdx, optimizer, optState || state, miniCalendarRenderer || renderMiniCalendar);
     }
-
-    let bottomNav = '';
-    if (sc.periods.length > 1) {
-      bottomNav = `
-        <div class="flex items-center justify-between pt-3 border-t border-slate-200 text-xs">
-          ${pIdx > 0 ? `
-            <button type="button" onclick="event.stopPropagation(); window.OtimizaApp.selectStageTab(${sIdx}, ${pIdx - 1}, ${sc.periods.length})"
-              class="px-3 py-1.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs">
-              <i data-lucide="chevron-left" class="w-3.5 h-3.5"></i>
-              <span>Etapa ${pIdx} (${sc.periods[pIdx - 1].length}d)</span>
-            </button>
-          ` : '<div></div>'}
-          ${pIdx < sc.periods.length - 1 ? `
-            <button type="button" onclick="event.stopPropagation(); window.OtimizaApp.selectStageTab(${sIdx}, ${pIdx + 1}, ${sc.periods.length})"
-              class="px-3.5 py-1.5 rounded-xl border border-slate-900 bg-slate-900 hover:bg-slate-800 text-white font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs">
-              <span>Próxima: Etapa ${pIdx + 2} (${sc.periods[pIdx + 1].length}d)</span>
-              <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
-            </button>
-          ` : `
-            <button type="button" onclick="event.stopPropagation(); window.OtimizaApp.selectStageTab(${sIdx}, 'all', ${sc.periods.length})"
-              class="text-[11px] font-bold text-slate-600 hover:text-slate-950 flex items-center gap-1 cursor-pointer">
-              <span>Ver todas as etapas juntas</span>
-              <i data-lucide="layers" class="w-3 h-3"></i>
-            </button>
-          `}
-        </div>
-      `;
-    }
-
-    return `
-      ${gapHtml}
-      <div id="stageContainer_${sIdx}_${pIdx}" class="${(sc.periods.length === 1 || pIdx === 0) ? '' : 'hidden'} space-y-3">
-        <div class="bg-white/95 border-2 border-slate-300 rounded-2xl p-5 space-y-4 shadow-sm">
-
-          <!-- HEADER DA ETAPA -->
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-slate-300/80 pb-3">
-            <div class="flex items-center gap-2.5">
-              <span class="w-7 h-7 rounded-lg bg-slate-900 text-white font-mono font-black text-xs flex items-center justify-center shrink-0 shadow-2xs">${String(pIdx + 1).padStart(2, '0')}</span>
-              <span class="font-extrabold text-slate-900 text-sm tracking-tight">Etapa ${pIdx + 1} • <span class="font-mono">${p.length}</span> Dias Marcados</span>
-            </div>
-            <div class="flex items-center gap-2 flex-wrap">
-              ${p.compDaysApplied > 0 ? `
-                <span class="text-xs font-bold text-sky-800 bg-sky-50 border border-sky-200 px-2.5 py-0.5 rounded-lg flex items-center gap-1 shadow-2xs" title="Aplicação de ${p.compDaysApplied} dias de banco de horas">
-                  <i data-lucide="clock" class="w-3 h-3 text-sky-600"></i> +${p.compDaysApplied}d Banco
-                </span>
-              ` : ''}
-              <span class="text-xs font-black text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-lg shadow-2xs">
-                🔥 ${p.totalOff} Dias Livres
-              </span>
-              <span class="text-xs font-bold text-slate-700 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-lg flex items-center gap-1 shadow-2xs">
-                <i data-lucide="trending-up" class="w-3 h-3 text-slate-500"></i> ${p.leverage}x
-              </span>
-            </div>
-          </div>
-
-          <!-- FLATTENED 3-COLUMN LINEAR BOARDING PASS ITINERARY (NO NESTED BOXES INSIDE BOXES) -->
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-0 items-center py-1">
-            <!-- COLUNA 1: 🛫 1º DIA LIVRE REAL -->
-            <div class="space-y-1">
-              <div class="flex items-center justify-between gap-1 text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                <span>🛫 1º DIA LIVRE REAL</span>
-                <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-slate-300 hidden md:block"></i>
-              </div>
-              <div class="text-base sm:text-lg font-black font-mono text-slate-950">
-                ${formatDate(p.effectiveStart)}
-              </div>
-              <div class="text-xs text-slate-600 font-medium">
-                ${DAYS_NAME[p.effectiveStart.getDay()]} • ${optimizer.isWorkingDay(p.effectiveStart) ? 'Início de Férias' : 'Repouso Semanal'}
-              </div>
-            </div>
-
-            <!-- COLUNA 2: 📋 OFICIAL NO SOUGOV / SIGRH -->
-            <div class="space-y-1 md:border-l md:border-r border-slate-300 md:px-5 relative">
-              <div class="flex items-center justify-between gap-2 text-[10px] font-black uppercase tracking-wider text-slate-700">
-                <span class="flex items-center gap-1">📋 PERÍODO NO SIGRH</span>
-                <div class="flex items-center gap-1.5">
-                  <span class="px-2 py-0.5 rounded-md bg-slate-900 text-white font-mono font-bold text-[10px]">
-                    ${p.length}d
-                  </span>
-                  <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-slate-300 hidden md:block"></i>
-                </div>
-              </div>
-              <div class="text-base sm:text-lg font-black font-mono text-slate-950">
-                ${formatDate(p.startDate)} a ${formatDate(p.endDate)}
-              </div>
-              <div class="text-xs">
-                ${endStatusHtml}
-              </div>
-            </div>
-
-            <!-- COLUNA 3: 💼 VOLTA AO TRABALHO -->
-            <div class="space-y-1 md:pl-5">
-              <div class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-emerald-800">
-                <span>💼 VOLTA AO TRABALHO</span>
-              </div>
-              <div class="text-base sm:text-lg font-black font-mono text-slate-950">
-                ${formatDate(p.returnDate)}
-              </div>
-              <div class="text-xs text-emerald-800 font-medium flex items-center gap-1">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 inline-block"></span>
-                <span>${DAYS_NAME[p.returnDate.getDay()]} • 1º Dia de Expediente</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- SUB-BARRA: EMENDAS & BOTÃO EXPANSOR DO CALENDÁRIO -->
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-2 border-t border-slate-300/80">
-            <div class="flex items-center gap-1.5 flex-wrap">
-              ${joinedHolidays.length > 0 ? `
-                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1 mr-0.5">
-                  <i data-lucide="sparkles" class="w-3 h-3 text-amber-500"></i> Emenda:
-                </span>
-                ${holidayTags}
-              ` : '<span class="text-[11px] text-slate-500 font-medium">Sem feriados adicionais na etapa</span>'}
-            </div>
-
-            <button type="button" onclick="event.stopPropagation(); window.OtimizaApp.toggleMiniCalendar(${sIdx}, ${pIdx})" class="self-start sm:self-auto text-[11px] font-bold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-100 border border-slate-300 px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer shrink-0 shadow-xs">
-              <i data-lucide="chevron-up" id="btnCalendarIcon_${sIdx}_${pIdx}" class="w-3.5 h-3.5 text-slate-600"></i>
-              <span id="btnCalendarText_${sIdx}_${pIdx}">Ocultar Calendário</span>
-            </button>
-          </div>
-
-          <!-- CONTAINER EXPANDIDO POR PADRÃO DO MINI-CALENDÁRIO -->
-          <div id="miniCalendar_${sIdx}_${pIdx}" class="pt-3 border-t border-slate-300/80">
-            ${renderMiniCalendar(p, optimizer)}
-          </div>
-
-          ${bottomNav}
-
-        </div>
-      </div>
-    `;
+    return '';
   }
 
   // Gera o HTML completo do card de cenário (accordion header + body com todas as etapas)
-  function buildScenarioCardHtml(sc, sIdx, isChampion, isRibbonActive, isCompared, theme, badgesHtml, tabsHtml, periodsBodyHtml) {
-    const topAccentClass = 'bg-slate-900';
-    const datesSummary = sc.periods.map(p => `${formatDate(p.startDate).slice(0, 5)} a ${formatDate(p.endDate).slice(0, 5)}`).join('  •  ');
-
-    return `
-      <!-- ACCENT TOP BORDER (4PX) -->
-      <div class="h-1 w-full ${topAccentClass}"></div>
-
-      <!-- ACCORDION HEADER (CLICKABLE) -->
-      <div onclick="window.OtimizaApp.toggleScenario(${sIdx})" class="p-5 sm:p-6 cursor-pointer flex flex-col md:flex-row md:items-center justify-between gap-4 select-none hover:bg-slate-300/40 transition-colors">
-        <div class="space-y-2 flex-1">
-          <div class="flex items-center gap-2 flex-wrap">
-            <span class="font-mono font-black text-xs px-2.5 py-1 rounded-lg bg-slate-200 text-slate-900 border border-slate-300">OPÇÃO ${String(sIdx + 1).padStart(2, '0')}</span>
-            ${badgesHtml}
-            <h4 class="font-black text-slate-900 text-base sm:text-lg tracking-tight ml-1">
-              ${sc.split.join(' + ')} dias
-            </h4>
-          </div>
-          <div class="pt-0.5">
-            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold ${theme.style} border shadow-2xs">
-              ${theme.text}
-            </span>
-          </div>
-          <p class="text-xs text-slate-600 font-medium flex items-center gap-1.5">
-            <i data-lucide="calendar-range" class="w-3.5 h-3.5 text-slate-500"></i>
-            <span class="text-slate-600">Períodos de Férias:</span>
-            <span class="text-slate-900 font-mono font-bold">${datesSummary}</span>
-          </p>
-        </div>
-
-        <div class="flex items-center gap-3 sm:gap-4 self-end md:self-auto flex-wrap">
-          <div class="text-right">
-            <span class="text-[10px] uppercase font-bold text-slate-500 block tracking-wider">Descanso Real</span>
-            <span class="text-xl sm:text-2xl font-black text-slate-900 font-mono">${sc.totalOff} dias</span>
-          </div>
-          <div class="text-right pl-3.5 border-l border-slate-300">
-            <span class="text-[10px] uppercase font-bold text-emerald-800 block tracking-wider">Ganho Líquido</span>
-            <span class="text-xl sm:text-2xl font-black text-emerald-700 font-mono">+${sc.extraGain}d</span>
-          </div>
-          <div class="text-right pl-3.5 border-l border-slate-300">
-            <span class="text-[10px] uppercase font-bold text-slate-600 block tracking-wider">Alavancagem</span>
-            <span class="text-xl sm:text-2xl font-black text-slate-800 font-mono">${sc.leverage}x</span>
-          </div>
-          <div class="pl-2 flex items-center gap-2">
-            <!-- BOTÃO DE ALTERNÂNCIA PARA O COMPARADOR DESACOPLADO -->
-            <button type="button"
-              id="btnCompare_${sIdx}"
-              onclick="event.stopPropagation(); window.OtimizaApp.toggleCompareScenario(${sIdx})"
-              aria-label="${isCompared ? 'Remover Opção ' + (sIdx + 1) + ' da comparação' : 'Adicionar Opção ' + (sIdx + 1) + ' à comparação'}"
-              class="px-3 py-2 rounded-xl border ${isCompared ? 'border-amber-500 bg-amber-400 text-slate-950 font-black shadow-xs ring-2 ring-amber-400/40' : 'border-slate-300 bg-white hover:bg-slate-100 text-slate-700 hover:text-slate-950 font-bold shadow-2xs'} text-xs transition-all duration-200 flex items-center gap-1.5 cursor-pointer shrink-0">
-              <i data-lucide="${isCompared ? 'check' : 'plus'}" class="w-3.5 h-3.5 ${isCompared ? 'text-slate-950' : 'text-slate-500'}"></i>
-              <span>${isCompared ? 'Comparando' : 'Comparar'}</span>
-            </button>
-
-            <button type="button" aria-label="Expandir detalhes da opção" class="w-9 h-9 rounded-xl border border-slate-300 text-slate-700 hover:text-slate-900 hover:bg-slate-200/70 bg-white flex items-center justify-center transition-all shadow-xs cursor-pointer">
-              <i data-lucide="chevron-down" id="scenarioBtnIcon_${sIdx}" class="w-4 h-4 transition-transform duration-200 ${isChampion ? 'rotate-180' : ''}"></i>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- ACCORDION BODY (COLLAPSIBLE) -->
-      <div id="scenarioBody_${sIdx}" class="${isChampion ? '' : 'hidden'} border-t-2 border-amber-300/60 p-5 sm:p-6 space-y-4 bg-white/40 backdrop-blur-xs">
-        ${tabsHtml}
-        ${periodsBodyHtml}
-
-        <!-- FOOTER ACTION BUTTONS: MOSTRAR NA FITA & COPIAR RESUMO & BAIXAR .ICS -->
-        <div class="pt-3 flex flex-col sm:flex-row items-center justify-end gap-3 border-t border-slate-300">
-          <button type="button" onclick="window.OtimizaApp.selectScenarioForRibbon(${sIdx}, true)" id="ribbonActiveBtn_${sIdx}" class="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-slate-300 ${isRibbonActive ? 'bg-slate-200 text-slate-900' : 'bg-white hover:bg-slate-50 text-slate-700'} text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer">
-            <i data-lucide="${isRibbonActive ? 'check' : 'activity'}" class="w-4 h-4 ${isRibbonActive ? 'text-emerald-600' : 'text-slate-500'}"></i>
-            <span>${isRibbonActive ? 'Ativo na Fita Anual' : 'Destacar na Fita Anual'}</span>
-          </button>
-          <button type="button" onclick="window.OtimizaApp.copyScenarioSummary(${sIdx}, this)" class="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer">
-            <i data-lucide="copy" class="w-4 h-4 text-slate-500"></i>
-            <span>Copiar Resumo de Férias</span>
-          </button>
-          <button type="button" onclick="window.OtimizaApp.downloadScenarioICS(${sIdx})" class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer">
-            <i data-lucide="calendar-plus" class="w-4 h-4 text-white"></i>
-            <span>Baixar Calendário (.ICS)</span>
-          </button>
-        </div>
-      </div>
-    `;
+  function buildScenarioCardHtml(sc, sIdx, isChampion, isRibbonActive, isCompared, theme, badgesHtml, tabsHtml, periodsBodyHtml, isHidden = false) {
+    if (typeof rBuildScenarioCardHtml === 'function') {
+      return rBuildScenarioCardHtml(sc, sIdx, isChampion, isRibbonActive, isCompared, theme, badgesHtml, tabsHtml, periodsBodyHtml, isHidden);
+    }
+    return '';
   }
 
   // ----------------------------------------------------
@@ -1103,7 +883,8 @@
         state.selectedYear,
         0,
         state.holidays,
-        state.customWindowEnabled ? { windowStartDate: state.windowStartDate, windowYears: state.windowYears } : null
+        state.customWindowEnabled ? { windowStartDate: state.windowStartDate, windowYears: state.windowYears } : null,
+        state.ribbonCollapsed
       );
     }
 
@@ -1121,84 +902,97 @@
         ` : ''}
       </div>
     `;
-  scenarios.forEach((sc, sIdx) => {
-    const isChampion = sIdx === 0;
-    const isRibbonActive = sIdx === (state.activeScenarioIndex || 0);
-    const isCompared = state.comparedScenarios && state.comparedScenarios.includes(sIdx);
-    const theme = resolveScenarioTheme(sc, sIdx, state.distributeThroughoutYear);
-    const badgesHtml = buildBadgesHtml(sc, sIdx, state.distributeThroughoutYear);
 
-    const card = document.createElement('div');
-    card.id = `scenarioCard_${sIdx}`;
-    card.className = isRibbonActive
-      ? `bg-gradient-to-br from-amber-100/80 via-sky-50/90 to-indigo-100/70 rounded-3xl border-2 border-amber-400 shadow-xl ring-2 ring-amber-400/40 transition-all duration-300 overflow-hidden`
-      : `bg-slate-100/90 rounded-3xl border-2 border-slate-300/90 shadow-md transition-all duration-300 overflow-hidden hover:border-amber-400 hover:shadow-xl hover:bg-gradient-to-br hover:from-amber-100/40 hover:via-sky-50/50 hover:to-indigo-100/40 cursor-pointer`;
+    scenarios.forEach((sc, sIdx) => {
+      const isChampion = sIdx === 0;
+      const isRibbonActive = sIdx === (state.activeScenarioIndex || 0);
+      const isCompared = state.comparedScenarios && state.comparedScenarios.includes(sIdx);
+      const theme = resolveScenarioTheme(sc, sIdx, state.distributeThroughoutYear);
+      const badgesHtml = buildBadgesHtml(sc, sIdx, state.distributeThroughoutYear);
 
-    // Abas de navegação entre etapas
-    let tabsHtml = '';
-    if (sc.periods.length > 1) {
-      const tabsItems = [];
-      sc.periods.forEach((p, pIdx) => {
-        if (pIdx > 0) {
-          const prevP = sc.periods[pIdx - 1];
-          const gapDays = Math.round((p.effectiveStart - prevP.returnDate) / (1000 * 60 * 60 * 24));
-          const monthsVal = (gapDays / 30.4).toFixed(1);
-          const monthsStr = monthsVal.endsWith('.0') ? `${parseInt(monthsVal)}m` : `${monthsVal}m`;
+      // Abas de navegação entre etapas
+      let tabsHtml = '';
+      if (sc.periods.length > 1) {
+        const tabsItems = [];
+        sc.periods.forEach((p, pIdx) => {
+          if (pIdx > 0) {
+            const prevP = sc.periods[pIdx - 1];
+            const gapDays = Math.round((p.effectiveStart - prevP.returnDate) / (1000 * 60 * 60 * 24));
+            const monthsVal = (gapDays / 30.4).toFixed(1);
+            const monthsStr = monthsVal.endsWith('.0') ? `${parseInt(monthsVal)}m` : `${monthsVal}m`;
+            tabsItems.push(`
+              <div id="tabGap_${sIdx}_${pIdx}"
+                title="Intervalo de trabalho entre Etapa ${pIdx} e Etapa ${pIdx + 1}: ${gapDays} dias (~${monthsStr} de recarga)"
+                class="flex items-center gap-1 px-1.5 py-0.5 rounded-lg text-xs select-none shrink-0 text-slate-500 hover:text-slate-800 transition-all">
+                <span class="w-2 h-0.5 bg-slate-300 rounded-full"></span>
+                <i data-lucide="clock" class="w-3 h-3 text-slate-400"></i>
+                <span class="font-mono font-bold text-slate-700 text-[11px]">${gapDays}d</span>
+                <span class="text-[10px] text-slate-400 hidden sm:inline">(~${monthsStr})</span>
+                <i data-lucide="arrow-right" class="w-3 h-3 text-slate-400"></i>
+                <span class="w-2 h-0.5 bg-slate-300 rounded-full"></span>
+              </div>
+            `);
+          }
           tabsItems.push(`
-            <div id="tabGap_${sIdx}_${pIdx}"
-              title="Intervalo de trabalho entre Etapa ${pIdx} e Etapa ${pIdx + 1}: ${gapDays} dias (~${monthsStr} de recarga)"
-              class="flex items-center gap-1 px-1.5 py-0.5 rounded-lg text-xs select-none shrink-0 text-slate-500 hover:text-slate-800 transition-all">
-              <span class="w-2 h-0.5 bg-slate-300 rounded-full"></span>
-              <i data-lucide="clock" class="w-3 h-3 text-slate-400"></i>
-              <span class="font-mono font-bold text-slate-700 text-[11px]">${gapDays}d</span>
-              <span class="text-[10px] text-slate-400 hidden sm:inline">(~${monthsStr})</span>
-              <i data-lucide="arrow-right" class="w-3 h-3 text-slate-400"></i>
-              <span class="w-2 h-0.5 bg-slate-300 rounded-full"></span>
-            </div>
+            <button type="button"
+              id="tabBtn_${sIdx}_${pIdx}"
+              onclick="event.stopPropagation(); window.OtimizaApp.selectStageTab(${sIdx}, ${pIdx}, ${sc.periods.length})"
+              class="px-3.5 py-1.5 rounded-xl text-xs transition-all flex items-center gap-1.5 cursor-pointer shrink-0 ${pIdx === 0 ? 'bg-slate-900 text-white font-black shadow-xs' : 'bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-950 font-bold border border-slate-200/80'}">
+              <span id="tabBadge_${sIdx}_${pIdx}" class="w-4 h-4 rounded-md ${pIdx === 0 ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-700'} flex items-center justify-center font-mono font-black text-[9px]">${String(pIdx + 1).padStart(2, '0')}</span>
+              <span>Etapa ${pIdx + 1} (${p.length}d)</span>
+            </button>
           `);
-        }
-        tabsItems.push(`
-          <button type="button"
-            id="tabBtn_${sIdx}_${pIdx}"
-            onclick="event.stopPropagation(); window.OtimizaApp.selectStageTab(${sIdx}, ${pIdx}, ${sc.periods.length})"
-            class="px-3.5 py-1.5 rounded-xl text-xs transition-all flex items-center gap-1.5 cursor-pointer shrink-0 ${pIdx === 0 ? 'bg-slate-900 text-white font-black shadow-xs' : 'bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-950 font-bold border border-slate-200/80'}">
-            <span id="tabBadge_${sIdx}_${pIdx}" class="w-4 h-4 rounded-md ${pIdx === 0 ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-700'} flex items-center justify-center font-mono font-black text-[9px]">${String(pIdx + 1).padStart(2, '0')}</span>
-            <span>Etapa ${pIdx + 1} (${p.length}d)</span>
-          </button>
-        `);
-      });
-      tabsHtml = `
-        <!-- SELETOR DE ETAPAS VIA ABAS (SEGMENTED CONTROL & TIMELINE STEPPER) -->
-        <div class="pb-3 border-b border-slate-300">
-          <div class="w-full flex items-center justify-between gap-2 p-1.5 bg-slate-200/90 rounded-2xl border border-slate-300/80 shadow-2xs">
-            <div class="flex items-center gap-1 sm:gap-1.5 shrink-0 flex-wrap sm:flex-nowrap">
-              ${tabsItems.join('')}
-              <div class="h-4 w-px bg-slate-300/80 shrink-0 mx-1 hidden sm:block"></div>
-              <button type="button"
-                id="tabBtn_${sIdx}_all"
-                onclick="event.stopPropagation(); window.OtimizaApp.selectStageTab(${sIdx}, 'all', ${sc.periods.length})"
-                class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shrink-0 bg-white hover:bg-slate-50 text-slate-600 hover:text-slate-900 border border-slate-200/80">
-                <i data-lucide="layers" class="w-3.5 h-3.5"></i>
-                <span>Todas</span>
-              </button>
-            </div>
-            <div id="tabInfo_${sIdx}" class="text-[11px] font-semibold text-slate-600 flex items-center gap-1.5 shrink-0 px-2 hidden 2xl:flex">
-              <span class="flex items-center gap-1 text-slate-600">
-                <i data-lucide="calendar" class="w-3.5 h-3.5 text-slate-500"></i>
-                Exibindo Etapa 1 de ${sc.periods.length}
-              </span>
+        });
+        tabsHtml = `
+          <!-- SELETOR DE ETAPAS VIA ABAS (SEGMENTED CONTROL & TIMELINE STEPPER) -->
+          <div class="pb-3 border-b border-slate-300">
+            <div class="w-full flex items-center justify-between gap-2 p-1.5 bg-slate-200/90 rounded-2xl border border-slate-300/80 shadow-2xs">
+              <div class="flex items-center gap-1 sm:gap-1.5 shrink-0 flex-wrap sm:flex-nowrap">
+                ${tabsItems.join('')}
+                <div class="h-4 w-px bg-slate-300/80 shrink-0 mx-1 hidden sm:block"></div>
+                <button type="button"
+                  id="tabBtn_${sIdx}_all"
+                  onclick="event.stopPropagation(); window.OtimizaApp.selectStageTab(${sIdx}, 'all', ${sc.periods.length})"
+                  class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shrink-0 bg-white hover:bg-slate-50 text-slate-600 hover:text-slate-900 border border-slate-200/80">
+                  <i data-lucide="layers" class="w-3.5 h-3.5"></i>
+                  <span>Todas</span>
+                </button>
+              </div>
+              <div id="tabInfo_${sIdx}" class="text-[11px] font-semibold text-slate-600 flex items-center gap-1.5 shrink-0 px-2 hidden 2xl:flex">
+                <span class="flex items-center gap-1 text-slate-600">
+                  <i data-lucide="calendar" class="w-3.5 h-3.5 text-slate-500"></i>
+                  Exibindo Etapa 1 de ${sc.periods.length}
+                </span>
+              </div>
             </div>
           </div>
-        </div>
+        `;
+      }
+
+      // Etapas e card completo usando o motor de templates desacoplado
+      const periodsBodyHtml = sc.periods.map((p, pIdx) => buildPeriodHtml(sc, sIdx, p, pIdx, optimizer, state, renderMiniCalendar)).join('');
+      const isHidden = !state.showAllScenarios && sIdx >= 5;
+      const cardHtml = buildScenarioCardHtml(sc, sIdx, isChampion, isRibbonActive, isCompared, theme, badgesHtml, tabsHtml, periodsBodyHtml, isHidden);
+      scenariosContainer.insertAdjacentHTML('beforeend', cardHtml);
+    });
+
+    // Se houver mais de 5 cenários gerados (até 10), adiciona botão expansor de opções adicionais
+    if (scenarios.length > 5) {
+      const toggleWrapper = document.createElement('div');
+      toggleWrapper.id = 'toggleAllScenariosWrapper';
+      toggleWrapper.className = 'pt-2 flex justify-center';
+      toggleWrapper.innerHTML = `
+        <button type="button"
+          id="btnToggleAllScenarios"
+          onclick="window.OtimizaApp.toggleShowAllScenarios()"
+          class="px-6 py-3 rounded-2xl bg-white hover:bg-slate-100 border border-slate-300 shadow-sm text-slate-800 text-xs font-black transition-all flex items-center gap-2 cursor-pointer hover:border-amber-400">
+          <i data-lucide="${state.showAllScenarios ? 'chevron-up' : 'chevron-down'}" class="w-4 h-4 text-amber-500"></i>
+          <span>${state.showAllScenarios ? 'Recolher para os 5 Melhores Cenários' : `Ver Mais 5 Alternativas Sazonais (Opções 06 a ${String(scenarios.length).padStart(2, '0')})`}</span>
+          <span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-mono text-[10px]">${state.showAllScenarios ? `${scenarios.length} de ${scenarios.length} visíveis` : `+${scenarios.length - 5} opções`}</span>
+        </button>
       `;
+      scenariosContainer.appendChild(toggleWrapper);
     }
-
-    // Etapas e card completo usando os builders dedicados
-    const periodsBodyHtml = sc.periods.map((p, pIdx) => buildPeriodHtml(sc, sIdx, p, pIdx, optimizer)).join('');
-    card.innerHTML = buildScenarioCardHtml(sc, sIdx, isChampion, isRibbonActive, isCompared, theme, badgesHtml, tabsHtml, periodsBodyHtml);
-
-    scenariosContainer.appendChild(card);
-  });
 
     state.currentScenarios = scenarios;
 
@@ -1254,20 +1048,34 @@
       text += `\n* Inclui ${sc.compensationDays} dia(s) de banco de horas/compensação.\n`;
     }
 
-    navigator.clipboard.writeText(text).then(() => {
+    const htmlTable = typeof generateScenarioTableHtml === 'function'
+      ? generateScenarioTableHtml(sc, state.selectedYear)
+      : null;
+
+    const copyPromise = (typeof navigator !== 'undefined' && navigator.clipboard && typeof window !== 'undefined' && window.ClipboardItem && htmlTable)
+      ? navigator.clipboard.write([
+          new ClipboardItem({
+            'text/html': new Blob([htmlTable], { type: 'text/html' }),
+            'text/plain': new Blob([text], { type: 'text/plain' })
+          })
+        ]).catch(() => navigator.clipboard.writeText(text))
+      : (typeof navigator !== 'undefined' && navigator.clipboard ? navigator.clipboard.writeText(text) : Promise.reject(new Error('Clipboard API not available')));
+
+    copyPromise.then(() => {
       if (!btnEl) return;
       const originalHtml = btnEl.innerHTML;
-      btnEl.innerHTML = `<i data-lucide="check" class="w-4 h-4 text-emerald-600"></i><span class="text-emerald-700">Copiado com Sucesso!</span>`;
+      btnEl.innerHTML = `<i data-lucide="check" class="w-4 h-4 text-emerald-600"></i><span class="text-emerald-700">Tabela Copiada (SEI/Texto)!</span>`;
       btnEl.classList.add('bg-emerald-50', 'border-emerald-200');
       if (window.lucide) window.lucide.createIcons();
+      showToast('Resumo copiado com formatação de tabela (pronto para colar no SEI-UFBA, Word ou E-mail).', 'success');
       setTimeout(() => {
         btnEl.innerHTML = originalHtml;
         btnEl.classList.remove('bg-emerald-50', 'border-emerald-200');
         if (window.lucide) window.lucide.createIcons();
-      }, 2000);
+      }, 2500);
     }).catch(err => {
       console.error('Falha ao copiar:', err);
-      alert('Resumo:\n\n' + text);
+      showToast('Não foi possível copiar diretamente para a área de transferência.', 'warning');
     });
   }
 
@@ -1844,7 +1652,12 @@
       onCustomWindowParamsChange,
       addExcludedPeriod,
       removeExcludedPeriod,
-      renderExcludedPeriods
+      renderExcludedPeriods,
+      toggleRibbonCollapse,
+      toggleShowAllScenarios,
+      buildBadgesHtml,
+      buildPeriodHtml,
+      buildScenarioCardHtml
     };
 
     // Atalhos globais para eventos inline do HTML
@@ -1881,6 +1694,8 @@
     window.addExcludedPeriod = addExcludedPeriod;
     window.removeExcludedPeriod = removeExcludedPeriod;
     window.renderExcludedPeriods = renderExcludedPeriods;
+    window.toggleRibbonCollapse = toggleRibbonCollapse;
+    window.toggleShowAllScenarios = toggleShowAllScenarios;
   }
 
   // Inicialização na carga do DOM (apenas no navegador)
@@ -1914,6 +1729,11 @@
       addExcludedPeriod,
       removeExcludedPeriod,
       renderExcludedPeriods,
+      toggleRibbonCollapse,
+      toggleShowAllScenarios,
+      buildBadgesHtml,
+      buildPeriodHtml,
+      buildScenarioCardHtml,
       state
     };
   }

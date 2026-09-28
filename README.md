@@ -1,8 +1,8 @@
 # Folga Extra • Otimizador Inteligente de Férias (UFBA / Salvador)
 
-> **Versão:** 3.2 • **Compatibilidade:** Navegadores Modernos (Offline-First / Zero Dependência de Build)  
+> **Versão:** 3.3 • **Compatibilidade:** Navegadores Modernos (Offline-First / Zero Dependência de Build)  
 > **Status de Qualidade:** 100% dos Testes Automatizados Aprovados (33/33 em `node test_suite.js`)  
-> **Documentos de Referência:** [`REGRAS_ALGORITMO.md`](./REGRAS_ALGORITMO.md) • [`GUIA_CORES_SISTEMA.md`](./GUIA_CORES_SISTEMA.md)
+> **Documentos de Referência:** [`REGRAS_ALGORITMO.md`](./REGRAS_ALGORITMO.md) • [`GUIA_CORES_SISTEMA.md`](./GUIA_CORES_SISTEMA.md) • [`STATUS_PROJETO.md`](./STATUS_PROJETO.md)
 
 ---
 
@@ -31,17 +31,25 @@ Utilizando um motor matemático exato de **Programação Dinâmica** e **Frontei
 * **Jornada de Trabalho:** Grid perfeitamente alinhado de 7 colunas proporcionais (`DOM`, `SEG`, `TER`, `QUA`, `QUI`, `SEX`, `SÁB`) em linha única.
 * **Coluna de Alavancagem & Bem-Estar:** Destaque visual refinado com badge `✨ Otimizadores`, controle tátil de Banco de Horas (+ / -), enforcamento de pontes e o filtro **Combate à Fadiga** (garantia de $\ge 60$ dias úteis de trabalho entre as parcelas).
 
-### 3. Fita Anual do Tempo Panorâmica (12 Meses)
-* **Cadência Real:** Linha do tempo dos 12 meses sincronizada com o cenário selecionado.
+### 3. Fita Anual do Tempo Panorâmica (12 Meses) com Modo Compacto
+* **Cadência Real & Fixação Inteligente:** Linha do tempo panorâmica sincronizada com o cenário ativo, fixada no topo com acabamento em vidro translúcido durante a navegação pelos resultados.
+* **Modo Compacto / Minimizável:** Botão `Compactar` / `Expandir Meses` que recolhe os 12 blocos mensais para uma fita esguia de resumo de distribuição, economizando espaço vertical de rolagem em telas menores e notebooks.
 * **Meses com Férias:** Destaque com gradiente solar, borda dourada e etiquetas em linha única (**`1ª Parcela`**, **`2ª Parcela`**, **`3ª Parcela`**).
 * **Meses sem Férias:** Micro-indicador discreto de feriados do mês (`X feriados`) e barra estritamente proporcional aos dias exatos de cada mês (`daysInMonth`), sem distorções visuais.
 
-### 4. Itinerários em Formato "Linear Boarding Pass"
+### 4. Curadoria em Top 5 com Expansão até 10 Alternativas
+* **Exibição Focada:** Inicialmente apresenta os **5 Melhores Cenários Estratégicos** (Campeã, Campeã Alternativa, Férias de Julho, Fim de Ano, e Divisões Clássicas).
+* **Expansão Sob Demanda:** Botão expansor discreto permite revelar instantaneamente mais 5 alternativas sazonais (totalizando até 10 opções calibradas pela Fronteira de Pareto).
+
+### 5. Itinerários em Formato "Linear Boarding Pass"
 * Estrutura horizontal limpa de 3 colunas direcionais com setas de transição executiva:
   $$\text{🛫 1º DIA LIVRE REAL} \quad \longrightarrow \quad \text{📋 PERÍODO NO SIGRH (10d)} \quad \longrightarrow \quad \text{💼 VOLTA AO TRABALHO}$$
 * Identificação clara do primeiro dia útil de retorno ao expediente e selo de segurança contra indeferimento pelo RH.
 
-### 5. Mais de 30 Roteiros Temáticos com Identidade Púrpura Nobre
+### 6. Exportação Corporativa de Resumo em Tabela HTML (SEI-UFBA / Word / E-mail)
+* O botão **Copiar Resumo de Férias** transfere simultaneamente para a área de transferência uma tabela formatada em HTML corporativo (com cabeçalhos escuros, bordas nítidas e totais consolidados) e texto simples, pronta para ser colada diretamente em processos do SEI-UFBA, documentos do Microsoft Word / LibreOffice e e-mails institucionais.
+
+### 7. Mais de 30 Roteiros Temáticos com Identidade Púrpura Nobre
 * Cada combinação gerada recebe automaticamente uma tag temática calculada a partir dos seus feriados reais, com estilo exclusivo em **Púrpura Nobre** (`bg-purple-100 text-purple-950 border border-purple-300`):
   * `🎭 Tríade de Ouro • Carnaval, São João e Fim de Ano`
   * `🌴 Verão & Independência • Carnaval e 2 de Julho`
@@ -52,7 +60,7 @@ Utilizando um motor matemático exato de **Programação Dinâmica** e **Frontei
   * `⚖️ Semestral Clássico • 2 Grandes Descansos Equilibrados`
   * `☀️ Cota Integral de Verão • 30d Contínuos de Descanso`
 
-### 6. Mini-Calendários 7xN com Preenchimento Contínuo e Bordas Semânticas
+### 8. Mini-Calendários 7xN com Preenchimento Contínuo e Bordas Semânticas
 * **Fundo contínuo de férias:** Todas as caixas de férias recebem preenchimento escuro unificado (`bg-slate-900 text-white`).
 * **Bordas grossas distintivas (3px):**
   * 🟡 **Feriado Oficial:** Dourado Âmbar (`border-amber-400`).
@@ -60,7 +68,7 @@ Utilizando um motor matemático exato de **Programação Dinâmica** e **Frontei
   * 🟣 **Fim de Semana (Sáb/Dom):** Índigo Suave (`border-indigo-400`), 100% desacoplado do azul.
   * 🟢 **Retorno ao Trabalho:** Esmeralda (`bg-emerald-600 border-emerald-500`).
 
-### 7. Comparador Desacoplado (Dock Flutuante + Slide-Over Drawer)
+### 9. Comparador Desacoplado (Dock Flutuante + Slide-Over Drawer)
 * **Dock Flutuante Inferior:** Surge no rodapé ao selecionar opções para comparação (até 3 simultâneas), com chips rápidos, contador em tempo real e botão de limpeza.
 * **Painel Deslizante Lateral (Slide-Over Drawer):** Abre suavemente sem interromper a navegação principal, permitindo contraste analítico direto entre as opções:
   * Dias Livres Contínuos (com destaque na melhor pontuação);
@@ -71,11 +79,11 @@ Utilizando um motor matemático exato de **Programação Dinâmica** e **Frontei
   * Botão de cópia rápida do comparativo para a área de transferência.
 * **Design Limpo e Autônomo:** Sem botões de decisão invasivos ("Adotar") e sem tags temáticas dentro do painel, garantindo foco 100% técnico para o servidor.
 
-### 8. PWA Offline-First (Progressive Web App)
+### 10. PWA Offline-First (Progressive Web App)
 * **Instalável:** Suporte nativo para adição à tela inicial em dispositivos móveis e desktops através do manifesto e prompt guiado.
 * **100% Funcional Sem Internet:** Service Worker com estratégia Cache-First dinâmico para todos os scripts, fontes e folhas de estilo.
 
-### 9. Janela Temporal Personalizada e Períodos a Evitar (Ponto 2)
+### 11. Janela Temporal Personalizada e Períodos a Evitar (Ponto 2)
 * **Alcance de 1 ou 2 Anos (Art. 77 Lei 8.112/90):** Permite iniciar a busca em data arbitrária (ex.: `03/05/2027`) e projetar o usufruto ao longo de 1 Ano (12 meses) ou 2 Anos (24 meses), cobrindo acúmulo legal de até 2 exercícios.
 * **Períodos a Evitar (Opcional):** Inserção simples de intervalos com colegas de férias ou projetos em andamento, descartando essas datas da escolha sem presets rígidos.
 * **Buffer Dinâmico de DP & Fita Panorâmica:** Matriz combinatória com buffer estendido (`maxDay = totalWindowDays + offset + 140`) suportando janelas de até 24 meses sem perda de candidatos tardios.
@@ -90,10 +98,11 @@ folga-extra/
 ├── js/
 │   ├── holidays.js       # Calendário astronômico multi-ano (Computus), parsing ISO blindado e feriados MGI/UFBA
 │   ├── optimizer.js      # Motor matemático de Programação Dinâmica multi-ano, buffer adaptativo e exclusão de períodos
-│   ├── ribbon.js         # Motor da Fita Anual do Tempo dinâmica (panorama contínuo de meses sincronizado)
+│   ├── ribbon.js         # Motor da Fita Anual do Tempo dinâmica (panorama contínuo de meses sincronizado e modo compacto)
 │   ├── mini-calendar.js  # Renderizador de grade mensal 7xN com bordas de destaque
 │   ├── tags.js           # Motor de 30+ roteiros temáticos e arquétipos culturais/sazonais
-│   └── app.js            # Controlador reativo da interface, toasts, janela personalizada e exportações
+│   ├── render.js         # Motor desacoplado de renderização de componentes, cards e tabela SEI
+│   └── app.js            # Controlador reativo da interface, toasts, janela personalizada e estado global
 ├── icons/
 │   └── icon.svg          # Ícone vetorial oficial PWA
 ├── manifest.json         # Manifesto PWA para instalação no celular e desktop

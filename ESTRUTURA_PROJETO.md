@@ -31,7 +31,8 @@ C:\Users\nexo\github\folga-extra\
 │   ├── 📄 optimizer.js                # Motor de Programação Dinâmica, Pareto multiobjetivo, janela 1/2 anos e exclusões
 │   ├── 📄 ribbon.js                   # Motor gráfico da Fita Anual do Tempo dinâmica e mini-barras proporcionais
 │   ├── 📄 mini-calendar.js            # Renderizador da grade 7xN com bordas semânticas desacopladas
-│   └── 📄 tags.js                     # Motor de catalogação e 30+ arquétipos temáticos (Púrpura Nobre)
+│   ├── 📄 tags.js                     # Motor de catalogação e 30+ arquétipos temáticos (Púrpura Nobre)
+│   └── 📄 render.js                   # Motor de Renderização de Templates, Cards de Cenário e Tabela Corporativa SEI
 │
 ├── 📁 icons/                          # Ativos gráficos e ícones
 │   └── 📄 icon.svg                    # Ícone vetorial oficial SVG para PWA e favicon
