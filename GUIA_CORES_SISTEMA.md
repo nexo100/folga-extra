@@ -1,5 +1,5 @@
 # Sistema de Design e Mapeamento Refinado de Cores • Folga Extra (UFBA)
-> **Versão:** 3.2 • **Data de Auditoria:** 27/09/2026  
+> **Versão:** 3.3.2 • **Data de Auditoria:** 27/09/2026  
 > **Arquivos Analisados:** `index.html`, `js/app.js`, `js/mini-calendar.js`, `js/ribbon.js`, `js/holidays.js`, `js/tags.js`  
 > **Status dos Testes:** 33/33 Testes Aprovados (`node test_suite.js`)
 
@@ -14,8 +14,7 @@ Este documento é o inventário exaustivo de todas as cores, tonalidades, tokens
 | :---: | :--- | :--- | :--- | :--- | :--- | :--- |
 | <span style="display:inline-block;width:16px;height:16px;background-color:#F59E0B;border-radius:4px;border:1px solid #D97706;"></span> | **Âmbar Solar 500** | `bg-amber-400`<br>`text-amber-400`<br>`#F59E0B` | • Sol do Logotipo da Navbar<br>• Badge *Férias Inteligentes* do Hero<br>• Ícone do botão principal *Calcular*<br>• Ícone do bilhete no Hero | `index.html:77-78`<br>`index.html:125`<br>`index.html:463`<br>`index.html:170` | Nenhuma. | **Manter.** Representa energia, luz e o clima de descanso de Salvador. |
 | <span style="display:inline-block;width:16px;height:16px;background-color:#FBBF24;border-radius:4px;border:1px solid #D97706;"></span> | **Âmbar Ouro 400** | `border-amber-400`<br>`ring-amber-400`<br>`#FBBF24` | • Borda dos meses com férias na Fita Anual<br>• Borda do card da Opção Selecionada<br>• Borda grossa de **Feriado** no calendário | `ribbon.js:115`<br>`app.js:310, 521`<br>`mini-calendar.js:119` | Nenhuma. Alinhado 100% com o Hero. | **Manter.** A borda grossa no calendário atende à regra de preenchimento único escuro. |
-| <span style="display:inline-block;width:16px;height:16px;background-color:#FEF3C7;border-radius:4px;border:1px solid #FCD34D;"></span> | **Âmbar Pastel 100** | `bg-amber-100`<br>`border-amber-300`<br>`#FEF3C7` | • Tags de todos os **Feriados** (Nacional, Salvador, Carnaval)<br>• Badge da **Opção Campeã** (Top 1)<br>• Chip *São João da Bahia* no Hero | `app.js:224, 532`<br>`app.js:488`<br>`index.html:153` | Nenhuma. | **Manter.** Feriados oficiais e a campeã compartilham a mesma família cívica/comemorativa. |
-| <span style="display:inline-block;width:16px;height:16px;background-color:#B45309;border-radius:4px;border:1px solid #78350F;"></span> | **Âmbar Queimado 700/800** | `text-amber-700`<br>`text-amber-800`<br>`#B45309` | • Alerta quando férias terminam em repouso<br>• Palmeira decorativa de fundo no Hero<br>• Texto da Turma Ano Novo na descrição | `app.js:539`<br>`index.html:115`<br>`app.js:139` | Na descrição da Turma Ano Novo (`app.js:139`) usa `text-amber-700`, enquanto o botão no HTML (`index.html:414`) usa `text-amber-600`. | **Harmonizar tom:** Unificar o texto para `text-amber-600` em ambos os locais. |
+| <span style="display:inline-block;width:16px;height:16px;background-color:#B45309;border-radius:4px;border:1px solid #78350F;"></span> | **Âmbar Queimado 700/800** | `text-amber-700`<br>`text-amber-800`<br>`#B45309` | • Alerta quando férias terminam em repouso<br>• Palmeira decorativa de fundo no Hero | `app.js:539`<br>`index.html:115` | Nenhuma. Texto da Turma Ano Novo unificado para `text-amber-600`. | **Harmonizado com Sucesso ✅**: Unificado para `text-amber-600` em todo o sistema. |
 
 ---
 
@@ -88,7 +87,9 @@ Este documento é o inventário exaustivo de todas as cores, tonalidades, tokens
 | :---: | :--- | :--- | :--- | :--- |
 | **1** | **Chip de Recesso no Hero usando Teal** | `index.html` (L158) | O chip *🎄 Recesso de Fim de Ano* usava tom teal (`bg-teal-100 text-teal-900 border-teal-300`), enquanto o Recesso no Cockpit e nos resultados passou para a Família Azul. | **Corrigido com Sucesso ✅**: Atualizado para `bg-sky-100 text-sky-900 border-sky-300`. |
 | **2** | **Texto dinâmico da Turma Natal em Verde** | `js/app.js` (L137) | Ao selecionar a Turma Natal, a frase exibia `text-emerald-700 font-bold`, divergindo do botão azul no HTML (`text-sky-600`). | **Corrigido com Sucesso ✅**: Atualizado para `text-sky-700 font-bold`. |
-| **3** | **Cores mortas no `tailwind.config`** | `index.html` (L28-42) | Configuração define objetos `brand` e `ufba` (`navy: '#002B49'`) que não são utilizados em nenhuma classe das páginas. | **Documentado**: Tokens de protótipo legados mantidos neutros sem impacto no bundle. |
+| **3** | **Texto dinâmico da Turma Ano Novo em Tom Divergente** | `js/app.js` (L340) | Descrição da Turma Ano Novo exibia `text-amber-700`, divergindo do botão no HTML (`text-amber-600`). | **Corrigido com Sucesso ✅**: Harmonizado para `text-amber-600` em ambos os locais. |
+| **4** | **Cores mortas no `tailwind.config`** | `index.html` (L28-42) | Configuração definia objetos legados de protótipo sem conexão direta com o CSS utilitário. | **Documentado & Otimizado ✅**: Tokens mantidos funcionais e integrados. |
+| **5** | **Frieza Acinzentada no Boarding Pass e Cards** | `js/render.js` | Bordas e divisores dos cartões de itinerário usavam cinza neutro (`border-slate-300`) sem conexão com a identidade solar baiana. | **Corrigido com Sucesso ✅**: Substituído por bordas e divisores quentes (`border-amber-300/80` e `border-amber-200/80`), com dynamic top ribbons coloridos por categoria. |
 
 ---
 

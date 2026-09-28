@@ -337,7 +337,7 @@
       if (shift === 'natal') {
         desc.innerHTML = '<span class="text-sky-700 font-bold">🎄 Turma Natal Ativa:</span> Dias úteis da semana do Natal são recesso compensado. 25/Dez e 01/Jan continuam feriados nacionais para todos.';
       } else if (shift === 'ano_novo') {
-        desc.innerHTML = '<span class="text-amber-700 font-bold">🎆 Turma Ano Novo Ativa:</span> Dias úteis da semana do Ano Novo são recesso compensado. 25/Dez e 01/Jan continuam feriados nacionais para todos.';
+        desc.innerHTML = '<span class="text-amber-600 font-bold">🎆 Turma Ano Novo Ativa:</span> Dias úteis da semana do Ano Novo são recesso compensado. 25/Dez e 01/Jan continuam feriados nacionais para todos.';
       } else {
         desc.innerHTML = 'Sem escala de revezamento. 25/Dez e 01/Jan são feriados para todos.';
       }

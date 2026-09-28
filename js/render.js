@@ -136,10 +136,10 @@
     return `
       ${gapHtml}
       <div id="stageContainer_${sIdx}_${pIdx}" class="${(sc.periods.length === 1 || pIdx === 0) ? '' : 'hidden'} space-y-3">
-        <div class="bg-white/95 border-2 border-slate-300 rounded-2xl p-5 space-y-4 shadow-sm">
+        <div class="bg-white/95 border-2 border-amber-300/80 rounded-2xl p-5 space-y-4 shadow-sm ring-1 ring-amber-400/20">
 
           <!-- HEADER DA ETAPA -->
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-slate-300/80 pb-3">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-amber-200/80 pb-3">
             <div class="flex items-center gap-2.5">
               <span class="w-7 h-7 rounded-lg bg-slate-900 text-white font-mono font-black text-xs flex items-center justify-center shrink-0 shadow-2xs">${String(pIdx + 1).padStart(2, '0')}</span>
               <span class="font-extrabold text-slate-900 text-sm tracking-tight">Etapa ${pIdx + 1} • <span class="font-mono">${p.length}</span> Dias Marcados</span>
@@ -165,7 +165,7 @@
             <div class="space-y-1">
               <div class="flex items-center justify-between gap-1 text-[10px] font-bold uppercase tracking-wider text-slate-500">
                 <span>🛫 1º DIA LIVRE REAL</span>
-                <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-slate-300 hidden md:block"></i>
+                <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-amber-400 hidden md:block"></i>
               </div>
               <div class="text-base sm:text-lg font-black font-mono text-slate-950">
                 ${formatDate(p.effectiveStart)}
@@ -176,14 +176,14 @@
             </div>
 
             <!-- COLUNA 2: 📋 OFICIAL NO SOUGOV / SIGRH -->
-            <div class="space-y-1 md:border-l md:border-r border-slate-300 md:px-5 relative">
+            <div class="space-y-1 md:border-l md:border-r border-amber-200/80 md:px-5 relative">
               <div class="flex items-center justify-between gap-2 text-[10px] font-black uppercase tracking-wider text-slate-700">
                 <span class="flex items-center gap-1">📋 PERÍODO NO SIGRH</span>
                 <div class="flex items-center gap-1.5">
                   <span class="px-2 py-0.5 rounded-md bg-slate-900 text-white font-mono font-bold text-[10px]">
                     ${p.length}d
                   </span>
-                  <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-slate-300 hidden md:block"></i>
+                  <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-amber-400 hidden md:block"></i>
                 </div>
               </div>
               <div class="text-base sm:text-lg font-black font-mono text-slate-950">
@@ -210,7 +210,7 @@
           </div>
 
           <!-- SUB-BARRA: EMENDAS & BOTÃO EXPANSOR DO CALENDÁRIO -->
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-2 border-t border-slate-300/80">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-2 border-t border-amber-200/80">
             <div class="flex items-center gap-1.5 flex-wrap">
               ${joinedHolidays.length > 0 ? `
                 <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1 mr-0.5">
@@ -227,7 +227,7 @@
           </div>
 
           <!-- CONTAINER EXPANDIDO POR PADRÃO DO MINI-CALENDÁRIO -->
-          <div id="miniCalendar_${sIdx}_${pIdx}" class="pt-3 border-t border-slate-300/80">
+          <div id="miniCalendar_${sIdx}_${pIdx}" class="pt-3 border-t border-amber-200/80">
             ${calendarHtml}
           </div>
 
@@ -242,23 +242,37 @@
    * Gera o HTML completo do card de cenário (header acordeão + corpo com itinerários)
    */
   function buildScenarioCardHtml(sc, sIdx, isChampion, isRibbonActive, isCompared, theme, badgesHtml, tabsHtml, periodsBodyHtml, isHidden = false) {
-    const topAccentClass = 'bg-slate-900';
+    let topAccentClass = 'bg-gradient-to-r from-amber-400 via-sky-400 to-indigo-500';
+    if (isChampion || sIdx === 0) {
+      topAccentClass = 'bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500';
+    } else if (sc.category && sc.category.includes('Julho')) {
+      topAccentClass = 'bg-gradient-to-r from-sky-400 via-cyan-400 to-blue-500';
+    } else if (sc.category && sc.category.includes('Fim de Ano')) {
+      topAccentClass = 'bg-gradient-to-r from-purple-500 via-pink-500 to-amber-400';
+    } else if (sc.category && sc.category.includes('Páscoa')) {
+      topAccentClass = 'bg-gradient-to-r from-orange-400 via-amber-400 to-rose-400';
+    }
+
+    const optionBadgeHtml = (isChampion || sIdx === 0)
+      ? `<span class="font-mono font-black text-xs px-2.5 py-1 rounded-lg bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 border border-amber-500 shadow-xs flex items-center gap-1"><i data-lucide="crown" class="w-3.5 h-3.5 text-slate-950"></i> OPÇÃO ${String(sIdx + 1).padStart(2, '0')}</span>`
+      : `<span class="font-mono font-black text-xs px-2.5 py-1 rounded-lg bg-slate-900 text-amber-300 border border-slate-700 shadow-2xs">OPÇÃO ${String(sIdx + 1).padStart(2, '0')}</span>`;
+
     const datesSummary = sc.periods.map(p => `${formatDate(p.startDate).slice(0, 5)} a ${formatDate(p.endDate).slice(0, 5)}`).join('  •  ');
     const hiddenAttr = isHidden ? 'style="display: none;" data-extra-scenario="true"' : 'data-extra-scenario="false"';
 
     return `
       <div id="scenarioCard_${sIdx}" ${hiddenAttr} class="${isRibbonActive
         ? 'bg-gradient-to-br from-amber-100/80 via-sky-50/90 to-indigo-100/70 rounded-3xl border-2 border-amber-400 shadow-xl ring-2 ring-amber-400/40 transition-all duration-300 overflow-hidden'
-        : 'bg-slate-100/90 rounded-3xl border-2 border-slate-300/90 shadow-md transition-all duration-300 overflow-hidden hover:border-amber-400 hover:shadow-xl hover:bg-gradient-to-br hover:from-amber-100/40 hover:via-sky-50/50 hover:to-indigo-100/40 cursor-pointer'}">
+        : 'bg-white/95 rounded-3xl border-2 border-amber-200/80 shadow-md shadow-amber-500/5 transition-all duration-300 overflow-hidden hover:border-amber-400 hover:shadow-xl hover:bg-gradient-to-br hover:from-amber-100/40 hover:via-sky-50/50 hover:to-indigo-100/40 cursor-pointer'}">
 
-        <!-- ACCENT TOP BORDER (4PX) -->
-        <div class="h-1 w-full ${topAccentClass}"></div>
+        <!-- ACCENT TOP BORDER (5PX) COM GRADIENTE FESTIVO -->
+        <div class="h-1.5 w-full ${topAccentClass}"></div>
 
         <!-- ACCORDION HEADER (CLICKABLE) -->
-        <div onclick="window.OtimizaApp.toggleScenario(${sIdx})" class="p-5 sm:p-6 cursor-pointer flex flex-col md:flex-row md:items-center justify-between gap-4 select-none hover:bg-slate-300/40 transition-colors">
+        <div onclick="window.OtimizaApp.toggleScenario(${sIdx})" class="p-5 sm:p-6 cursor-pointer flex flex-col md:flex-row md:items-center justify-between gap-4 select-none hover:bg-amber-50/40 transition-colors">
           <div class="space-y-2 flex-1">
             <div class="flex items-center gap-2 flex-wrap">
-              <span class="font-mono font-black text-xs px-2.5 py-1 rounded-lg bg-slate-200 text-slate-900 border border-slate-300">OPÇÃO ${String(sIdx + 1).padStart(2, '0')}</span>
+              ${optionBadgeHtml}
               ${badgesHtml}
               <h4 class="font-black text-slate-900 text-base sm:text-lg tracking-tight ml-1">
                 ${sc.split.join(' + ')} dias

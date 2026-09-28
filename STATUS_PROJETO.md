@@ -1,6 +1,6 @@
 # DOCUMENTO DE TRANSIÇÃO E ESTADO DO PROJETO (HANDOFF)
 **Projeto:** Folga Extra (UFBA) — Otimizador Inteligente de Férias e Descanso  
-**Versão Atual:** v3.3.1  
+**Versão Atual:** v3.3.2  
 **Data de Atualização:** 27/09/2026  
 **Caminho Local Oficial:** `C:\Users\nexo\github\folga-extra`  
 **Repositório GitHub:** `https://github.com/nexo100/folga-extra`  
@@ -97,14 +97,15 @@ O painel de controle superior foi reestruturado de forma harmoniosa, com alturas
 
 ---
 
-### J. Desacoplamento Arquitetural, Top 5 Expansível, Exportação Corporativa SEI e Cápsula Ultra-Slim (v3.3.1)
+### J. Desacoplamento Arquitetural, Cápsula Ultra-Slim e Harmonização Visual Sólida (v3.3.2)
 - **Extração Oficial do Motor de Renderização (`js/render.js`):** Desacoplamento completo dos geradores de HTML dos cards de cenários, badges de mérito, blocos de itinerário boarding pass e gerador de tabelas ricas para fora de `js/app.js`, reduzindo a complexidade ciclomática do controlador principal e viabilizando testes unitários dedicados de renderização.
-- **Curadoria em Top 5 com Expansão até 10 Alternativas:** Substituição da listagem longa inicial pela exibição padrão dos **5 Melhores Cenários Estratégicos** (Campeã, Campeã Alternativa, Julho, Fim de Ano e Clássicas). Foi adicionado o botão `#btnToggleAllScenarios` que expande suavemente as 5 alternativas complementares (totalizando até 10 opções).
 - **Fita Anual em Cápsula Flutuante Ultra-Slim 36px (Proposta B):** Implementação da cápsula flutuante de baixo perfil (~36px a 38px) no `#annualRibbonContainer`. Ao alternar para o modo compacto (`#btnToggleRibbonCollapse`), o contêiner se transforma em uma cápsula elegante de vidro escuro e contorno dourado (`bg-slate-950/95 border-2 border-amber-400`), contendo o selo da opção (`👑 Opção 01`), o contador dinâmico de dias livres (`🔥 42d Livres (+12d)`), um sparkline de 12 micro-pontos luminosos que pulsam nos meses de férias, chips das etapas e botão direto `[Ver 12 Meses]`. Isso libera mais de 85% do espaço vertical durante a rolagem mantendo a navegação ultra-clara e divertida.
-- **Identidade Visual Solar e Tropical (Alegre e Saturada):** Preservação absoluta das cores quentes, solares e festivas que remetem às férias, praias e descanso baiano (tons de âmbar, azul celeste, esmeralda e púrpura real), evitando frieza corporativa e celebrando o momento lúdico de planejar férias.
+- **Identidade Visual Solar e Tropical (Alegre e Saturada):** Preservação e amplificação absoluta das cores quentes, solares e festivas que remetem às férias, praias e descanso baiano (tons de âmbar, azul celeste, esmeralda e púrpura real), evitando frieza corporativa e celebrando o momento lúdico de planejar férias.
+- **Dynamic Accent Ribbons e Badges Dourados:** Cartões de cenários agora contam com faixas superiores coloridas por categoria (`bg-gradient-to-r from-amber-400...`, `from-sky-400...`, `from-purple-500...`) e selo de coroa dourada para a opção campeã.
+- **Itinerário Boarding Pass Aquecido:** Substituição dos divisores e bordas cinzentas (`border-slate-300`) por bordas e anéis quentes (`border-amber-300/80` e `ring-amber-400/20`), aproximando o layout de um bilhete festivo de viagem à Bahia.
+- **Harmonização de Inconsistências:** Tom dinâmico da Turma Ano Novo unificado para `text-amber-600` em sincronia com o botão no HTML; eliminação de discrepâncias e alinhamento total com `GUIA_CORES_SISTEMA.md`.
 - **Exportação Corporativa em Tabela HTML (SEI-UFBA / Word / E-mail):** O botão **Copiar Resumo de Férias** gera um payload duplo na área de transferência (`ClipboardItem` com `text/html` e `text/plain`). Ao colar no SEI-UFBA, no Microsoft Word ou no cliente de e-mail, o usuário obtém uma tabela oficial formatada com cabeçalhos escuros, colunas dimensionadas, destaques em verde e totais consolidados.
-- **Acessibilidade e Estabilização do Cockpit:** Adicionado `role="status"` e `aria-live="polite"` ao `#toastContainer` para compatibilidade com leitores de tela; adicionado `overscroll-contain` e `max-h-24` ao `#excludedPeriodsList` para evitar encadeamento de rolagem indesejado no Cockpit.
-- **Service Worker v3.3.1:** Adição de `./js/render.js` aos ativos estáticos pré-cacheados em `sw.js` com limpeza automática de versões legadas de cache.
+- **Service Worker v3.3.2:** Adição de `./js/render.js` aos ativos estáticos pré-cacheados em `sw.js` com limpeza automática de versões legadas de cache.
 
 ---
 
