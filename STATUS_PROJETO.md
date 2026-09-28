@@ -1,6 +1,6 @@
 # DOCUMENTO DE TRANSIÇÃO E ESTADO DO PROJETO (HANDOFF)
 **Projeto:** Folga Extra (UFBA) — Otimizador Inteligente de Férias e Descanso  
-**Versão Atual:** v3.4.0  
+**Versão Atual:** v3.4.1  
 **Data de Atualização:** 28/09/2026  
 **Caminho Local Oficial:** `C:\Users\nexo\github\folga-extra`  
 **Repositório GitHub:** `https://github.com/nexo100/folga-extra`  
@@ -121,6 +121,22 @@ O painel de controle superior foi reestruturado de forma harmoniosa, com alturas
 - **Compartilhamento Festivo para WhatsApp (`generateWhatsAppMessage`):** Botão `[📲 Copiar p/ WhatsApp]` que gera uma mensagem formatada com emojis solares e itinerário detalhado, pronta para colar em conversas familiares ou com cônjuge para planejar viagens com antecedência.
 - **Cópia para o SEI-UFBA e Impressão:** Ações integradas de cópia de tabela corporativa e impressão nativa do bilhete.
 - **Service Worker Atualizado para v3.4.0:** Atualização do manifesto e cache com invalidação de versões prévias.
+
+---
+
+### L. Elevação do Sistema de Cores e Atmosfera Semântica Unificada (v3.4.1)
+- **Atmosfera Solar e Gradiente Ambiental:** Aplicação de gradiente sutil no plano de fundo do aplicativo (`bg-gradient-to-b from-amber-50/50 via-[#F8FAFC] to-sky-50/30`), proporcionando calor de praia e férias sem criar ruído ou poluição visual.
+- **Unidade Visual de Objetos Iguais (Fim da Salada de Frutas Arbitrária):** Cartões de cenários de mesma função agora compartilham a mesma identidade de prestígio, com bordas douradas quentes (`border-amber-200/90`), efeito hover iluminado e faixa de acento superior unificada no gradiente de pôr do sol baiano (`bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500`).
+- **Métricas Semânticas Saturadas e de Alto Contraste:**
+  * *Descanso Real:* Placa compacta escura de luxo (`bg-slate-950 text-amber-400 border border-slate-800`), destacando o número de dias livres totais em tipografia mono âmbar brilhante.
+  * *Ganho Líquido:* Placa verde esmeralda vibrante (`bg-emerald-50 text-emerald-950 border border-emerald-300`), comunicando com precisão o lucro de dias sem gastar férias.
+  * *Alavancagem:* Placa dourada calorosa (`bg-amber-50 text-amber-950 border border-amber-300`), evidenciando o multiplicador de eficiência do servidor.
+- **Harmonização do Cockpit e Mini-Calendários:**
+  * Os 3 cartões superiores do Cockpit foram calibrados com bordas quentes consistentes (`border-2 border-amber-200/90 hover:border-amber-400`), eliminando o contraste cinza frio anterior.
+  * O contêiner dos mini-calendários de etapas recebeu contorno âmbar suave (`border-2 border-amber-200/90`), cabeçalho com divisor delicado e ícone de calendário dourado (`text-amber-600`), mantendo 100% preservada a semântica de cores interna dos dias (índigo para fins de semana, azul para facultativos, etc.).
+- **Botões de Filtros Rápidos (Minimalistas Inativos / Dourado Radiante Ativo):**
+  * Botões inativos mantidos em estilo neutro e clean com fundo branco e contorno sutil.
+  * Botão ativo elevado para contraste máximo de autoridade (`bg-slate-950 text-amber-300 border-2 border-amber-400 shadow-md shadow-amber-400/20 ring-2 ring-amber-400/30`).
 
 ---
 

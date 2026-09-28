@@ -709,9 +709,9 @@
 
       if (card) {
         if (isSelected) {
-          card.className = 'bg-gradient-to-br from-amber-100/80 via-sky-50/90 to-indigo-100/70 rounded-3xl border-2 border-amber-400 shadow-xl ring-2 ring-amber-400/40 transition-all duration-300 overflow-hidden';
+          card.className = 'bg-gradient-to-br from-amber-100/80 via-white to-amber-50/70 rounded-3xl border-2 border-amber-400 shadow-xl ring-4 ring-amber-400/25 transition-all duration-300 overflow-hidden';
         } else {
-          card.className = 'bg-slate-100/90 rounded-3xl border-2 border-slate-300/90 shadow-md transition-all duration-300 overflow-hidden hover:border-amber-400 hover:shadow-xl hover:bg-gradient-to-br hover:from-amber-100/40 hover:via-sky-50/50 hover:to-indigo-100/40 cursor-pointer';
+          card.className = 'bg-white/95 rounded-3xl border-2 border-amber-200/90 shadow-md shadow-amber-500/5 transition-all duration-300 overflow-hidden hover:border-amber-400 hover:shadow-xl hover:bg-gradient-to-br hover:from-amber-50/40 hover:via-white hover:to-amber-50/30 cursor-pointer';
         }
       }
     });
@@ -1252,7 +1252,7 @@
     const activeBtnId = filterKey === '10+10+10' ? 'filterBtn_10_10_10' : `filterBtn_${filterKey}`;
     const activeBtn = typeof document !== 'undefined' ? document.getElementById(activeBtnId) : null;
     if (activeBtn) {
-      activeBtn.className = 'filter-pill px-3 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 cursor-pointer bg-slate-950 text-amber-400 shadow-2xs shrink-0';
+      activeBtn.className = 'filter-pill px-3 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 cursor-pointer bg-slate-950 text-amber-300 border-2 border-amber-400 shadow-md shadow-amber-400/20 ring-2 ring-amber-400/30 shrink-0';
     }
 
     // 2. Filtra os cards renderizados no container

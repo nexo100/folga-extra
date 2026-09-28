@@ -78,10 +78,10 @@
     }
   </style>
 </head>
-<body class="h-full bg-[#F8FAFC] text-slate-800 flex flex-col font-sans antialiased selection:bg-amber-400 selection:text-slate-950">
+<body class="min-h-full bg-gradient-to-b from-amber-50/50 via-[#F8FAFC] to-sky-50/30 text-slate-800 flex flex-col font-sans antialiased selection:bg-amber-400 selection:text-slate-950">
 
   <!-- TOP HEADER / NAV BAR -->
-  <header class="bg-white/85 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-40 py-2.5 sm:py-3.5 px-4 sm:px-8">
+  <header class="bg-white/90 backdrop-blur-md border-b-2 border-amber-300/60 sticky top-0 z-40 py-2.5 sm:py-3.5 px-4 sm:px-8 shadow-xs">
     <div class="max-w-6xl mx-auto flex flex-row items-center justify-between gap-3">
       <div class="flex items-center gap-2.5 sm:gap-3">
         <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-slate-900 text-amber-400 flex items-center justify-center shadow-md shadow-slate-900/10 shrink-0">
@@ -217,7 +217,7 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
 
           <!-- CARD COLUNA 1: LOTAÇÃO & COTA DE FÉRIAS -->
-          <div class="bg-gradient-to-b from-white to-slate-50/80 p-5 rounded-2xl border-2 border-slate-200/90 hover:border-amber-300/80 transition-all duration-300 shadow-xs h-full flex flex-col justify-between space-y-4">
+          <div class="bg-gradient-to-b from-white via-white to-amber-50/20 p-5 rounded-2xl border-2 border-amber-200/90 hover:border-amber-400 transition-all duration-300 shadow-xs h-full flex flex-col justify-between space-y-4">
             <div class="space-y-4">
               <!-- CABEÇALHO DO CARD 1 -->
               <div class="flex items-center justify-between border-b border-slate-200/60 pb-2.5">
@@ -294,7 +294,7 @@
           </div>
 
           <!-- CARD COLUNA 2: CALENDÁRIO & JANELA TEMPORAL -->
-          <div class="bg-gradient-to-b from-white to-amber-50/20 p-5 rounded-2xl border-2 border-slate-200/90 hover:border-amber-300/80 transition-all duration-300 shadow-xs h-full flex flex-col justify-between space-y-4">
+          <div class="bg-gradient-to-b from-white via-white to-amber-50/20 p-5 rounded-2xl border-2 border-amber-200/90 hover:border-amber-400 transition-all duration-300 shadow-xs h-full flex flex-col justify-between space-y-4">
             <div class="space-y-3.5">
               <!-- CABEÇALHO DO CARD 2 -->
               <div class="flex items-center justify-between border-b border-slate-200/60 pb-2.5">
@@ -625,7 +625,7 @@
             <i data-lucide="filter" class="w-3.5 h-3.5 text-slate-400"></i> Filtros:
           </span>
           <button type="button" onclick="window.OtimizaApp ? window.OtimizaApp.setScenarioFilter('all') : setScenarioFilter('all')" id="filterBtn_all"
-            class="filter-pill px-3 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 cursor-pointer bg-slate-950 text-amber-400 shadow-2xs shrink-0">
+            class="filter-pill px-3 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 cursor-pointer bg-slate-950 text-amber-300 border-2 border-amber-400 shadow-md shadow-amber-400/20 ring-2 ring-amber-400/30 shrink-0">
             <span>Todas as Opções</span>
           </button>
           <button type="button" onclick="window.OtimizaApp ? window.OtimizaApp.setScenarioFilter('top3') : setScenarioFilter('top3')" id="filterBtn_top3"

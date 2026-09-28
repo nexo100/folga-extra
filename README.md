@@ -1,6 +1,6 @@
 # Folga Extra • Otimizador Inteligente de Férias (UFBA / Salvador)
 
-> **Versão:** 3.4.0 • **Compatibilidade:** Navegadores Modernos (Offline-First / Zero Dependência de Build)  
+> **Versão:** 3.4.1 • **Compatibilidade:** Navegadores Modernos (Offline-First / Zero Dependência de Build)  
 > **Status de Qualidade:** 100% dos Testes Automatizados Aprovados (33/33 em `node test_suite.js`)  
 > **Documentos de Referência:** [`REGRAS_ALGORITMO.md`](./REGRAS_ALGORITMO.md) • [`GUIA_CORES_SISTEMA.md`](./GUIA_CORES_SISTEMA.md) • [`STATUS_PROJETO.md`](./STATUS_PROJETO.md)
 

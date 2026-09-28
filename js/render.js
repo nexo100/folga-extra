@@ -242,16 +242,7 @@
    * Gera o HTML completo do card de cenário (header acordeão + corpo com itinerários)
    */
   function buildScenarioCardHtml(sc, sIdx, isChampion, isRibbonActive, isCompared, theme, badgesHtml, tabsHtml, periodsBodyHtml, isHidden = false) {
-    let topAccentClass = 'bg-gradient-to-r from-amber-400 via-sky-400 to-indigo-500';
-    if (isChampion || sIdx === 0) {
-      topAccentClass = 'bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500';
-    } else if (sc.category && sc.category.includes('Julho')) {
-      topAccentClass = 'bg-gradient-to-r from-sky-400 via-cyan-400 to-blue-500';
-    } else if (sc.category && sc.category.includes('Fim de Ano')) {
-      topAccentClass = 'bg-gradient-to-r from-purple-500 via-pink-500 to-amber-400';
-    } else if (sc.category && sc.category.includes('Páscoa')) {
-      topAccentClass = 'bg-gradient-to-r from-orange-400 via-amber-400 to-rose-400';
-    }
+    const topAccentClass = 'bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500';
 
     const optionBadgeHtml = (isChampion || sIdx === 0)
       ? `<span class="font-mono font-black text-xs px-2.5 py-1 rounded-lg bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 border border-amber-500 shadow-xs flex items-center gap-1"><i data-lucide="crown" class="w-3.5 h-3.5 text-slate-950"></i> OPÇÃO ${String(sIdx + 1).padStart(2, '0')}</span>`
@@ -300,8 +291,8 @@
         data-wasted="${sc.totalWasted}" 
         data-sidx="${sIdx}" 
         class="${isRibbonActive
-        ? 'bg-gradient-to-br from-amber-100/80 via-sky-50/90 to-indigo-100/70 rounded-3xl border-2 border-amber-400 shadow-xl ring-2 ring-amber-400/40 transition-all duration-300 overflow-hidden'
-        : 'bg-white/95 rounded-3xl border-2 border-amber-200/80 shadow-md shadow-amber-500/5 transition-all duration-300 overflow-hidden hover:border-amber-400 hover:shadow-xl hover:bg-gradient-to-br hover:from-amber-100/40 hover:via-sky-50/50 hover:to-indigo-100/40 cursor-pointer'}">
+        ? 'bg-gradient-to-br from-amber-100/80 via-white to-amber-50/70 rounded-3xl border-2 border-amber-400 shadow-xl ring-4 ring-amber-400/25 transition-all duration-300 overflow-hidden'
+        : 'bg-white/95 rounded-3xl border-2 border-amber-200/90 shadow-md shadow-amber-500/5 transition-all duration-300 overflow-hidden hover:border-amber-400 hover:shadow-xl hover:bg-gradient-to-br hover:from-amber-50/40 hover:via-white hover:to-amber-50/30 cursor-pointer'}">
 
         <!-- ACCENT TOP BORDER (5PX) COM GRADIENTE FESTIVO -->
         <div class="h-1.5 w-full ${topAccentClass}"></div>
@@ -329,20 +320,20 @@
             ${routeLineHtml}
           </div>
 
-          <div class="flex items-center gap-3 sm:gap-4 self-end md:self-auto flex-wrap">
-            <div class="text-right">
-              <span class="text-[10px] uppercase font-bold text-slate-500 block tracking-wider">Descanso Real</span>
-              <span class="text-xl sm:text-2xl font-black text-slate-900 font-mono">${sc.totalOff} dias</span>
+          <div class="flex items-center gap-2 sm:gap-2.5 self-end md:self-auto flex-wrap">
+            <div class="bg-slate-950 text-amber-400 border border-slate-800 px-3 py-1.5 rounded-2xl shadow-xs text-right min-w-[76px]">
+              <span class="text-[9px] uppercase font-bold text-slate-400 block tracking-wider">Descanso</span>
+              <span class="text-base sm:text-lg font-black text-amber-300 font-mono leading-none">${sc.totalOff}d</span>
             </div>
-            <div class="text-right pl-3.5 border-l border-slate-300">
-              <span class="text-[10px] uppercase font-bold text-emerald-800 block tracking-wider">Ganho Líquido</span>
-              <span class="text-xl sm:text-2xl font-black text-emerald-700 font-mono">+${sc.extraGain}d</span>
+            <div class="bg-emerald-50 text-emerald-950 border border-emerald-300 px-3 py-1.5 rounded-2xl shadow-2xs text-right min-w-[76px]">
+              <span class="text-[9px] uppercase font-bold text-emerald-700 block tracking-wider">Ganho</span>
+              <span class="text-base sm:text-lg font-black text-emerald-700 font-mono leading-none">+${sc.extraGain}d</span>
             </div>
-            <div class="text-right pl-3.5 border-l border-slate-300">
-              <span class="text-[10px] uppercase font-bold text-slate-600 block tracking-wider">Alavancagem</span>
-              <span class="text-xl sm:text-2xl font-black text-slate-800 font-mono">${sc.leverage}x</span>
+            <div class="bg-amber-50 text-amber-950 border border-amber-300 px-3 py-1.5 rounded-2xl shadow-2xs text-right min-w-[76px]">
+              <span class="text-[9px] uppercase font-bold text-amber-800 block tracking-wider">Alavanc.</span>
+              <span class="text-base sm:text-lg font-black text-amber-800 font-mono leading-none">${sc.leverage}x</span>
             </div>
-            <div class="pl-2 flex items-center gap-2">
+            <div class="pl-1 flex items-center gap-2">
               <!-- BOTÃO DO COMPARADOR DESACOPLADO -->
               <button type="button"
                 id="btnCompare_${sIdx}"

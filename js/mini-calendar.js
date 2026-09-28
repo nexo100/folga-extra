@@ -74,10 +74,10 @@
       const daysInMonth = new Date(year, month + 1, 0).getDate();
 
       html += `
-        <div class="bg-white border-2 border-slate-300/80 rounded-2xl p-3.5 sm:p-4 shadow-sm">
-          <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-200">
+        <div class="bg-white border-2 border-amber-200/90 rounded-2xl p-3.5 sm:p-4 shadow-sm">
+          <div class="flex items-center justify-between pb-2 mb-2 border-b border-amber-100">
             <span class="text-xs font-bold text-slate-900 flex items-center gap-1.5">
-              <i data-lucide="calendar" class="w-3.5 h-3.5 text-slate-700"></i> ${MONTH_NAMES[month]} ${year}
+              <i data-lucide="calendar" class="w-3.5 h-3.5 text-amber-600"></i> ${MONTH_NAMES[month]} ${year}
             </span>
             <span class="text-[10px] text-slate-500 font-medium tracking-wide">Dias da Etapa</span>
           </div>
